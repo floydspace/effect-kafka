@@ -4,8 +4,7 @@
 junit.xml
 /jest.config.json
 /coverage/
-/dist/changelog.md
-/dist/version.txt
+permissions-backup.acl
 /.prettierignore
 /.prettierrc.json
 /test/
@@ -22,6 +21,8 @@ dist
 /.projenrc.js
 tsconfig.tsbuildinfo
 /.eslintrc.json
+/.husky/
+/.changeset/
 /.gitattributes
 /.projenrc.ts
 /projenrc

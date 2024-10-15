@@ -1,8 +1,12 @@
 {
   "files": [
+    ".changeset/config.json",
     ".eslintrc.json",
     ".gitattributes",
+    ".github/workflows/build.yml",
+    ".github/workflows/release.yml",
     ".gitignore",
+    ".husky/pre-push",
     ".npmignore",
     ".npmrc",
     ".prettierignore",

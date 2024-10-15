@@ -1,6 +1,19 @@
 {
   "dependencies": [
     {
+      "name": "@changesets/changelog-github",
+      "type": "build"
+    },
+    {
+      "name": "@changesets/cli",
+      "type": "build"
+    },
+    {
+      "name": "@floydspace/projen-components",
+      "version": "next",
+      "type": "build"
+    },
+    {
       "name": "@types/jest",
       "type": "build"
     },
@@ -17,11 +30,6 @@
     {
       "name": "@typescript-eslint/parser",
       "version": "^7",
-      "type": "build"
-    },
-    {
-      "name": "commit-and-tag-version",
-      "version": "^12",
       "type": "build"
     },
     {
@@ -48,6 +56,14 @@
     {
       "name": "eslint",
       "version": "^8",
+      "type": "build"
+    },
+    {
+      "name": "husky",
+      "type": "build"
+    },
+    {
+      "name": "is-ci",
       "type": "build"
     },
     {

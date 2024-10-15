@@ -33,8 +33,7 @@ jspm_packages/
 junit.xml
 !/jest.config.json
 /coverage/
-/dist/changelog.md
-/dist/version.txt
+!/.github/workflows/build.yml
 !/.prettierignore
 !/.prettierrc.json
 !/.npmrc
@@ -45,4 +44,7 @@ junit.xml
 /lib
 /dist/
 !/.eslintrc.json
+!/.changeset/config.json
+!/.github/workflows/release.yml
 !/.projenrc.ts
+!/.husky/pre-push
