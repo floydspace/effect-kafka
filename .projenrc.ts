@@ -9,6 +9,9 @@ const project = new typescript.TypeScriptProject({
   pnpmVersion: "8",
   projenrcTs: true,
   prettier: true,
+  prettierOptions: {
+    settings: { printWidth: 120 },
+  },
   github: true,
   githubOptions: { mergify: false, pullRequestLint: false },
   release: false,
@@ -32,5 +35,9 @@ new Husky(project, {
 new Changesets(project, {
   repo: "floydspace/effect-kafka",
 });
+
+// project.addDeps("@confluentinc/kafka-javascript");
+project.addDeps("kafkajs");
+project.addDeps("effect", "@effect/platform", "@effect/platform-node");
 
 project.synth();

@@ -43,6 +43,12 @@
     "ts-node": "^10.9.2",
     "typescript": "~5.5.4"
   },
+  "dependencies": {
+    "@effect/platform": "^0.68.6",
+    "@effect/platform-node": "^0.63.6",
+    "effect": "^3.9.2",
+    "kafkajs": "^2.2.4"
+  },
   "pnpm": {},
   "main": "lib/index.js",
   "license": "Apache-2.0",
