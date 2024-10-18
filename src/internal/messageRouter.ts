@@ -1,6 +1,5 @@
 import { Chunk, Context, Effect, Effectable, FiberRef, Inspectable, Option, Predicate, Tracer } from "effect";
 import { dual } from "effect/Function";
-import type * as App from "../ConsumerApp";
 import * as Error from "../ConsumerError";
 import * as MessagePayload from "../MessagePayload";
 import type * as Router from "../MessageRouter";
@@ -41,7 +40,7 @@ class RouterImpl<E = never, R = never>
   }
 }
 
-const toConsumerApp = <E, R>(self: Router.MessageRouter<E, R>): App.Default<E | Error.RouteNotFound, R> => {
+const toConsumerApp = <E, R>(self: Router.MessageRouter<E, R>): Router.Default<E | Error.RouteNotFound, R> => {
   return Effect.withFiberRuntime<void, E | Error.RouteNotFound, R>((fiber) => {
     const context = Context.unsafeMake(new Map(fiber.getFiberRef(FiberRef.currentContext).unsafeMap));
     const payload = Context.unsafeGet(context, MessagePayload.MessagePayload);

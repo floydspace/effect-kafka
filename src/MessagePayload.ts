@@ -1,21 +1,24 @@
+/**
+ * @since 0.1.0
+ */
 import type * as Context from "effect/Context";
 import type { EachMessagePayload, KafkaMessage } from "kafkajs"; // TODO: use generic type
 import * as internal from "./internal/messagePayload";
 
 /**
- * @since 1.0.0
+ * @since 0.1.0
  * @category type ids
  */
 export const TypeId: unique symbol = internal.TypeId;
 
 /**
- * @since 1.0.0
+ * @since 0.1.0
  * @category type ids
  */
 export type TypeId = typeof TypeId;
 
 /**
- * @since 1.0.0
+ * @since 0.1.0
  * @category models
  */
 export interface MessagePayload {
@@ -28,13 +31,13 @@ export interface MessagePayload {
 }
 
 /**
- * @since 1.0.0
+ * @since 0.1.0
  * @category context
  */
 export const MessagePayload: Context.Tag<MessagePayload, MessagePayload> = internal.messagePayloadTag;
 
 /**
- * @since 1.0.0
+ * @since 0.1.0
  * @category constructors
  */
 export const make: (payload: EachMessagePayload) => MessagePayload = internal.make;

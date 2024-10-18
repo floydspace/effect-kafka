@@ -1,12 +1,15 @@
 import { Changesets, Husky } from "@floydspace/projen-components";
-import { TypeScriptLibProject } from "./projenrc";
+import { Docgen, TypeScriptLibProject } from "./projenrc";
+
+const org = "floydspace";
+const name = "effect-kafka";
+const repo = `${org}/${name}`;
 
 const project = new TypeScriptLibProject({
-  name: "effect-kafka",
+  name: name,
+  homepage: `https://${org}.github.io/${name}`,
   typescriptVersion: "~5.5.4",
-  prettierOptions: {
-    settings: { printWidth: 120 },
-  },
+  prettierOptions: { settings: { printWidth: 120 } },
   github: true,
   githubOptions: { mergify: false, pullRequestLint: false },
   release: false,
@@ -23,9 +26,9 @@ new Husky(project, {
   },
 });
 
-new Changesets(project, {
-  repo: "floydspace/effect-kafka",
-});
+new Docgen(project);
+
+new Changesets(project, { repo });
 
 project.addPeerDeps("kafkajs", "@confluentinc/kafka-javascript");
 project.package.addField("peerDependenciesMeta", {
@@ -34,5 +37,7 @@ project.package.addField("peerDependenciesMeta", {
 });
 
 project.addPeerDeps("effect", "@effect/platform", "@effect/platform-node");
+
+project.tsconfigDev.addInclude("examples");
 
 project.synth();

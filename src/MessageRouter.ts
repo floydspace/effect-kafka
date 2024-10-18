@@ -1,48 +1,56 @@
+/**
+ * @since 0.1.0
+ */
 import { Chunk, Context, Effect, Inspectable, Layer, Scope } from "effect";
-import type * as App from "./ConsumerApp";
 import type * as Error from "./ConsumerError";
 import * as internal from "./internal/messageRouter";
 import type * as MessagePayload from "./MessagePayload";
 
 /**
- * @since 1.0.0
+ * @since 0.1.0
  * @category type ids
  */
 export const TypeId: unique symbol = internal.TypeId;
 
 /**
- * @since 1.0.0
+ * @since 0.1.0
  * @category type ids
  */
 export type TypeId = typeof TypeId;
 
 /**
- * @since 1.0.0
+ * @since 0.1.0
+ * @category models
+ */
+export type Default<E = never, R = never> = Effect.Effect<void, E, R | MessagePayload.MessagePayload>;
+
+/**
+ * @since 0.1.0
  * @category models
  */
 export interface MessageRouter<E = never, R = never>
-  extends App.Default<E | Error.RouteNotFound, R>,
+  extends Default<E | Error.RouteNotFound, R>,
     Inspectable.Inspectable {
   readonly [TypeId]: TypeId;
   readonly routes: Chunk.Chunk<Route<E, R>>;
 }
 
 /**
- * @since 1.0.0
+ * @since 0.1.0
  */
 export declare namespace MessageRouter {
   /**
-   * @since 1.0.0
+   * @since 0.1.0
    */
   export type Provided = MessagePayload.MessagePayload | Scope.Scope;
 
   /**
-   * @since 1.0.0
+   * @since 0.1.0
    */
   export type ExcludeProvided<A> = Exclude<A, Provided>;
 
   /**
-   * @since 1.0.0
+   * @since 0.1.0
    */
   export interface Service<E, R> {
     readonly router: Effect.Effect<MessageRouter<E, R>>;
@@ -56,7 +64,7 @@ export declare namespace MessageRouter {
   }
 
   /**
-   * @since 1.0.0
+   * @since 0.1.0
    */
   export interface TagClass<Self, Name extends string, E, R> extends Context.Tag<Self, Service<E, R>> {
     readonly Live: Layer.Layer<Self>;
@@ -75,19 +83,19 @@ export declare namespace MessageRouter {
 }
 
 /**
- * @since 1.0.0
+ * @since 0.1.0
  * @category type ids
  */
 export const RouteTypeId: unique symbol = internal.RouteTypeId;
 
 /**
- * @since 1.0.0
+ * @since 0.1.0
  * @category type ids
  */
 export type RouteTypeId = typeof RouteTypeId;
 
 /**
- * @since 1.0.0
+ * @since 0.1.0
  * @category models
  */
 export interface Route<E = never, R = never> {
@@ -98,23 +106,23 @@ export interface Route<E = never, R = never> {
 }
 
 /**
- * @since 1.0.0
+ * @since 0.1.0
  */
 export declare namespace Route {
   /**
-   * @since 1.0.0
+   * @since 0.1.0
    */
-  export type Handler<E, R> = App.Default<E, R>;
+  export type Handler<E, R> = Default<E, R>;
 }
 
 /**
- * @since 1.0.0
+ * @since 0.1.0
  * @category constructors
  */
 export const empty: MessageRouter = internal.empty;
 
 /**
- * @since 1.0.0
+ * @since 0.1.0
  * @category constructors
  */
 export const fromIterable: <R extends Route<any, any>>(
@@ -123,7 +131,7 @@ export const fromIterable: <R extends Route<any, any>>(
   internal.fromIterable;
 
 /**
- * @since 1.0.0
+ * @since 0.1.0
  * @category constructors
  */
 export const makeRoute: <E, R>(
@@ -133,12 +141,12 @@ export const makeRoute: <E, R>(
 ) => Route<E, MessageRouter.ExcludeProvided<R>> = internal.makeRoute;
 
 /**
- * @since 1.0.0
+ * @since 0.1.0
  * @category routing
  */
 export const subscribe: {
   /**
-   * @since 1.0.0
+   * @since 0.1.0
    * @category routing
    */
   <R1, E1>(
@@ -147,7 +155,7 @@ export const subscribe: {
     options?: { readonly fromBeginning?: boolean | undefined } | undefined,
   ): <E, R>(self: MessageRouter<E, R>) => MessageRouter<E1 | E, R | MessageRouter.ExcludeProvided<R1>>;
   /**
-   * @since 1.0.0
+   * @since 0.1.0
    * @category routing
    */
   <E, R, E1, R1>(

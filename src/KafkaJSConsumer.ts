@@ -1,3 +1,6 @@
+/**
+ * @since 0.1.0
+ */
 import { Chunk, Effect, Layer, Runtime, Scope } from "effect";
 import { LazyArg } from "effect/Function";
 import { ConsumerConfig, EachMessageHandler, EachMessagePayload, Kafka } from "kafkajs";
@@ -5,6 +8,10 @@ import * as Consumer from "./Consumer";
 import * as ConsumerError from "./ConsumerError";
 import * as MessagePayload from "./MessagePayload";
 
+/**
+ * @since 0.1.0
+ * @category constructors
+ */
 export const make = (
   evaluate: LazyArg<Kafka>,
   options: ConsumerConfig,
@@ -36,5 +43,9 @@ export const make = (
     });
   });
 
+/**
+ * @since 0.1.0
+ * @category layers
+ */
 export const layer = (evaluate: LazyArg<Kafka>, options: ConsumerConfig) =>
   Layer.scoped(Consumer.Consumer, make(evaluate, options));

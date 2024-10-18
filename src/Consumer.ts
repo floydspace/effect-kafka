@@ -1,22 +1,25 @@
+/**
+ * @since 0.1.0
+ */
 import { Context, Effect, Layer, Scope } from "effect";
 import * as internal from "./internal/consumer";
 import type * as MessagePayload from "./MessagePayload";
 import type * as MessageRouter from "./MessageRouter";
 
 /**
- * @since 1.0.0
+ * @since 0.1.0
  * @category type ids
  */
 export const TypeId: unique symbol = internal.TypeId;
 
 /**
- * @since 1.0.0
+ * @since 0.1.0
  * @category type ids
  */
 export type TypeId = typeof TypeId;
 
 /**
- * @since 1.0.0
+ * @since 0.1.0
  * @category models
  */
 export interface Consumer {
@@ -29,13 +32,13 @@ export interface Consumer {
 }
 
 /**
- * @since 1.0.0
+ * @since 0.1.0
  * @category constructors
  */
 export const Consumer: Context.Tag<Consumer, Consumer> = internal.consumerTag;
 
 /**
- * @since 1.0.0
+ * @since 0.1.0
  * @category constructors
  */
 export const make: (options: {
@@ -43,19 +46,19 @@ export const make: (options: {
 }) => Consumer = internal.make;
 
 /**
- * @since 1.0.0
+ * @since 0.1.0
  * @category accessors
  */
 export const serve: {
   /**
-   * @since 1.0.0
+   * @since 0.1.0
    * @category accessors
    */
   (): <E, R>(
     app: MessageRouter.MessageRouter<E, R>,
   ) => Layer.Layer<never, never, Consumer | Exclude<R, MessagePayload.MessagePayload | Scope.Scope>>;
   /**
-   * @since 1.0.0
+   * @since 0.1.0
    * @category accessors
    */
   <E, R>(
@@ -64,19 +67,19 @@ export const serve: {
 } = internal.serve;
 
 /**
- * @since 1.0.0
+ * @since 0.1.0
  * @category accessors
  */
 export const serveEffect: {
   /**
-   * @since 1.0.0
+   * @since 0.1.0
    * @category accessors
    */
   (): <E, R>(
     app: MessageRouter.MessageRouter<E, R>,
   ) => Effect.Effect<void, never, Scope.Scope | Consumer | Exclude<R, MessagePayload.MessagePayload>>;
   /**
-   * @since 1.0.0
+   * @since 0.1.0
    * @category accessors
    */
   <E, R>(

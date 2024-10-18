@@ -6,6 +6,7 @@
     "changeset": "npx projen changeset",
     "compile": "npx projen compile",
     "default": "npx projen default",
+    "docgen": "npx projen docgen",
     "eject": "npx projen eject",
     "eslint": "npx projen eslint",
     "package": "npx projen package",
@@ -28,6 +29,7 @@
     "@changesets/changelog-github": "^0.5.0",
     "@changesets/cli": "^2.27.9",
     "@confluentinc/kafka-javascript": "0.2.1",
+    "@effect/docgen": "^0.4.5",
     "@effect/platform": "0.68.6",
     "@effect/platform-node": "0.63.6",
     "@floydspace/projen-components": "next",
@@ -66,6 +68,7 @@
   },
   "main": "lib/index.js",
   "license": "MIT",
+  "homepage": "https://floydspace.github.io/effect-kafka",
   "publishConfig": {
     "access": "public"
   },

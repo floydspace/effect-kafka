@@ -9,6 +9,10 @@
       "type": "build"
     },
     {
+      "name": "@effect/docgen",
+      "type": "build"
+    },
+    {
       "name": "@floydspace/projen-components",
       "version": "next",
       "type": "build"

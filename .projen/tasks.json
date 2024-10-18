@@ -63,6 +63,14 @@
         }
       ]
     },
+    "docgen": {
+      "name": "docgen",
+      "steps": [
+        {
+          "exec": "docgen"
+        }
+      ]
+    },
     "eject": {
       "name": "eject",
       "description": "Remove projen from the project",

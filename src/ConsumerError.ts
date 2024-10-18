@@ -1,27 +1,30 @@
+/**
+ * @since 0.1.0
+ */
 import { Error } from "@effect/platform";
 import * as internal from "./internal/consumerError";
 import type * as MessagePayload from "./MessagePayload";
 
 /**
- * @since 1.0.0
+ * @since 0.1.0
  * @category type id
  */
 export const TypeId: unique symbol = internal.TypeId;
 
 /**
- * @since 1.0.0
+ * @since 0.1.0
  * @category type id
  */
 export type TypeId = typeof TypeId;
 
 /**
- * @since 1.0.0
+ * @since 0.1.0
  * @category error
  */
 export type ConsumerError = RouteNotFound;
 
 /**
- * @since 1.0.0
+ * @since 0.1.0
  * @category error
  */
 export class RouteNotFound extends Error.TypeIdError(TypeId, "RouteNotFound")<{
