@@ -29,8 +29,6 @@ jspm_packages/
 *.tgz
 .yarn-integrity
 .cache
-/test-reports/
-junit.xml
 !/jest.config.json
 /coverage/
 !/.github/workflows/build.yml
@@ -44,6 +42,7 @@ junit.xml
 /lib
 /dist/
 !/.eslintrc.json
+!/tsconfig.esm.json
 !/.changeset/config.json
 !/.github/workflows/release.yml
 !/.projenrc.ts

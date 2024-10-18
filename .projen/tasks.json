@@ -45,44 +45,12 @@
         }
       ]
     },
-    "clobber": {
-      "name": "clobber",
-      "description": "hard resets to HEAD of origin and cleans the local repo",
-      "env": {
-        "BRANCH": "$(git branch --show-current)"
-      },
-      "steps": [
-        {
-          "exec": "git checkout -b scratch",
-          "name": "save current HEAD in \"scratch\" branch"
-        },
-        {
-          "exec": "git checkout $BRANCH"
-        },
-        {
-          "exec": "git fetch origin",
-          "name": "fetch latest changes from origin"
-        },
-        {
-          "exec": "git reset --hard origin/$BRANCH",
-          "name": "hard reset to origin commit"
-        },
-        {
-          "exec": "git clean -fdx",
-          "name": "clean all untracked files"
-        },
-        {
-          "say": "ready to rock! (unpushed commits are under the \"scratch\" branch)"
-        }
-      ],
-      "condition": "git diff --exit-code > /dev/null"
-    },
     "compile": {
       "name": "compile",
       "description": "Only compile",
       "steps": [
         {
-          "exec": "tsc --build"
+          "exec": "tsc -b ./tsconfig.json ./tsconfig.esm.json"
         }
       ]
     },
@@ -137,15 +105,7 @@
     },
     "package": {
       "name": "package",
-      "description": "Creates the distribution package",
-      "steps": [
-        {
-          "exec": "mkdir -p dist/js"
-        },
-        {
-          "exec": "pnpm pack --pack-destination dist/js"
-        }
-      ]
+      "description": "Creates the distribution package"
     },
     "post-compile": {
       "name": "post-compile",

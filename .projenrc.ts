@@ -1,14 +1,9 @@
 import { Changesets, Husky } from "@floydspace/projen-components";
-import { javascript, typescript } from "projen";
+import { TypeScriptLibProject } from "./projenrc";
 
-const project = new typescript.TypeScriptProject({
-  defaultReleaseBranch: "main",
+const project = new TypeScriptLibProject({
   name: "effect-kafka",
-  packageManager: javascript.NodePackageManager.PNPM,
   typescriptVersion: "~5.5.4",
-  pnpmVersion: "8",
-  projenrcTs: true,
-  prettier: true,
   prettierOptions: {
     settings: { printWidth: 120 },
   },
@@ -19,10 +14,6 @@ const project = new typescript.TypeScriptProject({
   pullRequestTemplate: false,
   workflowNodeVersion: "lts/*",
   workflowPackageCache: true,
-  depsUpgrade: false,
-  jestOptions: {
-    configFilePath: "jest.config.json",
-  },
   devDeps: ["@floydspace/projen-components@next"],
 });
 
@@ -36,8 +27,12 @@ new Changesets(project, {
   repo: "floydspace/effect-kafka",
 });
 
-// project.addDeps("@confluentinc/kafka-javascript");
-project.addDeps("kafkajs");
-project.addDeps("effect", "@effect/platform", "@effect/platform-node");
+project.addPeerDeps("kafkajs", "@confluentinc/kafka-javascript");
+project.package.addField("peerDependenciesMeta", {
+  kafkajs: { optional: true },
+  "@confluentinc/kafka-javascript": { optional: true },
+});
+
+project.addPeerDeps("effect", "@effect/platform", "@effect/platform-node");
 
 project.synth();

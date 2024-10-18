@@ -26,13 +26,7 @@
     "/node_modules/"
   ],
   "reporters": [
-    "default",
-    [
-      "jest-junit",
-      {
-        "outputDirectory": "test-reports"
-      }
-    ]
+    "default"
   ],
   "transform": {
     "^.+\\.[t]sx?$": [
