@@ -49,3 +49,4 @@ docs/
 !/.github/workflows/release.yml
 !/.projenrc.ts
 !/.husky/pre-push
+!/.vscode/extensions.json

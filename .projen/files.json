@@ -14,6 +14,7 @@
     ".projen/deps.json",
     ".projen/files.json",
     ".projen/tasks.json",
+    ".vscode/extensions.json",
     "docgen.json",
     "jest.config.json",
     "LICENSE",

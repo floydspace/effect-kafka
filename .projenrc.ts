@@ -1,4 +1,4 @@
-import { Changesets, Husky } from "@floydspace/projen-components";
+import { Changesets, Husky, VscodeExtensionRecommendations } from "@floydspace/projen-components";
 import { Docgen, TypeScriptLibProject } from "./projenrc";
 
 const org = "floydspace";
@@ -30,13 +30,16 @@ new Docgen(project);
 
 new Changesets(project, { repo });
 
+const recommendations = new VscodeExtensionRecommendations(project);
+recommendations.addRecommendations("effectful-tech.effect-vscode");
+
+project.addPeerDeps("effect", "@effect/platform", "@effect/platform-node");
+
 project.addPeerDeps("kafkajs", "@confluentinc/kafka-javascript");
 project.package.addField("peerDependenciesMeta", {
   kafkajs: { optional: true },
   "@confluentinc/kafka-javascript": { optional: true },
 });
-
-project.addPeerDeps("effect", "@effect/platform", "@effect/platform-node");
 
 project.tsconfigDev.addInclude("examples");
 
