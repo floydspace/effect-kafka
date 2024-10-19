@@ -1,5 +1,5 @@
 import { Changesets, Husky, VscodeExtensionRecommendations } from "@floydspace/projen-components";
-import { Docgen, TypeScriptLibProject } from "./projenrc";
+import { Docgen, Examples, TypeScriptLibProject } from "./projenrc";
 
 const org = "floydspace";
 const name = "effect-kafka";
@@ -33,19 +33,21 @@ new Changesets(project, { repo });
 const recommendations = new VscodeExtensionRecommendations(project);
 recommendations.addRecommendations("effectful-tech.effect-vscode");
 
+new Examples(project);
+
+project.addPackageIgnore("/docker-compose.yml");
+
+// Effect dependencies
 project.addDevDeps("@effect/platform-node");
 project.addPeerDeps("effect", "@effect/platform");
 
+// Kafka dependencies
 project.addPeerDeps("kafkajs", "@confluentinc/kafka-javascript");
-project.package.addField("peerDependenciesMeta", {
-  kafkajs: { optional: true },
-  "@confluentinc/kafka-javascript": { optional: true },
-});
-
-project.tsconfigDev.addInclude("examples");
-project.eslint?.addOverride({
-  files: ["examples/**/*.ts"],
-  rules: { "import/no-extraneous-dependencies": "off" },
+project.addFields({
+  peerDependenciesMeta: {
+    kafkajs: { optional: true },
+    "@confluentinc/kafka-javascript": { optional: true },
+  },
 });
 
 project.synth();

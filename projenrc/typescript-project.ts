@@ -62,7 +62,7 @@ export class TypeScriptLibProject extends typescript.TypeScriptProject {
     // Build both cjs and esm
     this.compileTask.reset("tsc -b ./tsconfig.json ./tsconfig.esm.json");
 
-    this.npmignore?.addPatterns("/tsconfig.esm.json");
+    this.addPackageIgnore("/tsconfig.esm.json");
 
     this.addFields({
       // Reference to esm index for root imports

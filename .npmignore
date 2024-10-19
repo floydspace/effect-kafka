@@ -21,7 +21,10 @@ tsconfig.tsbuildinfo
 /.eslintrc.json
 /tsconfig.esm.json
 /.husky/
+/docs
 /.changeset/
+/examples
+/docker-compose.yml
 /.gitattributes
 /.projenrc.ts
 /projenrc

@@ -40,7 +40,8 @@ export class Docgen extends Component {
       omitEmpty: true,
     });
 
-    project.addGitIgnore("docs/");
+    project.addGitIgnore("/docs");
+    project.addPackageIgnore("/docs");
 
     const ghProject = github.GitHub.of(project.root);
     if (ghProject) {
