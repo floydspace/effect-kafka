@@ -1,3 +1,6 @@
+/**
+ * @since 0.2.0
+ */
 import { KafkaJSConnectionError, KafkaJSNonRetriableError } from "kafkajs";
 
 declare module "kafkajs" {
@@ -12,4 +15,13 @@ declare module "kafkajs" {
 KafkaJSConnectionError.prototype._tag = "KafkaJSConnectionError";
 KafkaJSNonRetriableError.prototype._tag = "KafkaJSNonRetriableError";
 
-export { KafkaJSConnectionError, KafkaJSNonRetriableError };
+export {
+  /**
+   * @since 0.2.0
+   */
+  KafkaJSConnectionError,
+  /**
+   * @since 0.2.0
+   */
+  KafkaJSNonRetriableError,
+};

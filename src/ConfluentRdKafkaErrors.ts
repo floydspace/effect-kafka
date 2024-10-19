@@ -1,3 +1,6 @@
+/**
+ * @since 0.2.0
+ */
 import { LibrdKafkaError as LibrdKafkaError$ } from "@confluentinc/kafka-javascript";
 import { Data } from "effect";
 
