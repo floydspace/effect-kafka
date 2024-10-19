@@ -4,6 +4,7 @@
     ".eslintrc.json",
     ".gitattributes",
     ".github/workflows/build.yml",
+    ".github/workflows/pages.yml",
     ".github/workflows/release.yml",
     ".gitignore",
     ".husky/pre-push",

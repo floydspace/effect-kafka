@@ -26,7 +26,7 @@ new Husky(project, {
   },
 });
 
-new Docgen(project);
+new Docgen(project, { repoOwner: org });
 
 new Changesets(project, { repo });
 

@@ -6,6 +6,7 @@
 /.eslintrc.json linguist-generated
 /.gitattributes linguist-generated
 /.github/workflows/build.yml linguist-generated
+/.github/workflows/pages.yml linguist-generated
 /.github/workflows/release.yml linguist-generated
 /.gitignore linguist-generated
 /.husky/pre-push linguist-generated

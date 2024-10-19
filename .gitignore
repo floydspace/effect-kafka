@@ -45,6 +45,7 @@ jspm_packages/
 !/tsconfig.esm.json
 !/docgen.json
 docs/
+!/.github/workflows/pages.yml
 !/.changeset/config.json
 !/.github/workflows/release.yml
 !/.projenrc.ts

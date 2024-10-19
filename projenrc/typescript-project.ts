@@ -16,7 +16,7 @@ export class TypeScriptLibProject extends typescript.TypeScriptProject {
       projenrcTs: true,
       license: "MIT",
       packageManager: javascript.NodePackageManager.PNPM,
-      pnpmVersion: "8",
+      pnpmVersion: "9",
       prettier: true,
       projenVersion: parent?.deps.getDependency("projen").version,
       typescriptVersion: parent?.deps.getDependency("typescript").version,
@@ -44,7 +44,7 @@ export class TypeScriptLibProject extends typescript.TypeScriptProject {
       preinstall: `npx only-allow ${this.package.packageManager}`,
     });
 
-    this.package.addEngine("pnpm", ">=8 <9");
+    this.package.addEngine("pnpm", ">=9 <10");
 
     // Add tsconfig for esm
     new JsonFile(this, "tsconfig.esm.json", {
