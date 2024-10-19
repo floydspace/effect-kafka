@@ -4,48 +4,10 @@
 import { KafkaJS } from "@confluentinc/kafka-javascript";
 import { Chunk, Effect, Layer, Runtime } from "effect";
 import * as Consumer from "./Consumer";
+import * as Error from "./ConsumerError";
+import * as internal from "./internal/confluentKafkaJSInstance";
 import * as KafkaInstance from "./KafkaInstance";
 import * as MessagePayload from "./MessagePayload";
-
-class DefaultLogger implements KafkaJS.Logger {
-  static create(runtime: Runtime.Runtime<never>): DefaultLogger {
-    return new DefaultLogger(runtime);
-  }
-
-  private logLevel: KafkaJS.logLevel;
-  private runSync: <A, E>(effect: Effect.Effect<A, E, never>) => A;
-
-  private constructor(runtime: Runtime.Runtime<never>) {
-    this.logLevel = KafkaJS.logLevel.INFO;
-    this.runSync = Runtime.runSync(runtime);
-  }
-
-  setLogLevel(logLevel: KafkaJS.logLevel) {
-    this.logLevel = logLevel;
-  }
-
-  info(message: string, extra?: object) {
-    if (this.logLevel >= KafkaJS.logLevel.INFO) Effect.logInfo({ message, ...extra }).pipe(this.runSync);
-  }
-
-  error(message: string, extra?: object) {
-    if (this.logLevel >= KafkaJS.logLevel.ERROR) Effect.logError({ message, ...extra }).pipe(this.runSync);
-  }
-
-  warn(message: string, extra?: object) {
-    if (this.logLevel >= KafkaJS.logLevel.WARN) Effect.logWarning({ message, ...extra }).pipe(this.runSync);
-  }
-
-  debug(message: string, extra?: object) {
-    if (this.logLevel >= KafkaJS.logLevel.DEBUG) Effect.logDebug({ message, ...extra }).pipe(this.runSync);
-  }
-
-  namespace() {
-    return this;
-  }
-}
-
-const makeLogger = Effect.map(Effect.runtime(), DefaultLogger.create);
 
 /**
  * @since 0.2.0
@@ -53,7 +15,7 @@ const makeLogger = Effect.map(Effect.runtime(), DefaultLogger.create);
  */
 export const make = (config: KafkaJS.KafkaConfig): Effect.Effect<KafkaInstance.KafkaInstance> =>
   Effect.gen(function* () {
-    const logger = yield* makeLogger;
+    const logger = yield* internal.makeLogger;
     const kafka = new KafkaJS.Kafka({ kafkaJS: { ...config, logger } });
 
     return KafkaInstance.make({
@@ -61,15 +23,17 @@ export const make = (config: KafkaJS.KafkaConfig): Effect.Effect<KafkaInstance.K
       consumer: (options) =>
         Effect.gen(function* () {
           const consumer = yield* Effect.acquireRelease(
-            Effect.sync(() =>
-              kafka.consumer({
-                kafkaJS: { groupId: options.groupId },
+            Effect.sync(() => kafka.consumer({ kafkaJS: { groupId: options.groupId } })).pipe(
+              Effect.tap(internal.connect),
+              Effect.catchTags({
+                LibrdKafkaError: (err) =>
+                  err.message === "broker transport failure"
+                    ? new Error.ConnectionException({ broker: err.origin, message: err.message, stack: err.stack })
+                    : Effect.die(err),
+                UnknownException: Effect.die,
               }),
-            ).pipe(
-              Effect.tap((c) => c.connect()),
-              Effect.orDie,
             ),
-            (c) => Effect.promise(() => c.disconnect()),
+            internal.disconnect,
           );
 
           return Consumer.make({

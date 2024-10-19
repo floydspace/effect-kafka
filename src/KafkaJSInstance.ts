@@ -2,34 +2,12 @@
  * @since 0.2.0
  */
 import { Chunk, Effect, Layer, Runtime } from "effect";
-import { EachMessageHandler, EachMessagePayload, Kafka, KafkaConfig, LogEntry, logLevel } from "kafkajs";
+import { EachMessageHandler, EachMessagePayload, Kafka, KafkaConfig } from "kafkajs";
 import * as Consumer from "./Consumer";
+import * as Error from "./ConsumerError";
+import * as internal from "./internal/kafkaJSInstance";
 import * as KafkaInstance from "./KafkaInstance";
 import * as MessagePayload from "./MessagePayload";
-
-const makeLogger = Effect.map(Effect.runtime(), (runtime) => {
-  const runSync = Runtime.runSync(runtime);
-
-  return (entry: LogEntry) => {
-    const prefix = entry.namespace ? `[${entry.namespace}] ` : "";
-    const message = JSON.stringify(
-      Object.assign({ level: entry.label }, entry.log, {
-        message: `${prefix}${entry.log.message}`,
-      }),
-    );
-
-    switch (entry.level) {
-      case logLevel.INFO:
-        return Effect.logInfo(message).pipe(runSync);
-      case logLevel.ERROR:
-        return Effect.logError(message).pipe(runSync);
-      case logLevel.WARN:
-        return Effect.logWarning(message).pipe(runSync);
-      case logLevel.DEBUG:
-        return Effect.logDebug(message).pipe(runSync);
-    }
-  };
-});
 
 /**
  * @since 0.2.0
@@ -37,7 +15,7 @@ const makeLogger = Effect.map(Effect.runtime(), (runtime) => {
  */
 export const make = (config: KafkaConfig): Effect.Effect<KafkaInstance.KafkaInstance> =>
   Effect.gen(function* () {
-    const logger = yield* makeLogger;
+    const logger = yield* internal.makeLogger;
     const kafka = new Kafka({ ...config, logCreator: () => logger });
 
     return KafkaInstance.make({
@@ -46,10 +24,13 @@ export const make = (config: KafkaConfig): Effect.Effect<KafkaInstance.KafkaInst
         Effect.gen(function* () {
           const consumer = yield* Effect.acquireRelease(
             Effect.sync(() => kafka.consumer(options)).pipe(
-              Effect.tap((c) => c.connect()),
-              Effect.orDie,
+              Effect.tap(internal.connect),
+              Effect.catchTags({
+                KafkaJSConnectionError: (err) => new Error.ConnectionException(err),
+                UnknownException: Effect.die,
+              }),
             ),
-            (c) => Effect.promise(() => c.disconnect()),
+            internal.disconnect,
           );
           return Consumer.make({
             run: (app) =>

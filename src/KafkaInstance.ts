@@ -2,9 +2,10 @@
  * @since 0.2.0
  */
 import { Context, Effect, Scope } from "effect";
-import * as Consumer from "./Consumer";
+import { Consumer } from "./Consumer";
+import type * as Error from "./ConsumerError";
 import * as internal from "./internal/kafkaInstance";
-import * as Producer from "./Producer";
+import { Producer } from "./Producer";
 
 /**
  * @since 0.2.0
@@ -25,10 +26,10 @@ export type TypeId = typeof TypeId;
 export interface KafkaInstance {
   readonly [TypeId]: TypeId;
   readonly producer: {
-    (options: Producer.Producer.ProducerOptions): Effect.Effect<never>;
+    (options: Producer.ProducerOptions): Effect.Effect<never, never, Scope.Scope>;
   };
   readonly consumer: {
-    (options: Consumer.Consumer.ConsumerOptions): Effect.Effect<Consumer.Consumer>;
+    (options: Consumer.ConsumerOptions): Effect.Effect<Consumer, Error.ConnectionException, Scope.Scope>;
   };
 }
 
@@ -44,9 +45,9 @@ export const KafkaInstance: Context.Tag<KafkaInstance, KafkaInstance> = internal
  */
 export const make: (options: {
   readonly producer: {
-    (options: Producer.Producer.ProducerOptions): Effect.Effect<never, never, Scope.Scope>;
+    (options: Producer.ProducerOptions): Effect.Effect<never, never, Scope.Scope>;
   };
   readonly consumer: {
-    (options: Consumer.Consumer.ConsumerOptions): Effect.Effect<Consumer.Consumer, never, Scope.Scope>;
+    (options: Consumer.ConsumerOptions): Effect.Effect<Consumer, Error.ConnectionException, Scope.Scope>;
   };
 }) => KafkaInstance = internal.make;

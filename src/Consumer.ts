@@ -3,6 +3,7 @@
  */
 import { Context, Effect, Layer, Scope } from "effect";
 import type { ConsumerConfig } from "kafkajs"; // TODO: use generic type
+import type * as Error from "./ConsumerError";
 import * as internal from "./internal/consumer";
 import type * as KafkaInstance from "./KafkaInstance";
 import type * as MessagePayload from "./MessagePayload";
@@ -70,7 +71,11 @@ export const serve: {
     options: ConsumerConfig,
   ): <E, R>(
     app: MessageRouter.MessageRouter<E, R>,
-  ) => Layer.Layer<never, never, KafkaInstance.KafkaInstance | Exclude<R, MessagePayload.MessagePayload | Scope.Scope>>;
+  ) => Layer.Layer<
+    never,
+    Error.ConnectionException,
+    KafkaInstance.KafkaInstance | Exclude<R, MessagePayload.MessagePayload | Scope.Scope>
+  >;
   /**
    * @since 0.1.0
    * @category accessors
@@ -78,7 +83,11 @@ export const serve: {
   <E, R>(
     app: MessageRouter.MessageRouter<E, R>,
     options: ConsumerConfig,
-  ): Layer.Layer<never, never, KafkaInstance.KafkaInstance | Exclude<R, MessagePayload.MessagePayload | Scope.Scope>>;
+  ): Layer.Layer<
+    never,
+    Error.ConnectionException,
+    KafkaInstance.KafkaInstance | Exclude<R, MessagePayload.MessagePayload | Scope.Scope>
+  >;
 } = internal.serve;
 
 /**
@@ -96,7 +105,7 @@ export const serveEffect: {
     app: MessageRouter.MessageRouter<E, R>,
   ) => Effect.Effect<
     void,
-    never,
+    Error.ConnectionException,
     Scope.Scope | KafkaInstance.KafkaInstance | Exclude<R, MessagePayload.MessagePayload>
   >;
   /**
@@ -106,5 +115,9 @@ export const serveEffect: {
   <E, R>(
     app: MessageRouter.MessageRouter<E, R>,
     options: ConsumerConfig,
-  ): Effect.Effect<void, never, Scope.Scope | KafkaInstance.KafkaInstance | Exclude<R, MessagePayload.MessagePayload>>;
+  ): Effect.Effect<
+    void,
+    Error.ConnectionException,
+    Scope.Scope | KafkaInstance.KafkaInstance | Exclude<R, MessagePayload.MessagePayload>
+  >;
 } = internal.serveEffect;
