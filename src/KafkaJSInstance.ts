@@ -1,3 +1,6 @@
+/**
+ * @since 0.2.0
+ */
 import { Chunk, Effect, Layer, Runtime } from "effect";
 import { EachMessageHandler, EachMessagePayload, Kafka, KafkaConfig, logCreator, logLevel } from "kafkajs";
 import * as Consumer from "./Consumer";

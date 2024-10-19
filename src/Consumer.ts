@@ -39,6 +39,9 @@ export interface Consumer {
  */
 export const Consumer: Context.Tag<Consumer, Consumer> = internal.consumerTag;
 
+/**
+ * @since 0.2.0
+ */
 export declare namespace Consumer {
   /**
    * @since 0.2.0

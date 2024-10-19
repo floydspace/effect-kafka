@@ -36,6 +36,9 @@ export interface MessagePayload {
  */
 export const MessagePayload: Context.Tag<MessagePayload, MessagePayload> = internal.messagePayloadTag;
 
+/**
+ * @since 0.2.0
+ */
 export declare namespace MessagePayload {
   /**
    * @since 0.2.0
