@@ -7,13 +7,54 @@ import * as Consumer from "./Consumer";
 import * as KafkaInstance from "./KafkaInstance";
 import * as MessagePayload from "./MessagePayload";
 
+class DefaultLogger implements KafkaJS.Logger {
+  static create(runtime: Runtime.Runtime<never>): DefaultLogger {
+    return new DefaultLogger(runtime);
+  }
+
+  private logLevel: KafkaJS.logLevel;
+  private runSync: <A, E>(effect: Effect.Effect<A, E, never>) => A;
+
+  private constructor(runtime: Runtime.Runtime<never>) {
+    this.logLevel = KafkaJS.logLevel.INFO;
+    this.runSync = Runtime.runSync(runtime);
+  }
+
+  setLogLevel(logLevel: KafkaJS.logLevel) {
+    this.logLevel = logLevel;
+  }
+
+  info(message: string, extra?: object) {
+    if (this.logLevel >= KafkaJS.logLevel.INFO) Effect.logInfo({ message, ...extra }).pipe(this.runSync);
+  }
+
+  error(message: string, extra?: object) {
+    if (this.logLevel >= KafkaJS.logLevel.ERROR) Effect.logError({ message, ...extra }).pipe(this.runSync);
+  }
+
+  warn(message: string, extra?: object) {
+    if (this.logLevel >= KafkaJS.logLevel.WARN) Effect.logWarning({ message, ...extra }).pipe(this.runSync);
+  }
+
+  debug(message: string, extra?: object) {
+    if (this.logLevel >= KafkaJS.logLevel.DEBUG) Effect.logDebug({ message, ...extra }).pipe(this.runSync);
+  }
+
+  namespace() {
+    return this;
+  }
+}
+
+const makeLogger = Effect.map(Effect.runtime(), DefaultLogger.create);
+
 /**
  * @since 0.2.0
  * @category constructors
  */
 export const make = (config: KafkaJS.KafkaConfig): Effect.Effect<KafkaInstance.KafkaInstance> =>
   Effect.gen(function* () {
-    const kafka = new KafkaJS.Kafka({ kafkaJS: config });
+    const logger = yield* makeLogger;
+    const kafka = new KafkaJS.Kafka({ kafkaJS: { ...config, logger } });
 
     return KafkaInstance.make({
       producer: () => Effect.never,

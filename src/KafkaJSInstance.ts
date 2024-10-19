@@ -2,10 +2,34 @@
  * @since 0.2.0
  */
 import { Chunk, Effect, Layer, Runtime } from "effect";
-import { EachMessageHandler, EachMessagePayload, Kafka, KafkaConfig, logCreator, logLevel } from "kafkajs";
+import { EachMessageHandler, EachMessagePayload, Kafka, KafkaConfig, LogEntry, logLevel } from "kafkajs";
 import * as Consumer from "./Consumer";
 import * as KafkaInstance from "./KafkaInstance";
 import * as MessagePayload from "./MessagePayload";
+
+const makeLogger = Effect.map(Effect.runtime(), (runtime) => {
+  const runSync = Runtime.runSync(runtime);
+
+  return (entry: LogEntry) => {
+    const prefix = entry.namespace ? `[${entry.namespace}] ` : "";
+    const message = JSON.stringify(
+      Object.assign({ level: entry.label }, entry.log, {
+        message: `${prefix}${entry.log.message}`,
+      }),
+    );
+
+    switch (entry.level) {
+      case logLevel.INFO:
+        return Effect.logInfo(message).pipe(runSync);
+      case logLevel.ERROR:
+        return Effect.logError(message).pipe(runSync);
+      case logLevel.WARN:
+        return Effect.logWarning(message).pipe(runSync);
+      case logLevel.DEBUG:
+        return Effect.logDebug(message).pipe(runSync);
+    }
+  };
+});
 
 /**
  * @since 0.2.0
@@ -13,29 +37,8 @@ import * as MessagePayload from "./MessagePayload";
  */
 export const make = (config: KafkaConfig): Effect.Effect<KafkaInstance.KafkaInstance> =>
   Effect.gen(function* () {
-    const LoggerEffect: logCreator =
-      () =>
-      ({ namespace, level, label, log }) => {
-        const prefix = namespace ? `[${namespace}] ` : "";
-        const message = JSON.stringify(
-          Object.assign({ level: label }, log, {
-            message: `${prefix}${log.message}`,
-          }),
-        );
-
-        switch (level) {
-          case logLevel.INFO:
-            return console.info(message);
-          case logLevel.ERROR:
-            return console.error(message);
-          case logLevel.WARN:
-            return console.warn(message);
-          case logLevel.DEBUG:
-            return console.log(message);
-        }
-      };
-
-    const kafka = new Kafka({ ...config, logCreator: LoggerEffect });
+    const logger = yield* makeLogger;
+    const kafka = new Kafka({ ...config, logCreator: () => logger });
 
     return KafkaInstance.make({
       producer: () => Effect.never,
@@ -54,7 +57,7 @@ export const make = (config: KafkaConfig): Effect.Effect<KafkaInstance.KafkaInst
                 const topics = Chunk.toArray(app.routes).map((route) => route.topic);
                 yield* Effect.promise(() => consumer.subscribe({ topics }));
 
-                const eachMessage: EachMessageHandler = yield* Effect.map(Effect.runtime<never>(), (runtime) => {
+                const eachMessage: EachMessageHandler = yield* Effect.map(Effect.runtime(), (runtime) => {
                   const runPromise = Runtime.runPromise(runtime);
                   return (payload: EachMessagePayload) =>
                     app.pipe(

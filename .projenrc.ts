@@ -22,7 +22,7 @@ const project = new TypeScriptLibProject({
 
 new Husky(project, {
   huskyHooks: {
-    "pre-push": ["CI=true pnpm test"],
+    "pre-push": ["CI=true pnpm test", "pnpm docgen"],
   },
 });
 

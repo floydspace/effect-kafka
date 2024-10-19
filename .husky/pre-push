@@ -1,1 +1,2 @@
 CI=true pnpm test
+pnpm docgen
