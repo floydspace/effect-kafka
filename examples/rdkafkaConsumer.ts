@@ -1,7 +1,6 @@
-import { KafkaConsumer } from "@confluentinc/kafka-javascript";
 import { NodeRuntime } from "@effect/platform-node";
 import { Console, Effect, Layer } from "effect";
-import { ConfluentRdKafkaConsumer, Consumer, MessagePayload, MessageRouter } from "../src";
+import { ConfluentRdKafkaInstance, Consumer, MessagePayload, MessageRouter } from "../src";
 
 const ConsumerLive = MessageRouter.empty.pipe(
   MessageRouter.subscribe(
@@ -14,16 +13,10 @@ const ConsumerLive = MessageRouter.empty.pipe(
       }),
     ),
   ),
-  Consumer.serve(),
+  Consumer.serve({ groupId: "group" }),
 );
 
-const KafkaLive = ConfluentRdKafkaConsumer.layer(
-  () =>
-    new KafkaConsumer({
-      "group.id": "group",
-      "metadata.broker.list": "localhost:19092",
-    }),
-);
+const KafkaLive = ConfluentRdKafkaInstance.layer({ "metadata.broker.list": "localhost:19092" });
 const MainLive = ConsumerLive.pipe(Layer.provide(KafkaLive));
 
 NodeRuntime.runMain(Layer.launch(MainLive));

@@ -1,7 +1,6 @@
 import { NodeRuntime } from "@effect/platform-node";
 import { Console, Effect, Layer } from "effect";
-import { Kafka } from "kafkajs";
-import { Consumer, KafkaJSConsumer, MessagePayload, MessageRouter } from "../src";
+import { Consumer, KafkaJSInstance, MessagePayload, MessageRouter } from "../src";
 
 // const kafka = new Kafka({
 //   brokers: ["localhost:19092"],
@@ -50,10 +49,10 @@ const ConsumerLive = MessageRouter.empty.pipe(
       }),
     ),
   ),
-  Consumer.serve(),
+  Consumer.serve({ groupId: "group" }),
 );
 
-const KafkaLive = KafkaJSConsumer.layer(() => new Kafka({ brokers: ["localhost:19092"] }), { groupId: "group" });
+const KafkaLive = KafkaJSInstance.layer({ brokers: ["localhost:19092"] });
 const MainLive = ConsumerLive.pipe(Layer.provide(KafkaLive));
 
 NodeRuntime.runMain(Layer.launch(MainLive));

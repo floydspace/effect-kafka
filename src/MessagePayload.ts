@@ -25,7 +25,7 @@ export interface MessagePayload {
   readonly [TypeId]: TypeId;
   readonly topic: string;
   readonly partition: number;
-  readonly message: KafkaMessage;
+  readonly message: MessagePayload.Message;
   // readonly heartbeat: () => Promise<void>; // TODO: use Effect
   // readonly pause: () => () => void;
 }
@@ -36,6 +36,13 @@ export interface MessagePayload {
  */
 export const MessagePayload: Context.Tag<MessagePayload, MessagePayload> = internal.messagePayloadTag;
 
+export declare namespace MessagePayload {
+  /**
+   * @since 0.2.0
+   */
+  export type Message = KafkaMessage;
+}
+
 /**
  * @since 0.1.0
  * @category constructors
@@ -43,5 +50,5 @@ export const MessagePayload: Context.Tag<MessagePayload, MessagePayload> = inter
 export const make: (payload: {
   readonly topic: string;
   readonly partition: number;
-  readonly message: KafkaMessage;
+  readonly message: MessagePayload.Message;
 }) => MessagePayload = internal.make;

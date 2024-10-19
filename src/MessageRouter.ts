@@ -110,7 +110,7 @@ export interface Route<E = never, R = never> {
  */
 export declare namespace Route {
   /**
-   * @since 0.1.1
+   * @since 0.2.0
    */
   export type Path = string | RegExp;
 

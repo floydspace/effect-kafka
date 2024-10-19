@@ -1,5 +1,4 @@
 import { Context } from "effect";
-import type { KafkaMessage } from "kafkajs"; // TODO: use generic type
 import type * as MessagePayload from "../MessagePayload";
 
 /** @internal */
@@ -16,5 +15,5 @@ const messagePayloadProto = {
 export const make = (payload: {
   readonly topic: string;
   readonly partition: number;
-  readonly message: KafkaMessage;
+  readonly message: MessagePayload.MessagePayload.Message;
 }): MessagePayload.MessagePayload => Object.assign(Object.create(messagePayloadProto), payload);

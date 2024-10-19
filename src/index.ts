@@ -15,14 +15,18 @@ export * as MessagePayload from "./MessagePayload";
  */
 export * as MessageRouter from "./MessageRouter";
 /**
- * @since 0.1.0
+ * @since 0.2.0
  */
-export * as KafkaJSConsumer from "./KafkaJSConsumer";
+export * as KafkaInstance from "./KafkaInstance";
 /**
- * @since 0.1.1
+ * @since 0.2.0
  */
-export * as ConfluentKafkaJSConsumer from "./ConfluentKafkaJSConsumer";
+export * as KafkaJSInstance from "./KafkaJSInstance";
 /**
- * @since 0.1.1
+ * @since 0.2.0
  */
-export * as ConfluentRdKafkaConsumer from "./ConfluentRdKafkaConsumer";
+export * as ConfluentKafkaJSInstance from "./ConfluentKafkaJSInstance";
+/**
+ * @since 0.2.0
+ */
+export * as ConfluentRdKafkaInstance from "./ConfluentRdKafkaInstance";
