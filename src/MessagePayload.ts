@@ -2,7 +2,7 @@
  * @since 0.1.0
  */
 import type * as Context from "effect/Context";
-import type { EachMessagePayload, KafkaMessage } from "kafkajs"; // TODO: use generic type
+import type { KafkaMessage } from "kafkajs"; // TODO: use generic type
 import * as internal from "./internal/messagePayload";
 
 /**
@@ -26,8 +26,8 @@ export interface MessagePayload {
   readonly topic: string;
   readonly partition: number;
   readonly message: KafkaMessage;
-  readonly heartbeat: () => Promise<void>; // TODO: use Effect
-  readonly pause: () => () => void;
+  // readonly heartbeat: () => Promise<void>; // TODO: use Effect
+  // readonly pause: () => () => void;
 }
 
 /**
@@ -40,4 +40,8 @@ export const MessagePayload: Context.Tag<MessagePayload, MessagePayload> = inter
  * @since 0.1.0
  * @category constructors
  */
-export const make: (payload: EachMessagePayload) => MessagePayload = internal.make;
+export const make: (payload: {
+  readonly topic: string;
+  readonly partition: number;
+  readonly message: KafkaMessage;
+}) => MessagePayload = internal.make;

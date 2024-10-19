@@ -21,7 +21,7 @@ devDependencies:
     specifier: 0.68.6
     version: 0.68.6(@effect/schema@0.75.5)(effect@3.9.2)
   '@effect/platform-node':
-    specifier: 0.63.6
+    specifier: ^0.63.6
     version: 0.63.6(@effect/platform@0.68.6)(effect@3.9.2)
   '@floydspace/projen-components':
     specifier: next

@@ -67,7 +67,7 @@ const toConsumerApp = <E, R>(self: Router.MessageRouter<E, R>): Router.Default<E
 class RouteImpl<E = never, R = never> extends Inspectable.Class implements Router.Route<E, R> {
   readonly [RouteTypeId]: Router.RouteTypeId;
   constructor(
-    readonly topic: string | RegExp,
+    readonly topic: Router.Route.Path,
     readonly handler: Router.Route.Handler<E, R>,
     readonly fromBeginning = false,
   ) {
@@ -95,7 +95,7 @@ export const fromIterable = <R extends Router.Route<any, any>>(
 
 /** @internal */
 export const makeRoute = <E, R>(
-  topic: string | RegExp,
+  topic: Router.Route.Path,
   handler: Router.Route.Handler<E, R>,
   options?: { readonly fromBeginning?: boolean | undefined } | undefined,
 ): Router.Route<E, Router.MessageRouter.ExcludeProvided<R>> =>
@@ -103,7 +103,7 @@ export const makeRoute = <E, R>(
 
 const route = (): {
   <R1, E1>(
-    topic: string | RegExp,
+    topic: Router.Route.Path,
     handler: Router.Route.Handler<E1, R1>,
     options?: { readonly fromBeginning?: boolean | undefined } | undefined,
   ): <E, R>(
@@ -111,21 +111,21 @@ const route = (): {
   ) => Router.MessageRouter<E1 | E, R | Router.MessageRouter.ExcludeProvided<R1>>;
   <E, R, E1, R1>(
     self: Router.MessageRouter<E, R>,
-    topic: string | RegExp,
+    topic: Router.Route.Path,
     handler: Router.Route.Handler<E1, R1>,
     options?: { readonly fromBeginning?: boolean | undefined } | undefined,
   ): Router.MessageRouter<E1 | E, R | Router.MessageRouter.ExcludeProvided<R1>>;
 } =>
   dual<
     <R1, E1>(
-      topic: string | RegExp,
+      topic: Router.Route.Path,
       handler: Router.Route.Handler<R1, E1>,
     ) => <E, R>(
       self: Router.MessageRouter<E, R>,
     ) => Router.MessageRouter<E | E1, R | Router.MessageRouter.ExcludeProvided<R1>>,
     <E, R, E1, R1>(
       self: Router.MessageRouter<E, R>,
-      topic: string | RegExp,
+      topic: Router.Route.Path,
       handler: Router.Route.Handler<E1, R1>,
       options?: { readonly fromBeginning?: boolean | undefined } | undefined,
     ) => Router.MessageRouter<E | E1, R | Router.MessageRouter.ExcludeProvided<R1>>

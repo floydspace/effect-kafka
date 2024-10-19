@@ -13,6 +13,10 @@
       "type": "build"
     },
     {
+      "name": "@effect/platform-node",
+      "type": "build"
+    },
+    {
       "name": "@floydspace/projen-components",
       "version": "next",
       "type": "build"
@@ -105,10 +109,6 @@
     },
     {
       "name": "@effect/platform",
-      "type": "peer"
-    },
-    {
-      "name": "@effect/platform-node",
       "type": "peer"
     },
     {

@@ -33,7 +33,8 @@ new Changesets(project, { repo });
 const recommendations = new VscodeExtensionRecommendations(project);
 recommendations.addRecommendations("effectful-tech.effect-vscode");
 
-project.addPeerDeps("effect", "@effect/platform", "@effect/platform-node");
+project.addDevDeps("@effect/platform-node");
+project.addPeerDeps("effect", "@effect/platform");
 
 project.addPeerDeps("kafkajs", "@confluentinc/kafka-javascript");
 project.package.addField("peerDependenciesMeta", {
@@ -42,5 +43,9 @@ project.package.addField("peerDependenciesMeta", {
 });
 
 project.tsconfigDev.addInclude("examples");
+project.eslint?.addOverride({
+  files: ["examples/**/*.ts"],
+  rules: { "import/no-extraneous-dependencies": "off" },
+});
 
 project.synth();

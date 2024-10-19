@@ -129,6 +129,14 @@
   "overrides": [
     {
       "files": [
+        "examples/**/*.ts"
+      ],
+      "rules": {
+        "import/no-extraneous-dependencies": "off"
+      }
+    },
+    {
+      "files": [
         ".projenrc.ts"
       ],
       "rules": {

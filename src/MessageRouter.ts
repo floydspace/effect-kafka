@@ -56,7 +56,7 @@ export declare namespace MessageRouter {
     readonly router: Effect.Effect<MessageRouter<E, R>>;
     readonly addRoute: (route: Route<E, R>) => Effect.Effect<void>;
     readonly subscribe: (
-      path: string | RegExp,
+      path: Route.Path,
       handler: Route.Handler<E, R | Provided>,
       options?: { readonly fromBeginning?: boolean | undefined } | undefined,
     ) => Effect.Effect<void>;
@@ -100,7 +100,7 @@ export type RouteTypeId = typeof RouteTypeId;
  */
 export interface Route<E = never, R = never> {
   readonly [RouteTypeId]: RouteTypeId;
-  readonly topic: string | RegExp;
+  readonly topic: Route.Path;
   readonly handler: Route.Handler<E, R>;
   readonly fromBeginning: boolean;
 }
@@ -109,6 +109,11 @@ export interface Route<E = never, R = never> {
  * @since 0.1.0
  */
 export declare namespace Route {
+  /**
+   * @since 0.1.1
+   */
+  export type Path = string | RegExp;
+
   /**
    * @since 0.1.0
    */
@@ -135,7 +140,7 @@ export const fromIterable: <R extends Route<any, any>>(
  * @category constructors
  */
 export const makeRoute: <E, R>(
-  topic: string | RegExp,
+  topic: Route.Path,
   handler: Route.Handler<E, R>,
   options?: { readonly fromBeginning?: boolean | undefined } | undefined,
 ) => Route<E, MessageRouter.ExcludeProvided<R>> = internal.makeRoute;
@@ -150,7 +155,7 @@ export const subscribe: {
    * @category routing
    */
   <R1, E1>(
-    topic: string | RegExp,
+    topic: Route.Path,
     handler: Route.Handler<E1, R1>,
     options?: { readonly fromBeginning?: boolean | undefined } | undefined,
   ): <E, R>(self: MessageRouter<E, R>) => MessageRouter<E1 | E, R | MessageRouter.ExcludeProvided<R1>>;
@@ -160,7 +165,7 @@ export const subscribe: {
    */
   <E, R, E1, R1>(
     self: MessageRouter<E, R>,
-    topic: string | RegExp,
+    topic: Route.Path,
     handler: Route.Handler<E1, R1>,
     options?: { readonly fromBeginning?: boolean | undefined } | undefined,
   ): MessageRouter<E | E1, R | MessageRouter.ExcludeProvided<R1>>;
