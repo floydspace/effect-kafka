@@ -42,7 +42,7 @@ class RouterImpl<E = never, R = never>
 
 const toConsumerApp = <E, R>(self: Router.MessageRouter<E, R>): Router.Default<E | Error.RouteNotFound, R> => {
   return Effect.withFiberRuntime<void, E | Error.RouteNotFound, R>((fiber) => {
-    const context = Context.unsafeMake(new Map(fiber.getFiberRef(FiberRef.currentContext).unsafeMap));
+    const context = fiber.getFiberRef(FiberRef.currentContext);
     const payload = Context.unsafeGet(context, MessagePayload.MessagePayload);
 
     let result = Chunk.findFirst(self.routes, (route) => route.topic === payload.topic); // TODO: match regex
@@ -56,11 +56,7 @@ const toConsumerApp = <E, R>(self: Router.MessageRouter<E, R>): Router.Default<E
       span.value.attribute("consumer.route", route.topic);
     }
 
-    return Effect.locally(
-      Effect.interruptible(route.handler) as Effect.Effect<void, E, Router.MessageRouter.ExcludeProvided<R>>,
-      FiberRef.currentContext,
-      context,
-    );
+    return Effect.interruptible(route.handler) as Effect.Effect<void, E, Router.MessageRouter.ExcludeProvided<R>>;
   });
 };
 

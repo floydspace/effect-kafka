@@ -56,28 +56,3 @@ const KafkaLive = KafkaJSInstance.layer({ brokers: ["localhost:19092"] });
 const MainLive = ConsumerLive.pipe(Layer.provide(KafkaLive));
 
 NodeRuntime.runMain(Layer.launch(MainLive));
-
-// const run = async () => {
-//   // Producing
-//   await producer.connect();
-//   await producer.send({
-//     topic: "test-topic",
-//     messages: [{ value: "Hello KafkaJS user!" }],
-//   });
-
-//   // Consuming
-//   await consumer.connect();
-//   await consumer.subscribe({ topic: "test-topic", fromBeginning: true });
-
-//   await consumer.run({
-//     eachMessage: async ({ topic: _, partition, message }) => {
-//       console.log({
-//         partition,
-//         offset: message.offset,
-//         value: message.value?.toString(),
-//       });
-//     },
-//   });
-// };
-
-// run().catch(console.error);
