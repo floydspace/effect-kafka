@@ -8,6 +8,7 @@ import * as Error from "./ConsumerError";
 import * as internal from "./internal/confluentKafkaJSInstance";
 import * as KafkaInstance from "./KafkaInstance";
 import * as MessagePayload from "./MessagePayload";
+import * as Producer from "./Producer";
 
 /**
  * @since 0.2.0
@@ -19,7 +20,27 @@ export const make = (config: KafkaJS.KafkaConfig): Effect.Effect<KafkaInstance.K
     const kafka = new KafkaJS.Kafka({ kafkaJS: { ...config, logger } });
 
     return KafkaInstance.make({
-      producer: () => Effect.never,
+      producer: (options) =>
+        Effect.gen(function* () {
+          const producer = yield* Effect.acquireRelease(
+            Effect.sync(() => kafka.producer({ kafkaJS: options })).pipe(
+              Effect.tap(internal.connect),
+              Effect.catchTags({
+                LibrdKafkaError: (err) =>
+                  err.message === "broker transport failure"
+                    ? new Error.ConnectionException({ broker: err.origin, message: err.message, stack: err.stack })
+                    : Effect.die(err),
+                UnknownException: Effect.die,
+              }),
+            ),
+            internal.disconnect,
+          );
+
+          return Producer.make({
+            send: (record) => Effect.promise(() => producer.send(record)),
+            sendBatch: (batch) => Effect.promise(() => producer.sendBatch(batch)),
+          });
+        }),
       consumer: (options) =>
         Effect.gen(function* () {
           const consumer = yield* Effect.acquireRelease(

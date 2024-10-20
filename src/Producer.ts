@@ -1,7 +1,44 @@
 /**
  * @since 0.2.0
  */
-import type { ProducerConfig } from "kafkajs"; // TODO: use generic type
+import { Context, Effect, FiberRef, Layer, Scope } from "effect";
+import type {
+  ProducerBatch as ProducerBatch$,
+  ProducerConfig,
+  ProducerRecord as ProducerRecord$,
+  RecordMetadata as RecordMetadata$,
+} from "kafkajs"; // TODO: use generic type
+import type * as Error from "./ConsumerError";
+import * as internal from "./internal/producer";
+import type * as KafkaInstance from "./KafkaInstance";
+
+/**
+ * @since 0.1.0
+ * @category type ids
+ */
+export const TypeId: unique symbol = internal.TypeId;
+
+/**
+ * @since 0.1.0
+ * @category type ids
+ */
+export type TypeId = typeof TypeId;
+
+/**
+ * @since 0.1.0
+ * @category models
+ */
+export interface Producer {
+  readonly [TypeId]: TypeId;
+  readonly send: (record: Producer.ProducerRecord) => Effect.Effect<Producer.RecordMetadata[]>;
+  readonly sendBatch: (batch: Producer.ProducerBatch) => Effect.Effect<Producer.RecordMetadata[]>;
+}
+
+/**
+ * @since 0.1.0
+ * @category constructors
+ */
+export const Producer: Context.Tag<Producer, Producer> = internal.producerTag;
 
 /**
  * @since 0.2.0
@@ -11,4 +48,81 @@ export declare namespace Producer {
    * @since 0.2.0
    */
   export type ProducerOptions = ProducerConfig;
+
+  /**
+   * @since 0.2.0
+   */
+  export type ProducerRecord = ProducerRecord$;
+
+  /**
+   * @since 0.2.0
+   */
+  export type ProducerBatch = ProducerBatch$;
+
+  /**
+   * @since 0.2.0
+   */
+  export type RecordMetadata = RecordMetadata$;
 }
+
+/**
+ * @since 0.2.0
+ * @category producer options
+ */
+export const currentProducerOptions: FiberRef.FiberRef<Producer.ProducerOptions> = internal.currentProducerOptions;
+
+/**
+ * @since 0.2.0
+ * @category producer options
+ */
+export const withProducerOptions: {
+  /**
+   * @since 0.2.0
+   * @category producer options
+   */
+  (config: Producer.ProducerOptions): <A, E, R>(effect: Effect.Effect<A, E, R>) => Effect.Effect<A, E, R>;
+  /**
+   * @since 0.2.0
+   * @category producer options
+   */
+  <A, E, R>(effect: Effect.Effect<A, E, R>, config: Producer.ProducerOptions): Effect.Effect<A, E, R>;
+} = internal.withProducerOptions;
+
+/**
+ * @since 0.2.0
+ * @category producer options
+ */
+export const setProducerOptions: (config: Producer.ProducerOptions) => Layer.Layer<never> = internal.setProducerOptions;
+
+/**
+ * @since 0.2.0
+ * @category constructors
+ */
+export const make: (options: {
+  readonly send: (record: Producer.ProducerRecord) => Effect.Effect<Producer.RecordMetadata[]>;
+  readonly sendBatch: (batch: Producer.ProducerBatch) => Effect.Effect<Producer.RecordMetadata[]>;
+}) => Producer = internal.make;
+
+/**
+ * @since 0.2.0
+ * @category accessors
+ */
+export const send: (
+  record: Producer.ProducerRecord,
+) => Effect.Effect<Producer.RecordMetadata[], Error.ConnectionException, KafkaInstance.KafkaInstance | Scope.Scope> =
+  internal.send;
+
+/**
+ * @since 0.2.0
+ * @category constructors
+ */
+export const makeProducer: (
+  options?: Producer.ProducerOptions,
+) => Effect.Effect<Producer, Error.ConnectionException, KafkaInstance.KafkaInstance | Scope.Scope> =
+  internal.makeProducer;
+
+/**
+ * @since 0.2.0
+ * @category layers
+ */
+export const layer = (options?: Producer.ProducerOptions) => Layer.scoped(Producer, makeProducer(options));

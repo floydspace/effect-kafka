@@ -8,6 +8,7 @@ import * as Error from "./ConsumerError";
 import * as internal from "./internal/kafkaJSInstance";
 import * as KafkaInstance from "./KafkaInstance";
 import * as MessagePayload from "./MessagePayload";
+import * as Producer from "./Producer";
 
 /**
  * @since 0.2.0
@@ -19,7 +20,24 @@ export const make = (config: KafkaConfig): Effect.Effect<KafkaInstance.KafkaInst
     const kafka = new Kafka({ ...config, logCreator: () => logger });
 
     return KafkaInstance.make({
-      producer: () => Effect.never,
+      producer: (options) =>
+        Effect.gen(function* () {
+          const producer = yield* Effect.acquireRelease(
+            Effect.sync(() => kafka.producer(options)).pipe(
+              Effect.tap(internal.connect),
+              Effect.catchTags({
+                KafkaJSConnectionError: (err) => new Error.ConnectionException(err),
+                UnknownException: Effect.die,
+              }),
+            ),
+            internal.disconnect,
+          );
+
+          return Producer.make({
+            send: (record) => Effect.promise(() => producer.send(record)),
+            sendBatch: (batch) => Effect.promise(() => producer.sendBatch(batch)),
+          });
+        }),
       consumer: (options) =>
         Effect.gen(function* () {
           const consumer = yield* Effect.acquireRelease(

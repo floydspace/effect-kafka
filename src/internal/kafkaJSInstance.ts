@@ -1,5 +1,5 @@
 import { Cause, Effect, Runtime } from "effect";
-import type { Consumer } from "kafkajs";
+import type { Consumer, Producer } from "kafkajs";
 import { LogEntry, logLevel } from "kafkajs";
 import { KafkaJSConnectionError, KafkaJSNonRetriableError } from "../KafkaJSErrors";
 
@@ -25,9 +25,11 @@ export const makeLogger = Effect.map(Effect.runtime(), (runtime) => {
 });
 
 /** @internal */
-export const connect = (consumer: Consumer): Effect.Effect<void, KafkaJSConnectionError | Cause.UnknownException> =>
+export const connect = <Client extends Consumer | Producer>(
+  client: Client,
+): Effect.Effect<void, KafkaJSConnectionError | Cause.UnknownException> =>
   Effect.tryPromise({
-    try: () => consumer.connect(),
+    try: () => client.connect(),
     catch: (err) => {
       if (err instanceof KafkaJSNonRetriableError) {
         return err.cause as KafkaJSConnectionError;
@@ -38,4 +40,5 @@ export const connect = (consumer: Consumer): Effect.Effect<void, KafkaJSConnecti
   });
 
 /** @internal */
-export const disconnect = (consumer: Consumer): Effect.Effect<void> => Effect.promise(() => consumer.disconnect());
+export const disconnect = <Client extends Consumer | Producer>(client: Client): Effect.Effect<void> =>
+  Effect.promise(() => client.disconnect());

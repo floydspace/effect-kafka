@@ -2,42 +2,6 @@ import { NodeRuntime } from "@effect/platform-node";
 import { Console, Effect, Layer } from "effect";
 import { Consumer, KafkaJSInstance, MessagePayload, MessageRouter } from "../src";
 
-// const kafka = new Kafka({
-//   brokers: ["localhost:19092"],
-// });
-
-// const producer = kafka.producer();
-// const consumer = kafka.consumer({ groupId: "group" });
-
-// class Producer extends Effect.Tag("Producer")<
-//   Producer,
-//   {
-//     readonly send: (record: ProducerRecord) => Effect.Effect<RecordMetadata[]>;
-//     readonly sendBatch: (batch: ProducerBatch) => Effect.Effect<RecordMetadata[]>;
-//   }
-// >() {}
-
-// class Consumer extends Effect.Tag("Consumer")<
-//   Consumer,
-//   {
-//     readonly subscribe: (
-//       subscription: ConsumerSubscribeTopics,
-//     ) => Effect.Effect<RecordMetadata[]>;
-//   }
-// >() {}
-
-// const e = Effect.acquireRelease(
-//   Effect.tryPromise(() => producer.connect()),
-//   () => Effect.promise(() => producer.disconnect()),
-// );
-
-// Effect.gen(function* () {
-//   yield* Producer.send({
-//     topic: "test-topic",
-//     messages: [{ value: "Hello KafkaJS user!" }],
-//   });
-// });
-
 const ConsumerLive = MessageRouter.empty.pipe(
   MessageRouter.subscribe(
     "test-topic",

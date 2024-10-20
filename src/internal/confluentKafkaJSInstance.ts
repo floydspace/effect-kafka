@@ -44,12 +44,14 @@ class DefaultLogger implements KafkaJS.Logger {
 export const makeLogger = Effect.map(Effect.runtime(), DefaultLogger.create);
 
 /** @internal */
-export const connect = (consumer: KafkaJS.Consumer): Effect.Effect<void, LibrdKafkaError | Cause.UnknownException> =>
+export const connect = <Client extends KafkaJS.Consumer | KafkaJS.Producer>(
+  client: Client,
+): Effect.Effect<void, LibrdKafkaError | Cause.UnknownException> =>
   Effect.tryPromise({
-    try: () => consumer.connect(),
+    try: () => client.connect(),
     catch: (err) => (isLibrdKafkaError(err) ? new LibrdKafkaError(err) : new Cause.UnknownException(err)),
   });
 
 /** @internal */
-export const disconnect = (consumer: KafkaJS.Consumer): Effect.Effect<void> =>
-  Effect.promise(() => consumer.disconnect());
+export const disconnect = <Client extends KafkaJS.Consumer | KafkaJS.Producer>(client: Client): Effect.Effect<void> =>
+  Effect.promise(() => client.disconnect());

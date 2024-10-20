@@ -17,6 +17,10 @@ export * as MessageRouter from "./MessageRouter";
 /**
  * @since 0.2.0
  */
+export * as Producer from "./Producer";
+/**
+ * @since 0.2.0
+ */
 export * as KafkaInstance from "./KafkaInstance";
 /**
  * @since 0.2.0

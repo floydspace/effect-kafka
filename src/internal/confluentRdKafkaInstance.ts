@@ -1,24 +1,40 @@
-import type { ClientMetrics, KafkaConsumer, Metadata, MetadataOptions } from "@confluentinc/kafka-javascript";
+import type { Client, ClientMetrics, Metadata, MetadataOptions } from "@confluentinc/kafka-javascript";
 import { Effect } from "effect";
-import { dual } from "effect/Function";
 import { LibrdKafkaError } from "../ConfluentRdKafkaErrors";
 
-/** @internal */
-export const connect = dual<
-  { (metadataOptions?: MetadataOptions): (consumer: KafkaConsumer) => Effect.Effect<Metadata, LibrdKafkaError> },
-  { (consumer: KafkaConsumer, metadataOptions?: MetadataOptions): Effect.Effect<Metadata, LibrdKafkaError> }
->(
-  2,
-  (consumer: KafkaConsumer, metadataOptions?: MetadataOptions): Effect.Effect<Metadata, LibrdKafkaError> =>
-    Effect.async<Metadata, LibrdKafkaError>((resume) => {
-      consumer.connect(metadataOptions, (err, data) =>
-        err ? resume(new LibrdKafkaError(err)) : resume(Effect.succeed(data)),
-      );
-    }),
-);
+// type ReadyEventListener = (info: ReadyInfo, metadata: Metadata) => void;
+// type FailureEventListener = (error: LibrdKafkaError, metrics: ClientMetrics) => void;
+// type ClientEventListener<Events extends string> = Parameters<Client<Events>["on"]>["1"];
+
+// /** @internal */
+// export const connect = <Events extends "ready" | "connection.failure">(
+//   client: Client<Events>,
+//   metadataOptions?: MetadataOptions,
+// ): Effect.Effect<Metadata, LibrdKafkaError> =>
+//   Effect.async<Metadata, LibrdKafkaError>((resume) => {
+//     debugger;
+//     client.connect(metadataOptions);
+
+//     const readyListener: ReadyEventListener = (_, data) => resume(Effect.succeed(data));
+//     client.on("ready" as Events, readyListener as ClientEventListener<Events>);
+
+//     const failureListener: FailureEventListener = (err) => resume(new LibrdKafkaError(err));
+//     client.on("connection.failure" as Events, failureListener as ClientEventListener<Events>);
+//   });
 
 /** @internal */
-export const disconnect = (consumer: KafkaConsumer) =>
+export const connect = <Events extends string>(
+  client: Client<Events>,
+  metadataOptions?: MetadataOptions,
+): Effect.Effect<Metadata, LibrdKafkaError> =>
+  Effect.async<Metadata, LibrdKafkaError>((resume) => {
+    client.connect(metadataOptions, (err, data) =>
+      err ? resume(new LibrdKafkaError(err)) : resume(Effect.succeed(data)),
+    );
+  });
+
+/** @internal */
+export const disconnect = <Events extends string>(client: Client<Events>) =>
   Effect.async<ClientMetrics, LibrdKafkaError>((resume) => {
-    consumer.disconnect((err, data) => (err ? resume(new LibrdKafkaError(err)) : resume(Effect.succeed(data))));
+    client.disconnect((err, data) => (err ? resume(new LibrdKafkaError(err)) : resume(Effect.succeed(data))));
   });

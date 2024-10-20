@@ -26,7 +26,7 @@ export type TypeId = typeof TypeId;
 export interface KafkaInstance {
   readonly [TypeId]: TypeId;
   readonly producer: {
-    (options: Producer.ProducerOptions): Effect.Effect<never, never, Scope.Scope>;
+    (options?: Producer.ProducerOptions): Effect.Effect<Producer, Error.ConnectionException, Scope.Scope>;
   };
   readonly consumer: {
     (options: Consumer.ConsumerOptions): Effect.Effect<Consumer, Error.ConnectionException, Scope.Scope>;
@@ -45,7 +45,7 @@ export const KafkaInstance: Context.Tag<KafkaInstance, KafkaInstance> = internal
  */
 export const make: (options: {
   readonly producer: {
-    (options: Producer.ProducerOptions): Effect.Effect<never, never, Scope.Scope>;
+    (options?: Producer.ProducerOptions): Effect.Effect<Producer, Error.ConnectionException, Scope.Scope>;
   };
   readonly consumer: {
     (options: Consumer.ConsumerOptions): Effect.Effect<Consumer, Error.ConnectionException, Scope.Scope>;
