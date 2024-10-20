@@ -22,6 +22,7 @@ tsconfig.tsbuildinfo
 /tsconfig.esm.json
 /.husky/
 /docs
+/docgen.json
 /.changeset/
 /examples
 /docker-compose.yml
