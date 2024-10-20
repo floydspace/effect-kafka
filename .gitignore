@@ -43,6 +43,7 @@ jspm_packages/
 /dist/
 !/.eslintrc.json
 !/tsconfig.esm.json
+!/.github/FUNDING.yml
 !/docgen.json
 /docs
 !/.github/workflows/pages.yml

@@ -3,6 +3,7 @@
     ".changeset/config.json",
     ".eslintrc.json",
     ".gitattributes",
+    ".github/FUNDING.yml",
     ".github/workflows/build.yml",
     ".github/workflows/pages.yml",
     ".github/workflows/release.yml",

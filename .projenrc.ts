@@ -1,4 +1,5 @@
 import { Changesets, Husky, VscodeExtensionRecommendations } from "@floydspace/projen-components";
+import { YamlFile } from "projen";
 import { Docgen, Examples, TypeScriptLibProject } from "./projenrc";
 
 const org = "floydspace";
@@ -19,6 +20,8 @@ const project = new TypeScriptLibProject({
   workflowPackageCache: true,
   devDeps: ["@floydspace/projen-components@next"],
 });
+
+new YamlFile(project, ".github/FUNDING.yml", { obj: { github: org } });
 
 new Husky(project, {
   huskyHooks: {
