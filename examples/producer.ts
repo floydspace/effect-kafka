@@ -12,7 +12,7 @@ import { KafkaJSInstance, Producer } from "../src";
 
 const program = Producer.send({
   topic: "test-topic",
-  messages: [{ value: "Hello effect-kafka user!" }],
+  messages: [{ value: "Hello, effect-kafka user!" }, { value: "How are you, effect-kafka user?" }],
 }).pipe(Producer.withProducerOptions({ allowAutoTopicCreation: true }));
 
 const KafkaLive = KafkaJSInstance.layer({ brokers: ["localhost:19092"] });

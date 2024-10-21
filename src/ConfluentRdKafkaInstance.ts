@@ -1,8 +1,6 @@
 /**
  * @since 0.2.0
  */
-import assert from "node:assert";
-
 import {
   Client,
   CODES,
@@ -13,7 +11,7 @@ import {
   Message,
   ProducerGlobalConfig,
 } from "@confluentinc/kafka-javascript";
-import { Chunk, Effect, Layer, Runtime } from "effect";
+import { Array, Chunk, Effect, Layer, Runtime } from "effect";
 import * as Consumer from "./Consumer";
 import * as Error from "./ConsumerError";
 import * as internal from "./internal/confluentRdKafkaInstance";
@@ -54,16 +52,19 @@ export const layer = (config: GlobalConfig) =>
             (c) => internal.disconnect(c).pipe(Effect.orDie),
           );
 
-          return Producer.make({
-            send: (record) => {
-              assert(record.messages.length === 1, "RdKafka only supports single message sends");
-              const [message] = record.messages;
+          const send: Producer.Producer["send"] = (record) =>
+            Effect.forEach(record.messages, (message) => {
               const messageValue = typeof message.value === "string" ? Buffer.from(message.value) : message.value;
-              const timestamp = message.timestamp ? new Date(message.timestamp).getTime() : null;
-              return Effect.sync(() => producer.produce(record.topic, null, messageValue, message.key, timestamp));
-            },
-            sendBatch: () => Effect.dieMessage("RdKafka does not support batch sends"),
-          });
+              const timestamp = message.timestamp ? Number(message.timestamp) : null;
+              return Effect.sync(() =>
+                producer.produce(record.topic, message.partition, messageValue, message.key, timestamp),
+              );
+            });
+
+          const sendBatch: Producer.Producer["sendBatch"] = (batch) =>
+            Effect.forEach(batch.topicMessages!, send).pipe(Effect.map(Array.flatten));
+
+          return Producer.make({ send, sendBatch });
         }),
       consumer: (options) =>
         Effect.gen(function* () {
@@ -99,6 +100,7 @@ export const layer = (config: GlobalConfig) =>
                         MessagePayload.MessagePayload,
                         MessagePayload.make({
                           topic: payload.topic,
+                          partition: payload.partition,
                           message: {
                             key: typeof payload.key === "string" ? Buffer.from(payload.key) : (payload.key ?? null),
                             value: payload.value,
@@ -112,7 +114,6 @@ export const layer = (config: GlobalConfig) =>
                             attributes: 0,
                             size: payload.size,
                           },
-                          partition: payload.partition,
                         }),
                       ),
                       runPromise,
