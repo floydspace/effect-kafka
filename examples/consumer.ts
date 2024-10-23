@@ -4,7 +4,7 @@ import { Consumer, ConsumerRecord, KafkaJSInstance, MessageRouter } from "../src
 
 const ConsumerLive = MessageRouter.empty.pipe(
   MessageRouter.subscribe(
-    "test-topic",
+    /test-topic/,
     Effect.flatMap(ConsumerRecord.ConsumerRecord, ({ topic: _, partition, ...message }) =>
       Console.log({
         partition,

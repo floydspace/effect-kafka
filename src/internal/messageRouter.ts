@@ -40,12 +40,21 @@ class RouterImpl<E = never, R = never>
   }
 }
 
+const matchTopic =
+  (topic: string) =>
+  <E, R>(route: Router.Route<E, R>) => {
+    if (typeof route.topic === "string") {
+      return route.topic === topic;
+    }
+    return route.topic.test(topic);
+  };
+
 const toConsumerApp = <E, R>(self: Router.MessageRouter<E, R>): Router.Default<E | Error.RouteNotFound, R> => {
   return Effect.withFiberRuntime<void, E | Error.RouteNotFound, R>((fiber) => {
     const context = fiber.getFiberRef(FiberRef.currentContext);
     const payload = Context.unsafeGet(context, ConsumerRecord.ConsumerRecord);
 
-    let result = Chunk.findFirst(self.routes, (route) => route.topic === payload.topic); // TODO: match regex
+    const result = Chunk.findFirst(self.routes, matchTopic(payload.topic));
     if (Option.isNone(result)) {
       return Effect.fail(new Error.RouteNotFound({ payload }));
     }
@@ -97,41 +106,23 @@ export const makeRoute = <E, R>(
 ): Router.Route<E, Router.MessageRouter.ExcludeProvided<R>> =>
   new RouteImpl(topic, handler, options?.fromBeginning ?? false) as any;
 
-const route = (): {
-  <R1, E1>(
+/** @internal */
+export const subscribe = dual<
+  <E1, R1>(
     topic: Router.Route.Path,
     handler: Router.Route.Handler<E1, R1>,
     options?: { readonly fromBeginning?: boolean | undefined } | undefined,
-  ): <E, R>(
+  ) => <E, R>(
     self: Router.MessageRouter<E, R>,
-  ) => Router.MessageRouter<E1 | E, R | Router.MessageRouter.ExcludeProvided<R1>>;
+  ) => Router.MessageRouter<E | E1, R | Router.MessageRouter.ExcludeProvided<R1>>,
   <E, R, E1, R1>(
     self: Router.MessageRouter<E, R>,
     topic: Router.Route.Path,
     handler: Router.Route.Handler<E1, R1>,
     options?: { readonly fromBeginning?: boolean | undefined } | undefined,
-  ): Router.MessageRouter<E1 | E, R | Router.MessageRouter.ExcludeProvided<R1>>;
-} =>
-  dual<
-    <R1, E1>(
-      topic: Router.Route.Path,
-      handler: Router.Route.Handler<R1, E1>,
-    ) => <E, R>(
-      self: Router.MessageRouter<E, R>,
-    ) => Router.MessageRouter<E | E1, R | Router.MessageRouter.ExcludeProvided<R1>>,
-    <E, R, E1, R1>(
-      self: Router.MessageRouter<E, R>,
-      topic: Router.Route.Path,
-      handler: Router.Route.Handler<E1, R1>,
-      options?: { readonly fromBeginning?: boolean | undefined } | undefined,
-    ) => Router.MessageRouter<E | E1, R | Router.MessageRouter.ExcludeProvided<R1>>
-  >(
-    (args) => isRouter(args[0]),
-    (self, topic, handler, options) =>
-      new RouterImpl<any, any>(
-        Chunk.append(self.routes, new RouteImpl(topic, handler, options?.fromBeginning ?? false)),
-      ),
-  );
-
-/** @internal */
-export const subscribe = route();
+  ) => Router.MessageRouter<E | E1, R | Router.MessageRouter.ExcludeProvided<R1>>
+>(
+  (args) => isRouter(args[0]),
+  (self, topic, handler, options) =>
+    new RouterImpl<any, any>(Chunk.append(self.routes, new RouteImpl(topic, handler, options?.fromBeginning ?? false))),
+);

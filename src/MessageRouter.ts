@@ -154,7 +154,7 @@ export const subscribe: {
    * @since 0.1.0
    * @category routing
    */
-  <R1, E1>(
+  <E1, R1>(
     topic: Route.Path,
     handler: Route.Handler<E1, R1>,
     options?: { readonly fromBeginning?: boolean | undefined } | undefined,
