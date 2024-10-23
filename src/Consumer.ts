@@ -4,9 +4,9 @@
 import { Context, Effect, Layer, Scope } from "effect";
 import type { ConsumerConfig } from "kafkajs"; // TODO: use generic type
 import type * as Error from "./ConsumerError";
+import type * as ConsumerRecord from "./ConsumerRecord";
 import * as internal from "./internal/consumer";
 import type * as KafkaInstance from "./KafkaInstance";
-import type * as MessagePayload from "./MessagePayload";
 import type * as MessageRouter from "./MessageRouter";
 
 /**
@@ -30,7 +30,7 @@ export interface Consumer {
   readonly run: {
     <E, R>(
       app: MessageRouter.MessageRouter<E, R>,
-    ): Effect.Effect<void, never, Exclude<R, MessagePayload.MessagePayload> | Scope.Scope>;
+    ): Effect.Effect<void, never, Exclude<R, ConsumerRecord.ConsumerRecord> | Scope.Scope>;
   };
 }
 
@@ -74,7 +74,7 @@ export const serve: {
   ) => Layer.Layer<
     never,
     Error.ConnectionException,
-    KafkaInstance.KafkaInstance | Exclude<R, MessagePayload.MessagePayload | Scope.Scope>
+    KafkaInstance.KafkaInstance | Exclude<R, ConsumerRecord.ConsumerRecord | Scope.Scope>
   >;
   /**
    * @since 0.1.0
@@ -86,7 +86,7 @@ export const serve: {
   ): Layer.Layer<
     never,
     Error.ConnectionException,
-    KafkaInstance.KafkaInstance | Exclude<R, MessagePayload.MessagePayload | Scope.Scope>
+    KafkaInstance.KafkaInstance | Exclude<R, ConsumerRecord.ConsumerRecord | Scope.Scope>
   >;
 } = internal.serve;
 
@@ -106,7 +106,7 @@ export const serveEffect: {
   ) => Effect.Effect<
     void,
     Error.ConnectionException,
-    Scope.Scope | KafkaInstance.KafkaInstance | Exclude<R, MessagePayload.MessagePayload>
+    Scope.Scope | KafkaInstance.KafkaInstance | Exclude<R, ConsumerRecord.ConsumerRecord>
   >;
   /**
    * @since 0.1.0
@@ -118,6 +118,6 @@ export const serveEffect: {
   ): Effect.Effect<
     void,
     Error.ConnectionException,
-    Scope.Scope | KafkaInstance.KafkaInstance | Exclude<R, MessagePayload.MessagePayload>
+    Scope.Scope | KafkaInstance.KafkaInstance | Exclude<R, ConsumerRecord.ConsumerRecord>
   >;
 } = internal.serveEffect;

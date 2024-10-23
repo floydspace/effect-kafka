@@ -3,8 +3,8 @@
  */
 import { Chunk, Context, Effect, Inspectable, Layer, Scope } from "effect";
 import type * as Error from "./ConsumerError";
+import type * as ConsumerRecord from "./ConsumerRecord";
 import * as internal from "./internal/messageRouter";
-import type * as MessagePayload from "./MessagePayload";
 
 /**
  * @since 0.1.0
@@ -22,7 +22,7 @@ export type TypeId = typeof TypeId;
  * @since 0.1.0
  * @category models
  */
-export type Default<E = never, R = never> = Effect.Effect<void, E, R | MessagePayload.MessagePayload>;
+export type Default<E = never, R = never> = Effect.Effect<void, E, R | ConsumerRecord.ConsumerRecord>;
 
 /**
  * @since 0.1.0
@@ -42,7 +42,7 @@ export declare namespace MessageRouter {
   /**
    * @since 0.1.0
    */
-  export type Provided = MessagePayload.MessagePayload | Scope.Scope;
+  export type Provided = ConsumerRecord.ConsumerRecord | Scope.Scope;
 
   /**
    * @since 0.1.0

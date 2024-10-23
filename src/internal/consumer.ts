@@ -2,8 +2,8 @@ import { Context, Effect, Layer, Scope } from "effect";
 import { dual } from "effect/Function";
 import type * as Consumer from "../Consumer";
 import type * as Error from "../ConsumerError";
+import type * as ConsumerRecord from "../ConsumerRecord";
 import * as KafkaInstance from "../KafkaInstance";
-import type * as MessagePayload from "../MessagePayload";
 import type * as MessageRouter from "../MessageRouter";
 
 /** @internal */
@@ -31,7 +31,7 @@ export const serve = dual<
     ) => Layer.Layer<
       never,
       Error.ConnectionException,
-      KafkaInstance.KafkaInstance | Exclude<R, MessagePayload.MessagePayload | Scope.Scope>
+      KafkaInstance.KafkaInstance | Exclude<R, ConsumerRecord.ConsumerRecord | Scope.Scope>
     >;
   },
   {
@@ -41,7 +41,7 @@ export const serve = dual<
     ): Layer.Layer<
       never,
       Error.ConnectionException,
-      KafkaInstance.KafkaInstance | Exclude<R, MessagePayload.MessagePayload | Scope.Scope>
+      KafkaInstance.KafkaInstance | Exclude<R, ConsumerRecord.ConsumerRecord | Scope.Scope>
     >;
   }
 >(
@@ -52,7 +52,7 @@ export const serve = dual<
   ): Layer.Layer<
     never,
     Error.ConnectionException,
-    KafkaInstance.KafkaInstance | Exclude<R, MessagePayload.MessagePayload | Scope.Scope>
+    KafkaInstance.KafkaInstance | Exclude<R, ConsumerRecord.ConsumerRecord | Scope.Scope>
   > =>
     Layer.scopedDiscard(
       Effect.gen(function* () {
@@ -73,7 +73,7 @@ export const serveEffect = dual<
     ) => Effect.Effect<
       void,
       Error.ConnectionException,
-      KafkaInstance.KafkaInstance | Scope.Scope | Exclude<R, MessagePayload.MessagePayload>
+      KafkaInstance.KafkaInstance | Scope.Scope | Exclude<R, ConsumerRecord.ConsumerRecord>
     >;
   },
   {
@@ -83,7 +83,7 @@ export const serveEffect = dual<
     ): Effect.Effect<
       void,
       Error.ConnectionException,
-      KafkaInstance.KafkaInstance | Scope.Scope | Exclude<R, MessagePayload.MessagePayload>
+      KafkaInstance.KafkaInstance | Scope.Scope | Exclude<R, ConsumerRecord.ConsumerRecord>
     >;
   }
 >(
@@ -94,7 +94,7 @@ export const serveEffect = dual<
   ): Effect.Effect<
     void,
     Error.ConnectionException,
-    KafkaInstance.KafkaInstance | Scope.Scope | Exclude<R, MessagePayload.MessagePayload>
+    KafkaInstance.KafkaInstance | Scope.Scope | Exclude<R, ConsumerRecord.ConsumerRecord>
   > =>
     Effect.gen(function* () {
       const instance = yield* KafkaInstance.KafkaInstance;

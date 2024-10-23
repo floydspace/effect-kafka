@@ -9,7 +9,7 @@ export * as ConsumerError from "./ConsumerError";
 /**
  * @since 0.1.0
  */
-export * as MessagePayload from "./MessagePayload";
+export * as ConsumerRecord from "./ConsumerRecord";
 /**
  * @since 0.1.0
  */

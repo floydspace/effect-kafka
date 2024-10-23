@@ -1,14 +1,15 @@
 import { NodeRuntime } from "@effect/platform-node";
 import { Console, Effect, Layer } from "effect";
-import { Consumer, KafkaJSInstance, MessagePayload, MessageRouter } from "../src";
+import { Consumer, ConsumerRecord, KafkaJSInstance, MessageRouter } from "../src";
 
 const ConsumerLive = MessageRouter.empty.pipe(
   MessageRouter.subscribe(
     "test-topic",
-    Effect.flatMap(MessagePayload.MessagePayload, ({ topic: _, partition, message }) =>
+    Effect.flatMap(ConsumerRecord.ConsumerRecord, ({ topic: _, partition, ...message }) =>
       Console.log({
         partition,
-        offset: message.offset,
+        ...message,
+        key: message.key?.toString(),
         value: message.value?.toString(),
       }),
     ),

@@ -14,9 +14,9 @@ import {
 import { Array, Chunk, Effect, Layer, Runtime } from "effect";
 import * as Consumer from "./Consumer";
 import * as Error from "./ConsumerError";
+import * as ConsumerRecord from "./ConsumerRecord";
 import * as internal from "./internal/confluentRdKafkaInstance";
 import * as KafkaInstance from "./KafkaInstance";
-import * as MessagePayload from "./MessagePayload";
 import * as Producer from "./Producer";
 
 type ConsumerHandler = Parameters<Client<"data">["on"]>["1"];
@@ -97,23 +97,21 @@ export const layer = (config: GlobalConfig) =>
                   return (payload: Message) =>
                     app.pipe(
                       Effect.provideService(
-                        MessagePayload.MessagePayload,
-                        MessagePayload.make({
+                        ConsumerRecord.ConsumerRecord,
+                        ConsumerRecord.make({
                           topic: payload.topic,
                           partition: payload.partition,
-                          message: {
-                            key: typeof payload.key === "string" ? Buffer.from(payload.key) : (payload.key ?? null),
-                            value: payload.value,
-                            // headers: payload.headers?.reduce((acc, header) => {
-                            //   const [key] = Object.keys(header);
-                            //   acc[key] = header[key];
-                            //   return acc;
-                            // }, {}),
-                            timestamp: payload.timestamp?.toString() ?? "",
-                            offset: payload.offset.toString(),
-                            attributes: 0,
-                            size: payload.size,
-                          },
+                          key: typeof payload.key === "string" ? Buffer.from(payload.key) : (payload.key ?? null),
+                          value: payload.value,
+                          headers: payload.headers?.reduce((acc, header) => {
+                            const [key] = Object.keys(header);
+                            acc[key] = header[key];
+                            return acc;
+                          }, {}),
+                          timestamp: payload.timestamp?.toString() ?? "",
+                          offset: payload.offset.toString(),
+                          attributes: 0,
+                          size: payload.size,
                         }),
                       ),
                       runPromise,

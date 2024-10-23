@@ -1,7 +1,7 @@
 import { Chunk, Context, Effect, Effectable, FiberRef, Inspectable, Option, Predicate, Tracer } from "effect";
 import { dual } from "effect/Function";
 import * as Error from "../ConsumerError";
-import * as MessagePayload from "../MessagePayload";
+import * as ConsumerRecord from "../ConsumerRecord";
 import type * as Router from "../MessageRouter";
 
 /** @internal */
@@ -43,7 +43,7 @@ class RouterImpl<E = never, R = never>
 const toConsumerApp = <E, R>(self: Router.MessageRouter<E, R>): Router.Default<E | Error.RouteNotFound, R> => {
   return Effect.withFiberRuntime<void, E | Error.RouteNotFound, R>((fiber) => {
     const context = fiber.getFiberRef(FiberRef.currentContext);
-    const payload = Context.unsafeGet(context, MessagePayload.MessagePayload);
+    const payload = Context.unsafeGet(context, ConsumerRecord.ConsumerRecord);
 
     let result = Chunk.findFirst(self.routes, (route) => route.topic === payload.topic); // TODO: match regex
     if (Option.isNone(result)) {

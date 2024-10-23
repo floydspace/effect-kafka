@@ -1,11 +1,11 @@
 import { NodeRuntime } from "@effect/platform-node";
 import { Console, Effect, Layer } from "effect";
-import { ConfluentKafkaJSInstance, Consumer, MessagePayload, MessageRouter } from "../src";
+import { ConfluentKafkaJSInstance, Consumer, ConsumerRecord, MessageRouter } from "../src";
 
 const ConsumerLive = MessageRouter.empty.pipe(
   MessageRouter.subscribe(
     "test-topic",
-    Effect.flatMap(MessagePayload.MessagePayload, ({ topic, partition, message }) =>
+    Effect.flatMap(ConsumerRecord.ConsumerRecord, ({ topic, partition, ...message }) =>
       Console.log({
         topic,
         partition,
@@ -16,7 +16,7 @@ const ConsumerLive = MessageRouter.empty.pipe(
   ),
   MessageRouter.subscribe(
     "customers",
-    Effect.flatMap(MessagePayload.MessagePayload, ({ topic, partition, message }) =>
+    Effect.flatMap(ConsumerRecord.ConsumerRecord, ({ topic, partition, ...message }) =>
       Console.log({
         topic,
         partition,

@@ -2,8 +2,8 @@
  * @since 0.1.0
  */
 import { Error } from "@effect/platform";
+import type * as ConsumerRecord from "./ConsumerRecord";
 import * as internal from "./internal/consumerError";
-import type * as MessagePayload from "./MessagePayload";
 
 /**
  * @since 0.1.0
@@ -28,9 +28,9 @@ export type ConsumerError = RouteNotFound;
  * @category error
  */
 export class RouteNotFound extends Error.TypeIdError(TypeId, "RouteNotFound")<{
-  readonly payload: MessagePayload.MessagePayload;
+  readonly payload: ConsumerRecord.ConsumerRecord;
 }> {
-  constructor(options: { payload: MessagePayload.MessagePayload }) {
+  constructor(options: { payload: ConsumerRecord.ConsumerRecord }) {
     super(options);
     (this as any).stack = `${this.name}: ${this.message}`;
   }

@@ -2,12 +2,12 @@
  * @since 0.2.0
  */
 import { Chunk, Effect, Layer, Runtime } from "effect";
-import { EachMessageHandler, EachMessagePayload, Kafka, KafkaConfig } from "kafkajs";
+import { EachBatchHandler, EachBatchPayload, Kafka, KafkaConfig } from "kafkajs";
 import * as Consumer from "./Consumer";
 import * as Error from "./ConsumerError";
+import * as ConsumerRecord from "./ConsumerRecord";
 import * as internal from "./internal/kafkaJSInstance";
 import * as KafkaInstance from "./KafkaInstance";
-import * as MessagePayload from "./MessagePayload";
 import * as Producer from "./Producer";
 
 /**
@@ -56,16 +56,33 @@ export const make = (config: KafkaConfig): Effect.Effect<KafkaInstance.KafkaInst
                 const topics = Chunk.toArray(app.routes).map((route) => route.topic);
                 yield* Effect.promise(() => consumer.subscribe({ topics }));
 
-                const eachMessage: EachMessageHandler = yield* Effect.map(Effect.runtime(), (runtime) => {
+                const eachBatch: EachBatchHandler = yield* Effect.map(Effect.runtime(), (runtime) => {
                   const runPromise = Runtime.runPromise(runtime);
-                  return (payload: EachMessagePayload) =>
-                    app.pipe(
-                      Effect.provideService(MessagePayload.MessagePayload, MessagePayload.make(payload)),
-                      runPromise,
-                    );
+                  return (payload: EachBatchPayload) =>
+                    Effect.forEach(
+                      payload.batch.messages,
+                      (message) =>
+                        app.pipe(
+                          Effect.provideService(
+                            ConsumerRecord.ConsumerRecord,
+                            ConsumerRecord.make({
+                              topic: payload.batch.topic,
+                              partition: payload.batch.partition,
+                              key: message.key,
+                              value: message.value,
+                              timestamp: message.timestamp,
+                              attributes: message.attributes,
+                              offset: message.offset,
+                              headers: message.headers,
+                              size: message.size,
+                            }),
+                          ),
+                        ),
+                      { discard: true },
+                    ).pipe(runPromise);
                 });
 
-                yield* Effect.promise(() => consumer.run({ eachMessage }));
+                yield* Effect.promise(() => consumer.run({ eachBatch }));
               }),
           });
         }),
