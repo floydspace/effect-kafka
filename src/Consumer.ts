@@ -30,7 +30,7 @@ export interface Consumer {
   readonly run: {
     <E, R>(
       app: MessageRouter.MessageRouter<E, R>,
-    ): Effect.Effect<void, never, Exclude<R, ConsumerRecord.ConsumerRecord> | Scope.Scope>;
+    ): Effect.Effect<void, never, Exclude<R, ConsumerRecord.ConsumerRecord>>;
   };
 }
 
@@ -54,9 +54,8 @@ export declare namespace Consumer {
  * @since 0.1.0
  * @category constructors
  */
-export const make: (options: {
-  readonly run: (app: MessageRouter.MessageRouter<void>) => Effect.Effect<void, never, Scope.Scope>;
-}) => Consumer = internal.make;
+export const make: (options: { readonly run: (app: MessageRouter.MessageRouter) => Effect.Effect<void> }) => Consumer =
+  internal.make;
 
 /**
  * @since 0.1.0

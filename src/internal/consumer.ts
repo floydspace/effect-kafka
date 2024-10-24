@@ -18,7 +18,7 @@ const consumerProto = {
 
 /** @internal */
 export const make = (options: {
-  readonly run: (app: MessageRouter.MessageRouter<void>) => Effect.Effect<void, never, Scope.Scope>;
+  readonly run: (app: MessageRouter.MessageRouter) => Effect.Effect<void>;
 }): Consumer.Consumer => Object.assign(Object.create(consumerProto), options);
 
 /** @internal */

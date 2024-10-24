@@ -1,10 +1,9 @@
 /**
  * @since 0.2.0
  */
-import { Chunk, Effect, Layer, Runtime } from "effect";
-import { EachBatchHandler, EachBatchPayload, Kafka, KafkaConfig } from "kafkajs";
+import { Chunk, Effect, Layer, Queue } from "effect";
+import { EachBatchHandler, Kafka, KafkaConfig } from "kafkajs";
 import * as Consumer from "./Consumer";
-import * as Error from "./ConsumerError";
 import * as ConsumerRecord from "./ConsumerRecord";
 import * as internal from "./internal/kafkaJSInstance";
 import * as KafkaInstance from "./KafkaInstance";
@@ -22,16 +21,7 @@ export const make = (config: KafkaConfig): Effect.Effect<KafkaInstance.KafkaInst
     return KafkaInstance.make({
       producer: (options) =>
         Effect.gen(function* () {
-          const producer = yield* Effect.acquireRelease(
-            Effect.sync(() => kafka.producer(options)).pipe(
-              Effect.tap(internal.connect),
-              Effect.catchTags({
-                KafkaJSConnectionError: (err) => new Error.ConnectionException(err),
-                UnknownException: Effect.die,
-              }),
-            ),
-            internal.disconnect,
-          );
+          const producer = yield* internal.acquireProducer(kafka, options);
 
           return Producer.make({
             send: (record) => Effect.promise(() => producer.send(record)),
@@ -40,47 +30,40 @@ export const make = (config: KafkaConfig): Effect.Effect<KafkaInstance.KafkaInst
         }),
       consumer: (options) =>
         Effect.gen(function* () {
-          const consumer = yield* Effect.acquireRelease(
-            Effect.sync(() => kafka.consumer(options)).pipe(
-              Effect.tap(internal.connect),
-              Effect.catchTags({
-                KafkaJSConnectionError: (err) => new Error.ConnectionException(err),
-                UnknownException: Effect.die,
-              }),
-            ),
-            internal.disconnect,
-          );
+          const consumer = yield* internal.acquireConsumer(kafka, options);
+
           return Consumer.make({
             run: (app) =>
               Effect.gen(function* () {
                 const topics = Chunk.toArray(app.routes).map((route) => route.topic);
                 yield* Effect.promise(() => consumer.subscribe({ topics }));
 
-                const eachBatch: EachBatchHandler = yield* Effect.map(Effect.runtime(), (runtime) => {
-                  const runPromise = Runtime.runPromise(runtime);
-                  return (payload: EachBatchPayload) =>
-                    Effect.forEach(
-                      payload.batch.messages,
-                      (message) =>
-                        app.pipe(
-                          Effect.provideService(
-                            ConsumerRecord.ConsumerRecord,
-                            ConsumerRecord.make({
-                              topic: payload.batch.topic,
-                              partition: payload.batch.partition,
-                              key: message.key,
-                              value: message.value,
-                              timestamp: message.timestamp,
-                              attributes: message.attributes,
-                              offset: message.offset,
-                              headers: message.headers,
-                              size: message.size,
-                            }),
-                          ),
-                        ),
-                      { discard: true },
-                    ).pipe(runPromise);
-                });
+                const queue = yield* Queue.bounded<ConsumerRecord.ConsumerRecord>(1);
+
+                const eachBatch: EachBatchHandler = async (payload) => {
+                  payload.batch.messages.forEach((message) => {
+                    Queue.unsafeOffer(
+                      queue,
+                      ConsumerRecord.make({
+                        topic: payload.batch.topic,
+                        partition: payload.batch.partition,
+                        key: message.key,
+                        value: message.value,
+                        timestamp: message.timestamp,
+                        attributes: message.attributes,
+                        offset: message.offset,
+                        headers: message.headers,
+                        size: message.size,
+                      }),
+                    );
+                  });
+                };
+
+                yield* app.pipe(
+                  Effect.provideServiceEffect(ConsumerRecord.ConsumerRecord, Queue.take(queue)),
+                  Effect.forever,
+                  Effect.fork,
+                );
 
                 yield* Effect.promise(() => consumer.run({ eachBatch }));
               }),

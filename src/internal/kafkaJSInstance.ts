@@ -1,6 +1,7 @@
 import { Cause, Effect, Runtime } from "effect";
-import type { Consumer, Producer } from "kafkajs";
-import { LogEntry, logLevel } from "kafkajs";
+import type { Consumer, ConsumerConfig, LogEntry, Producer, ProducerConfig } from "kafkajs";
+import { Kafka, logLevel } from "kafkajs";
+import * as Error from "../ConsumerError";
 import { KafkaJSConnectionError, KafkaJSNonRetriableError } from "../KafkaJSErrors";
 
 /** @internal */
@@ -42,3 +43,29 @@ export const connect = <Client extends Consumer | Producer>(
 /** @internal */
 export const disconnect = <Client extends Consumer | Producer>(client: Client): Effect.Effect<void> =>
   Effect.promise(() => client.disconnect());
+
+/** @internal */
+export const acquireProducer = (kafka: Kafka, options?: ProducerConfig) =>
+  Effect.acquireRelease(
+    Effect.sync(() => kafka.producer(options)).pipe(
+      Effect.tap(connect),
+      Effect.catchTags({
+        KafkaJSConnectionError: (err) => new Error.ConnectionException(err),
+        UnknownException: Effect.die,
+      }),
+    ),
+    disconnect,
+  );
+
+/** @internal */
+export const acquireConsumer = (kafka: Kafka, options: ConsumerConfig) =>
+  Effect.acquireRelease(
+    Effect.sync(() => kafka.consumer(options)).pipe(
+      Effect.tap(connect),
+      Effect.catchTags({
+        KafkaJSConnectionError: (err) => new Error.ConnectionException(err),
+        UnknownException: Effect.die,
+      }),
+    ),
+    disconnect,
+  );

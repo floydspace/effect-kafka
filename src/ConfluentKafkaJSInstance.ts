@@ -2,9 +2,8 @@
  * @since 0.2.0
  */
 import { KafkaJS } from "@confluentinc/kafka-javascript";
-import { Chunk, Effect, Layer, Runtime } from "effect";
+import { Chunk, Effect, Layer, Queue } from "effect";
 import * as Consumer from "./Consumer";
-import * as Error from "./ConsumerError";
 import * as ConsumerRecord from "./ConsumerRecord";
 import * as internal from "./internal/confluentKafkaJSInstance";
 import * as KafkaInstance from "./KafkaInstance";
@@ -22,19 +21,7 @@ export const make = (config: KafkaJS.KafkaConfig): Effect.Effect<KafkaInstance.K
     return KafkaInstance.make({
       producer: (options) =>
         Effect.gen(function* () {
-          const producer = yield* Effect.acquireRelease(
-            Effect.sync(() => kafka.producer({ kafkaJS: options })).pipe(
-              Effect.tap(internal.connect),
-              Effect.catchTags({
-                LibrdKafkaError: (err) =>
-                  err.message === "broker transport failure"
-                    ? new Error.ConnectionException({ broker: err.origin, message: err.message, stack: err.stack })
-                    : Effect.die(err),
-                UnknownException: Effect.die,
-              }),
-            ),
-            internal.disconnect,
-          );
+          const producer = yield* internal.acquireProducer(kafka, options);
 
           return Producer.make({
             send: (record) => Effect.promise(() => producer.send(record)),
@@ -43,19 +30,7 @@ export const make = (config: KafkaJS.KafkaConfig): Effect.Effect<KafkaInstance.K
         }),
       consumer: (options) =>
         Effect.gen(function* () {
-          const consumer = yield* Effect.acquireRelease(
-            Effect.sync(() => kafka.consumer({ kafkaJS: { groupId: options.groupId } })).pipe(
-              Effect.tap(internal.connect),
-              Effect.catchTags({
-                LibrdKafkaError: (err) =>
-                  err.message === "broker transport failure"
-                    ? new Error.ConnectionException({ broker: err.origin, message: err.message, stack: err.stack })
-                    : Effect.die(err),
-                UnknownException: Effect.die,
-              }),
-            ),
-            internal.disconnect,
-          );
+          const consumer = yield* internal.acquireConsumer(kafka, { groupId: options.groupId });
 
           return Consumer.make({
             run: (app) =>
@@ -63,31 +38,32 @@ export const make = (config: KafkaJS.KafkaConfig): Effect.Effect<KafkaInstance.K
                 const topics = Chunk.toArray(app.routes).map((route) => route.topic);
                 yield* Effect.promise(() => consumer.subscribe({ topics }));
 
-                const eachBatch: KafkaJS.EachBatchHandler = yield* Effect.map(Effect.runtime(), (runtime) => {
-                  const runPromise = Runtime.runPromise(runtime);
-                  return (payload: KafkaJS.EachBatchPayload) =>
-                    Effect.forEach(
-                      payload.batch.messages,
-                      (message) =>
-                        app.pipe(
-                          Effect.provideService(
-                            ConsumerRecord.ConsumerRecord,
-                            ConsumerRecord.make({
-                              topic: payload.batch.topic,
-                              partition: payload.batch.partition,
-                              key: message.key,
-                              value: message.value,
-                              timestamp: message.timestamp,
-                              attributes: message.attributes,
-                              offset: message.offset,
-                              headers: message.headers,
-                              size: message.size,
-                            }),
-                          ),
-                        ),
-                      { discard: true },
-                    ).pipe(runPromise);
-                });
+                const queue = yield* Queue.bounded<ConsumerRecord.ConsumerRecord>(1);
+
+                const eachBatch: KafkaJS.EachBatchHandler = async (payload) => {
+                  payload.batch.messages.forEach((message) => {
+                    Queue.unsafeOffer(
+                      queue,
+                      ConsumerRecord.make({
+                        topic: payload.batch.topic,
+                        partition: payload.batch.partition,
+                        key: message.key,
+                        value: message.value,
+                        timestamp: message.timestamp,
+                        attributes: message.attributes,
+                        offset: message.offset,
+                        headers: message.headers,
+                        size: message.size,
+                      }),
+                    );
+                  });
+                };
+
+                yield* app.pipe(
+                  Effect.provideServiceEffect(ConsumerRecord.ConsumerRecord, Queue.take(queue)),
+                  Effect.forever,
+                  Effect.fork,
+                );
 
                 yield* Effect.promise(() => consumer.run({ eachBatch }));
               }),
