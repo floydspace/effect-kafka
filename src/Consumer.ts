@@ -128,6 +128,10 @@ export const serveEffect: {
   >;
 } = internal.serveEffect;
 
+/**
+ * @since 0.3.0
+ * @category accessors
+ */
 export const serveStream: (
   path: MessageRouter.Route.Path,
   options: Consumer.ConsumerOptions,
