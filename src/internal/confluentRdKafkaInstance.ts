@@ -2,6 +2,7 @@ import type {
   Client,
   ClientMetrics,
   ConsumerGlobalConfig,
+  ConsumerTopicConfig,
   Metadata,
   MetadataOptions,
   ProducerGlobalConfig,
@@ -70,9 +71,9 @@ export const connectProducerScoped = (config: ProducerGlobalConfig) =>
   );
 
 /** @internal */
-export const connectConsumerScoped = (config: ConsumerGlobalConfig) =>
+export const connectConsumerScoped = (config: ConsumerGlobalConfig, topicConfig?: ConsumerTopicConfig) =>
   Effect.acquireRelease(
-    Effect.sync(() => new KafkaConsumer(config)).pipe(
+    Effect.sync(() => new KafkaConsumer(config, topicConfig)).pipe(
       Effect.tap((c) => connect(c)),
       Effect.tap(() => Effect.logInfo("Consumer connected", { timestamp: new Date().toISOString() })),
       Effect.catchTag("LibrdKafkaError", (err) =>

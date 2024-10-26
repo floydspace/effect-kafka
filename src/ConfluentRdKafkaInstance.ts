@@ -1,12 +1,18 @@
 /**
  * @since 0.2.0
  */
-import { GlobalConfig, ProducerGlobalConfig } from "@confluentinc/kafka-javascript";
-import { Array, Chunk, Effect, Fiber, Layer, Queue } from "effect";
+import {
+  ConsumerGlobalConfig,
+  ConsumerTopicConfig,
+  GlobalConfig,
+  ProducerGlobalConfig,
+} from "@confluentinc/kafka-javascript";
+import { Array, Chunk, Effect, Fiber, Layer, Queue, Stream } from "effect";
 import * as Consumer from "./Consumer";
 import * as ConsumerRecord from "./ConsumerRecord";
 import * as internal from "./internal/confluentRdKafkaInstance";
 import * as KafkaInstance from "./KafkaInstance";
+import type * as MessageRouter from "./MessageRouter";
 import * as Producer from "./Producer";
 
 /**
@@ -46,39 +52,60 @@ export const layer = (config: GlobalConfig) =>
         }),
       consumer: (options) =>
         Effect.gen(function* () {
-          const consumer = yield* internal.connectConsumerScoped({
-            ...config,
-            "group.id": options.groupId,
-            // TODO: map other options
-          });
+          const consumerConfig: ConsumerGlobalConfig = { ...config, "group.id": options.groupId };
+          if (options && "autoCommit" in options) {
+            consumerConfig["enable.auto.commit"] = options.autoCommit;
+          }
+          // TODO: map other options
+
+          const consumerTopicConfig: ConsumerTopicConfig = {};
+          if (options && "fromBeginning" in options) {
+            consumerTopicConfig["auto.offset.reset"] = options.fromBeginning ? "earliest" : "latest";
+          }
+          // TODO: map other options
+
+          const consumer = yield* internal.connectConsumerScoped(consumerConfig, consumerTopicConfig);
+
+          const subscribeAndConsume = (topics: MessageRouter.Route.Path[]) =>
+            Effect.gen(function* () {
+              yield* internal.subscribeScoped(consumer, topics);
+
+              const queue = yield* Queue.bounded<ConsumerRecord.ConsumerRecord>(1);
+
+              const eachMessage: internal.ConsumerHandler = (payload) =>
+                Queue.unsafeOffer(
+                  queue,
+                  ConsumerRecord.make({
+                    topic: payload.topic,
+                    partition: payload.partition,
+                    highWatermark: "-1001", // Not supported
+                    key: typeof payload.key === "string" ? Buffer.from(payload.key) : (payload.key ?? null),
+                    value: payload.value,
+                    headers: payload.headers?.reduce((acc, header) => {
+                      const [key] = Object.keys(header);
+                      acc[key] = header[key];
+                      return acc;
+                    }, {}),
+                    timestamp: payload.timestamp?.toString() ?? "",
+                    offset: payload.offset.toString(),
+                    attributes: 0,
+                    size: payload.size,
+                    heartbeat: () => Effect.void, // Not supported
+                    commit: () => Effect.sync(() => consumer.commit()),
+                  }),
+                );
+
+              yield* internal.consume(consumer, { eachMessage });
+
+              return queue;
+            });
 
           return Consumer.make({
             run: (app) =>
               Effect.gen(function* () {
                 const topics = Chunk.toArray(app.routes).map((route) => route.topic);
-                yield* internal.subscribeScoped(consumer, topics);
 
-                const queue = yield* Queue.bounded<ConsumerRecord.ConsumerRecord>(1);
-
-                const eachMessage: internal.ConsumerHandler = (payload) =>
-                  Queue.unsafeOffer(
-                    queue,
-                    ConsumerRecord.make({
-                      topic: payload.topic,
-                      partition: payload.partition,
-                      key: typeof payload.key === "string" ? Buffer.from(payload.key) : (payload.key ?? null),
-                      value: payload.value,
-                      headers: payload.headers?.reduce((acc, header) => {
-                        const [key] = Object.keys(header);
-                        acc[key] = header[key];
-                        return acc;
-                      }, {}),
-                      timestamp: payload.timestamp?.toString() ?? "",
-                      offset: payload.offset.toString(),
-                      attributes: 0,
-                      size: payload.size,
-                    }),
-                  );
+                const queue = yield* subscribeAndConsume(topics);
 
                 const fiber = yield* app.pipe(
                   Effect.provideServiceEffect(ConsumerRecord.ConsumerRecord, Queue.take(queue)),
@@ -86,10 +113,9 @@ export const layer = (config: GlobalConfig) =>
                   Effect.fork,
                 );
 
-                yield* internal.consume(consumer, { eachMessage });
-
                 yield* Fiber.join(fiber);
               }),
+            runStream: (topic) => subscribeAndConsume([topic]).pipe(Effect.map(Stream.fromQueue), Stream.flatten()),
           });
         }),
     }),
