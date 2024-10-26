@@ -1,5 +1,16 @@
 # effect-kafka
 
+## 0.3.0
+
+### Minor Changes
+
+- [`c2902e0`](https://github.com/floydspace/effect-kafka/commit/c2902e0ba0723331346169454f45b3541c8d6276) Thanks [@floydspace](https://github.com/floydspace)! - - rename `MessagePayload` to `ConsumerRecord` similar how it is named in `zio-kafka`
+
+  - handle message batches manually
+
+- [#4](https://github.com/floydspace/effect-kafka/pull/4) [`f5d97d2`](https://github.com/floydspace/effect-kafka/commit/f5d97d2a843ca450ffef6d679b213c8addf70459) Thanks [@floydspace](https://github.com/floydspace)! - implement stream consumer
+  allow handling commits manually
+
 ## 0.2.0
 
 ### Minor Changes
