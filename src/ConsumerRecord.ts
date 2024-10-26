@@ -1,9 +1,9 @@
 /**
  * @since 0.1.0
  */
+import type { KafkaJS } from "@confluentinc/kafka-javascript"; // TODO: use generic type
 import { Effect } from "effect";
 import type * as Context from "effect/Context";
-import type { IHeaders } from "kafkajs"; // TODO: use generic type
 import * as internal from "./internal/consumerRecord";
 
 /**
@@ -53,7 +53,7 @@ export declare namespace ConsumerRecord {
   /**
    * @since 0.2.0
    */
-  export interface Headers extends IHeaders {}
+  export interface Headers extends KafkaJS.IHeaders {}
 }
 
 /**

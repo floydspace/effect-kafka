@@ -1,13 +1,8 @@
 /**
  * @since 0.2.0
  */
+import type { KafkaJS } from "@confluentinc/kafka-javascript"; // TODO: use generic type
 import { Context, Effect, FiberRef, Layer, Scope } from "effect";
-import type {
-  ProducerBatch as ProducerBatch$,
-  ProducerConfig,
-  ProducerRecord as ProducerRecord$,
-  RecordMetadata as RecordMetadata$,
-} from "kafkajs"; // TODO: use generic type
 import type * as Error from "./ConsumerError";
 import * as internal from "./internal/producer";
 import type * as KafkaInstance from "./KafkaInstance";
@@ -47,22 +42,22 @@ export declare namespace Producer {
   /**
    * @since 0.2.0
    */
-  export type ProducerOptions = ProducerConfig;
+  export type ProducerOptions = KafkaJS.ProducerConfig;
 
   /**
    * @since 0.2.0
    */
-  export type ProducerRecord = ProducerRecord$;
+  export type ProducerRecord = KafkaJS.ProducerRecord;
 
   /**
    * @since 0.2.0
    */
-  export type ProducerBatch = ProducerBatch$;
+  export type ProducerBatch = KafkaJS.ProducerBatch;
 
   /**
    * @since 0.2.0
    */
-  export type RecordMetadata = RecordMetadata$;
+  export type RecordMetadata = KafkaJS.RecordMetadata;
 }
 
 /**
