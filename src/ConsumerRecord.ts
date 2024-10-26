@@ -1,8 +1,9 @@
 /**
  * @since 0.1.0
  */
+import type { KafkaJS } from "@confluentinc/kafka-javascript"; // TODO: use generic type
+import { Effect } from "effect";
 import type * as Context from "effect/Context";
-import type { IHeaders } from "kafkajs"; // TODO: use generic type
 import * as internal from "./internal/consumerRecord";
 
 /**
@@ -25,6 +26,7 @@ export interface ConsumerRecord {
   readonly [TypeId]: TypeId;
   readonly topic: string;
   readonly partition: number;
+  readonly highWatermark: string;
   readonly key: Buffer | null;
   readonly value: Buffer | null;
   readonly timestamp: string;
@@ -32,8 +34,10 @@ export interface ConsumerRecord {
   readonly offset: string;
   readonly headers?: ConsumerRecord.Headers;
   readonly size?: number;
-  // readonly heartbeat: () => Promise<void>; // TODO: use Effect
+  // readonly resolveOffset: (offset: string) => void;
+  readonly heartbeat: () => Effect.Effect<void>;
   // readonly pause: () => () => void;
+  readonly commit: () => Effect.Effect<void>;
 }
 
 /**
@@ -49,7 +53,7 @@ export declare namespace ConsumerRecord {
   /**
    * @since 0.2.0
    */
-  export interface Headers extends IHeaders {}
+  export interface Headers extends KafkaJS.IHeaders {}
 }
 
 /**
@@ -59,6 +63,7 @@ export declare namespace ConsumerRecord {
 export const make: (payload: {
   readonly topic: string;
   readonly partition: number;
+  readonly highWatermark: string;
   readonly key: Buffer | null;
   readonly value: Buffer | null;
   readonly timestamp: string;
@@ -66,4 +71,6 @@ export const make: (payload: {
   readonly offset: string;
   readonly headers?: ConsumerRecord.Headers;
   readonly size?: number;
+  readonly heartbeat: () => Effect.Effect<void>;
+  readonly commit: () => Effect.Effect<void>;
 }) => ConsumerRecord = internal.make;

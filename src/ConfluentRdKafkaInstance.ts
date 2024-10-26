@@ -2,24 +2,18 @@
  * @since 0.2.0
  */
 import {
-  Client,
-  CODES,
   ConsumerGlobalConfig,
+  ConsumerTopicConfig,
   GlobalConfig,
-  KafkaConsumer,
-  Producer as KafkaProducer,
-  Message,
   ProducerGlobalConfig,
 } from "@confluentinc/kafka-javascript";
-import { Array, Chunk, Effect, Layer, Runtime } from "effect";
+import { Array, Chunk, Effect, Fiber, Layer, Queue, Stream } from "effect";
 import * as Consumer from "./Consumer";
-import * as Error from "./ConsumerError";
 import * as ConsumerRecord from "./ConsumerRecord";
 import * as internal from "./internal/confluentRdKafkaInstance";
 import * as KafkaInstance from "./KafkaInstance";
+import type * as MessageRouter from "./MessageRouter";
 import * as Producer from "./Producer";
-
-type ConsumerHandler = Parameters<Client<"data">["on"]>["1"];
 
 /**
  * @since 0.2.0
@@ -40,17 +34,7 @@ export const layer = (config: GlobalConfig) =>
           }
           // TODO: map other options
 
-          const producer = yield* Effect.acquireRelease(
-            Effect.sync(() => new KafkaProducer(producerConfig)).pipe(
-              Effect.tap((p) => internal.connect(p)),
-              Effect.catchTag("LibrdKafkaError", (err) =>
-                err.code === CODES.ERRORS.ERR__TRANSPORT
-                  ? new Error.ConnectionException({ broker: err.origin, message: err.message, stack: err.stack })
-                  : Effect.die(err),
-              ),
-            ),
-            (c) => internal.disconnect(c).pipe(Effect.orDie),
-          );
+          const producer = yield* internal.connectProducerScoped(producerConfig);
 
           const send: Producer.Producer["send"] = (record) =>
             Effect.forEach(record.messages, (message) => {
@@ -68,61 +52,70 @@ export const layer = (config: GlobalConfig) =>
         }),
       consumer: (options) =>
         Effect.gen(function* () {
-          const consumerConfig: ConsumerGlobalConfig = {
-            ...config,
-            "group.id": options.groupId,
-            // TODO: map other options
-          };
+          const consumerConfig: ConsumerGlobalConfig = { ...config, "group.id": options.groupId };
+          if (options && "autoCommit" in options) {
+            consumerConfig["enable.auto.commit"] = options.autoCommit;
+          }
+          // TODO: map other options
 
-          const consumer = yield* Effect.acquireRelease(
-            Effect.sync(() => new KafkaConsumer(consumerConfig)).pipe(
-              Effect.tap((c) => internal.connect(c)),
-              Effect.catchTag("LibrdKafkaError", (err) =>
-                err.code === CODES.ERRORS.ERR__TRANSPORT
-                  ? new Error.ConnectionException({ broker: err.origin, message: err.message, stack: err.stack })
-                  : Effect.die(err),
-              ),
-            ),
-            (c) => internal.disconnect(c).pipe(Effect.orDie),
-          );
+          const consumerTopicConfig: ConsumerTopicConfig = {};
+          if (options && "fromBeginning" in options) {
+            consumerTopicConfig["auto.offset.reset"] = options.fromBeginning ? "earliest" : "latest";
+          }
+          // TODO: map other options
+
+          const consumer = yield* internal.connectConsumerScoped(consumerConfig, consumerTopicConfig);
+
+          const subscribeAndConsume = (topics: MessageRouter.Route.Path[]) =>
+            Effect.gen(function* () {
+              yield* internal.subscribeScoped(consumer, topics);
+
+              const queue = yield* Queue.bounded<ConsumerRecord.ConsumerRecord>(1);
+
+              const eachMessage: internal.ConsumerHandler = (payload) =>
+                Queue.unsafeOffer(
+                  queue,
+                  ConsumerRecord.make({
+                    topic: payload.topic,
+                    partition: payload.partition,
+                    highWatermark: "-1001", // Not supported
+                    key: typeof payload.key === "string" ? Buffer.from(payload.key) : (payload.key ?? null),
+                    value: payload.value,
+                    headers: payload.headers?.reduce((acc, header) => {
+                      const [key] = Object.keys(header);
+                      acc[key] = header[key];
+                      return acc;
+                    }, {}),
+                    timestamp: payload.timestamp?.toString() ?? "",
+                    offset: payload.offset.toString(),
+                    attributes: 0,
+                    size: payload.size,
+                    heartbeat: () => Effect.void, // Not supported
+                    commit: () => Effect.sync(() => consumer.commit()),
+                  }),
+                );
+
+              yield* internal.consume(consumer, { eachMessage });
+
+              return queue;
+            });
 
           return Consumer.make({
             run: (app) =>
               Effect.gen(function* () {
                 const topics = Chunk.toArray(app.routes).map((route) => route.topic);
-                yield* Effect.sync(() => consumer.subscribe(topics));
 
-                const eachMessage: ConsumerHandler = yield* Effect.map(Effect.runtime<never>(), (runtime) => {
-                  const runPromise = Runtime.runPromise(runtime);
-                  return (payload: Message) =>
-                    app.pipe(
-                      Effect.provideService(
-                        ConsumerRecord.ConsumerRecord,
-                        ConsumerRecord.make({
-                          topic: payload.topic,
-                          partition: payload.partition,
-                          key: typeof payload.key === "string" ? Buffer.from(payload.key) : (payload.key ?? null),
-                          value: payload.value,
-                          headers: payload.headers?.reduce((acc, header) => {
-                            const [key] = Object.keys(header);
-                            acc[key] = header[key];
-                            return acc;
-                          }, {}),
-                          timestamp: payload.timestamp?.toString() ?? "",
-                          offset: payload.offset.toString(),
-                          attributes: 0,
-                          size: payload.size,
-                        }),
-                      ),
-                      runPromise,
-                    );
-                });
+                const queue = yield* subscribeAndConsume(topics);
 
-                consumer.on("data", eachMessage);
+                const fiber = yield* app.pipe(
+                  Effect.provideServiceEffect(ConsumerRecord.ConsumerRecord, Queue.take(queue)),
+                  Effect.forever,
+                  Effect.fork,
+                );
 
-                yield* Effect.fork(Effect.sync(() => consumer.consume()));
-                yield* Effect.never;
+                yield* Fiber.join(fiber);
               }),
+            runStream: (topic) => subscribeAndConsume([topic]).pipe(Effect.map(Stream.fromQueue), Stream.flatten()),
           });
         }),
     }),

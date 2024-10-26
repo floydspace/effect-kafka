@@ -1,4 +1,4 @@
-import { Context, Effect, Layer, Scope } from "effect";
+import { Context, Effect, Layer, Scope, Stream } from "effect";
 import { dual } from "effect/Function";
 import type * as Consumer from "../Consumer";
 import type * as Error from "../ConsumerError";
@@ -18,7 +18,10 @@ const consumerProto = {
 
 /** @internal */
 export const make = (options: {
-  readonly run: (app: MessageRouter.MessageRouter<void>) => Effect.Effect<void, never, Scope.Scope>;
+  readonly run: (app: MessageRouter.MessageRouter) => Effect.Effect<void, never, Scope.Scope>;
+  readonly runStream?: (
+    path: MessageRouter.Route.Path,
+  ) => Stream.Stream<ConsumerRecord.ConsumerRecord, never, Scope.Scope>;
 }): Consumer.Consumer => Object.assign(Object.create(consumerProto), options);
 
 /** @internal */
@@ -102,3 +105,16 @@ export const serveEffect = dual<
       yield* consumer.run(app);
     }),
 );
+
+/** @internal */
+export const serveStream = (
+  path: MessageRouter.Route.Path,
+  options: Consumer.Consumer.ConsumerOptions,
+): Stream.Stream<ConsumerRecord.ConsumerRecord, Error.ConnectionException, KafkaInstance.KafkaInstance | Scope.Scope> =>
+  Effect.gen(function* () {
+    const instance = yield* KafkaInstance.KafkaInstance;
+    return yield* instance.consumer(options);
+  }).pipe(
+    Effect.map((consumer) => consumer.runStream(path)),
+    Stream.flatten(),
+  );

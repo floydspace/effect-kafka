@@ -12,9 +12,9 @@ Effect Kafka Reference: https://floydspace.github.io/effect-kafka
 
 - [x] Consumer
 - [x] Producer
-- [ ] Consumer Streams
+- [x] Consumer Streams
 - [ ] Producer Streams
-- [ ] Acknowledge management
+- [x] Acknowledge management
 - [ ] Transactions
 
 # Contributing Guidelines

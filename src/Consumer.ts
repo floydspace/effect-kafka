@@ -1,8 +1,8 @@
 /**
  * @since 0.1.0
  */
-import { Context, Effect, Layer, Scope } from "effect";
-import type { ConsumerConfig } from "kafkajs"; // TODO: use generic type
+import type { KafkaJS } from "@confluentinc/kafka-javascript"; // TODO: use generic type
+import { Context, Effect, Layer, Scope, Stream } from "effect";
 import type * as Error from "./ConsumerError";
 import type * as ConsumerRecord from "./ConsumerRecord";
 import * as internal from "./internal/consumer";
@@ -32,6 +32,9 @@ export interface Consumer {
       app: MessageRouter.MessageRouter<E, R>,
     ): Effect.Effect<void, never, Exclude<R, ConsumerRecord.ConsumerRecord> | Scope.Scope>;
   };
+  readonly runStream: {
+    (path: MessageRouter.Route.Path): Stream.Stream<ConsumerRecord.ConsumerRecord, never, Scope.Scope>;
+  };
 }
 
 /**
@@ -47,7 +50,7 @@ export declare namespace Consumer {
   /**
    * @since 0.2.0
    */
-  export type ConsumerOptions = ConsumerConfig;
+  export interface ConsumerOptions extends KafkaJS.ConsumerConfig {}
 }
 
 /**
@@ -55,7 +58,10 @@ export declare namespace Consumer {
  * @category constructors
  */
 export const make: (options: {
-  readonly run: (app: MessageRouter.MessageRouter<void>) => Effect.Effect<void, never, Scope.Scope>;
+  readonly run: (app: MessageRouter.MessageRouter) => Effect.Effect<void, never, Scope.Scope>;
+  readonly runStream?: (
+    path: MessageRouter.Route.Path,
+  ) => Stream.Stream<ConsumerRecord.ConsumerRecord, never, Scope.Scope>;
 }) => Consumer = internal.make;
 
 /**
@@ -68,7 +74,7 @@ export const serve: {
    * @category accessors
    */
   (
-    options: ConsumerConfig,
+    options: Consumer.ConsumerOptions,
   ): <E, R>(
     app: MessageRouter.MessageRouter<E, R>,
   ) => Layer.Layer<
@@ -82,7 +88,7 @@ export const serve: {
    */
   <E, R>(
     app: MessageRouter.MessageRouter<E, R>,
-    options: ConsumerConfig,
+    options: Consumer.ConsumerOptions,
   ): Layer.Layer<
     never,
     Error.ConnectionException,
@@ -100,7 +106,7 @@ export const serveEffect: {
    * @category accessors
    */
   (
-    options: ConsumerConfig,
+    options: Consumer.ConsumerOptions,
   ): <E, R>(
     app: MessageRouter.MessageRouter<E, R>,
   ) => Effect.Effect<
@@ -114,10 +120,23 @@ export const serveEffect: {
    */
   <E, R>(
     app: MessageRouter.MessageRouter<E, R>,
-    options: ConsumerConfig,
+    options: Consumer.ConsumerOptions,
   ): Effect.Effect<
     void,
     Error.ConnectionException,
     Scope.Scope | KafkaInstance.KafkaInstance | Exclude<R, ConsumerRecord.ConsumerRecord>
   >;
 } = internal.serveEffect;
+
+/**
+ * @since 0.3.0
+ * @category accessors
+ */
+export const serveStream: (
+  path: MessageRouter.Route.Path,
+  options: Consumer.ConsumerOptions,
+) => Stream.Stream<
+  ConsumerRecord.ConsumerRecord,
+  Error.ConnectionException,
+  KafkaInstance.KafkaInstance | Scope.Scope
+> = internal.serveStream;

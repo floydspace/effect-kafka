@@ -1,4 +1,4 @@
-import { Context } from "effect";
+import { Context, Effect } from "effect";
 import type * as ConsumerRecord from "../ConsumerRecord";
 
 /** @internal */
@@ -15,6 +15,7 @@ const consumerRecordProto = {
 export const make = (payload: {
   readonly topic: string;
   readonly partition: number;
+  readonly highWatermark: string;
   readonly key: Buffer | null;
   readonly value: Buffer | null;
   readonly timestamp: string;
@@ -22,4 +23,6 @@ export const make = (payload: {
   readonly offset: string;
   readonly headers?: ConsumerRecord.ConsumerRecord.Headers;
   readonly size?: number;
+  readonly heartbeat: () => Effect.Effect<void>;
+  readonly commit: () => Effect.Effect<void>;
 }): ConsumerRecord.ConsumerRecord => Object.assign(Object.create(consumerRecordProto), payload);

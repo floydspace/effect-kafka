@@ -2,12 +2,12 @@
  * @since 0.2.0
  */
 import { KafkaJS } from "@confluentinc/kafka-javascript";
-import { Chunk, Effect, Layer, Runtime } from "effect";
+import { Chunk, Effect, Fiber, Layer, Queue, Stream } from "effect";
 import * as Consumer from "./Consumer";
-import * as Error from "./ConsumerError";
 import * as ConsumerRecord from "./ConsumerRecord";
 import * as internal from "./internal/confluentKafkaJSInstance";
 import * as KafkaInstance from "./KafkaInstance";
+import type * as MessageRouter from "./MessageRouter";
 import * as Producer from "./Producer";
 
 /**
@@ -17,24 +17,12 @@ import * as Producer from "./Producer";
 export const make = (config: KafkaJS.KafkaConfig): Effect.Effect<KafkaInstance.KafkaInstance> =>
   Effect.gen(function* () {
     const logger = yield* internal.makeLogger;
-    const kafka = new KafkaJS.Kafka({ kafkaJS: { ...config, logger } });
+    const kafka = new KafkaJS.Kafka({ kafkaJS: { ...config, logger, logLevel: KafkaJS.logLevel.DEBUG } });
 
     return KafkaInstance.make({
       producer: (options) =>
         Effect.gen(function* () {
-          const producer = yield* Effect.acquireRelease(
-            Effect.sync(() => kafka.producer({ kafkaJS: options })).pipe(
-              Effect.tap(internal.connect),
-              Effect.catchTags({
-                LibrdKafkaError: (err) =>
-                  err.message === "broker transport failure"
-                    ? new Error.ConnectionException({ broker: err.origin, message: err.message, stack: err.stack })
-                    : Effect.die(err),
-                UnknownException: Effect.die,
-              }),
-            ),
-            internal.disconnect,
-          );
+          const producer = yield* internal.connectProducerScoped(kafka, options);
 
           return Producer.make({
             send: (record) => Effect.promise(() => producer.send(record)),
@@ -43,54 +31,57 @@ export const make = (config: KafkaJS.KafkaConfig): Effect.Effect<KafkaInstance.K
         }),
       consumer: (options) =>
         Effect.gen(function* () {
-          const consumer = yield* Effect.acquireRelease(
-            Effect.sync(() => kafka.consumer({ kafkaJS: { groupId: options.groupId } })).pipe(
-              Effect.tap(internal.connect),
-              Effect.catchTags({
-                LibrdKafkaError: (err) =>
-                  err.message === "broker transport failure"
-                    ? new Error.ConnectionException({ broker: err.origin, message: err.message, stack: err.stack })
-                    : Effect.die(err),
-                UnknownException: Effect.die,
-              }),
-            ),
-            internal.disconnect,
-          );
+          const consumer = yield* internal.connectConsumerScoped(kafka, options);
+
+          const subscribeAndConsume = (topics: MessageRouter.Route.Path[]) =>
+            Effect.gen(function* () {
+              yield* internal.subscribe(consumer, { topics });
+
+              const queue = yield* Queue.bounded<ConsumerRecord.ConsumerRecord>(1);
+
+              const eachBatch: KafkaJS.EachBatchHandler = async (payload) => {
+                payload.batch.messages.forEach((message) => {
+                  Queue.unsafeOffer(
+                    queue,
+                    ConsumerRecord.make({
+                      topic: payload.batch.topic,
+                      partition: payload.batch.partition,
+                      highWatermark: payload.batch.highWatermark,
+                      key: message.key,
+                      value: message.value,
+                      timestamp: message.timestamp,
+                      attributes: message.attributes,
+                      offset: message.offset,
+                      headers: message.headers,
+                      size: message.size,
+                      heartbeat: () => Effect.promise(() => payload.heartbeat()),
+                      commit: () => Effect.promise(() => payload.commitOffsetsIfNecessary()),
+                    }),
+                  );
+                });
+              };
+
+              yield* internal.consume(consumer, { eachBatch });
+
+              return queue;
+            });
 
           return Consumer.make({
             run: (app) =>
               Effect.gen(function* () {
                 const topics = Chunk.toArray(app.routes).map((route) => route.topic);
-                yield* Effect.promise(() => consumer.subscribe({ topics }));
 
-                const eachBatch: KafkaJS.EachBatchHandler = yield* Effect.map(Effect.runtime(), (runtime) => {
-                  const runPromise = Runtime.runPromise(runtime);
-                  return (payload: KafkaJS.EachBatchPayload) =>
-                    Effect.forEach(
-                      payload.batch.messages,
-                      (message) =>
-                        app.pipe(
-                          Effect.provideService(
-                            ConsumerRecord.ConsumerRecord,
-                            ConsumerRecord.make({
-                              topic: payload.batch.topic,
-                              partition: payload.batch.partition,
-                              key: message.key,
-                              value: message.value,
-                              timestamp: message.timestamp,
-                              attributes: message.attributes,
-                              offset: message.offset,
-                              headers: message.headers,
-                              size: message.size,
-                            }),
-                          ),
-                        ),
-                      { discard: true },
-                    ).pipe(runPromise);
-                });
+                const queue = yield* subscribeAndConsume(topics);
 
-                yield* Effect.promise(() => consumer.run({ eachBatch }));
+                const fiber = yield* app.pipe(
+                  Effect.provideServiceEffect(ConsumerRecord.ConsumerRecord, Queue.take(queue)),
+                  Effect.forever,
+                  Effect.fork,
+                );
+
+                yield* Fiber.join(fiber);
               }),
+            runStream: (topic) => subscribeAndConsume([topic]).pipe(Effect.map(Stream.fromQueue), Stream.flatten()),
           });
         }),
     });
