@@ -13,6 +13,9 @@ import { LibrdKafkaError } from "../ConfluentRdKafkaErrors";
 import * as Error from "../ConsumerError";
 
 /** @internal */
+export type ConsumerHandler = Parameters<Client<"data">["on"]>["1"];
+
+/** @internal */
 export const connect = <Events extends string>(
   client: Client<Events>,
   metadataOptions?: MetadataOptions,
@@ -30,7 +33,25 @@ export const disconnect = <Events extends string>(client: Client<Events>) =>
   });
 
 /** @internal */
-export const acquireProducer = (config: ProducerGlobalConfig) =>
+export const subscribeScoped = (consumer: KafkaConsumer, topics: SubscribeTopicList) =>
+  Effect.acquireRelease(
+    Effect.sync(() => consumer.subscribe(topics)).pipe(
+      Effect.tap(() => Effect.logInfo("Consumer subscribed", { timestamp: new Date().toISOString() })),
+    ),
+    (c) =>
+      Effect.sync(() => c.unsubscribe()).pipe(
+        Effect.tap(() => Effect.logInfo("Consumer unsubscribed", { timestamp: new Date().toISOString() })),
+      ),
+  ).pipe(Effect.annotateLogs({ topics }));
+
+/** @internal */
+export const consume = (consumer: KafkaConsumer, config: { eachMessage: ConsumerHandler }) =>
+  Effect.sync(() => consumer.on("data", config.eachMessage)).pipe(
+    Effect.tap(() => Effect.sync(() => consumer.consume())),
+  );
+
+/** @internal */
+export const connectProducerScoped = (config: ProducerGlobalConfig) =>
   Effect.acquireRelease(
     Effect.sync(() => new KafkaProducer(config)).pipe(
       Effect.tap((p) => connect(p)),
@@ -49,7 +70,7 @@ export const acquireProducer = (config: ProducerGlobalConfig) =>
   );
 
 /** @internal */
-export const acquireConsumer = (config: ConsumerGlobalConfig) =>
+export const connectConsumerScoped = (config: ConsumerGlobalConfig) =>
   Effect.acquireRelease(
     Effect.sync(() => new KafkaConsumer(config)).pipe(
       Effect.tap((c) => connect(c)),
@@ -66,16 +87,3 @@ export const acquireConsumer = (config: ConsumerGlobalConfig) =>
         Effect.orDie,
       ),
   ).pipe(Effect.annotateLogs({ groupId: config["group.id"] }));
-
-/** @internal */
-export const consumeFromTopics = (consumer: KafkaConsumer, topics: SubscribeTopicList) =>
-  Effect.acquireUseRelease(
-    Effect.sync(() => consumer.subscribe(topics)).pipe(
-      Effect.tap(() => Effect.logInfo("Consumer subscribed", { timestamp: new Date().toISOString() })),
-    ),
-    (c) => Effect.sync(() => c.consume()).pipe(Effect.andThen(() => Effect.never)),
-    (c) =>
-      Effect.sync(() => c.unsubscribe()).pipe(
-        Effect.tap(() => Effect.logInfo("Consumer unsubscribed", { timestamp: new Date().toISOString() })),
-      ),
-  ).pipe(Effect.annotateLogs({ topics }));

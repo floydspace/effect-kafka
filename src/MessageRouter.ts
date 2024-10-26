@@ -2,7 +2,6 @@
  * @since 0.1.0
  */
 import { Chunk, Context, Effect, Inspectable, Layer, Scope } from "effect";
-import type * as Error from "./ConsumerError";
 import type * as ConsumerRecord from "./ConsumerRecord";
 import * as internal from "./internal/messageRouter";
 
@@ -28,9 +27,7 @@ export type Default<E = never, R = never> = Effect.Effect<void, E, R | ConsumerR
  * @since 0.1.0
  * @category models
  */
-export interface MessageRouter<E = never, R = never>
-  extends Default<E | Error.RouteNotFound, R>,
-    Inspectable.Inspectable {
+export interface MessageRouter<E = never, R = never> extends Default<E, R>, Inspectable.Inspectable {
   readonly [TypeId]: TypeId;
   readonly routes: Chunk.Chunk<Route<E, R>>;
 }

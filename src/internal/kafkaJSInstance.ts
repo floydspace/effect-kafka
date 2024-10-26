@@ -1,5 +1,13 @@
 import { Cause, Effect, Runtime } from "effect";
-import type { Consumer, ConsumerConfig, LogEntry, Producer, ProducerConfig } from "kafkajs";
+import type {
+  Consumer,
+  ConsumerConfig,
+  ConsumerRunConfig,
+  ConsumerSubscribeTopics,
+  LogEntry,
+  Producer,
+  ProducerConfig,
+} from "kafkajs";
 import { Kafka, logLevel } from "kafkajs";
 import * as Error from "../ConsumerError";
 import { KafkaJSConnectionError, KafkaJSNonRetriableError } from "../KafkaJSErrors";
@@ -45,7 +53,14 @@ export const disconnect = <Client extends Consumer | Producer>(client: Client): 
   Effect.promise(() => client.disconnect());
 
 /** @internal */
-export const acquireProducer = (kafka: Kafka, options?: ProducerConfig) =>
+export const subscribe = (consumer: Consumer, subscription: ConsumerSubscribeTopics) =>
+  Effect.promise(() => consumer.subscribe(subscription));
+
+/** @internal */
+export const consume = (consumer: Consumer, config: ConsumerRunConfig) => Effect.promise(() => consumer.run(config));
+
+/** @internal */
+export const connectProducerScoped = (kafka: Kafka, options?: ProducerConfig) =>
   Effect.acquireRelease(
     Effect.sync(() => kafka.producer(options)).pipe(
       Effect.tap(connect),
@@ -58,7 +73,7 @@ export const acquireProducer = (kafka: Kafka, options?: ProducerConfig) =>
   );
 
 /** @internal */
-export const acquireConsumer = (kafka: Kafka, options: ConsumerConfig) =>
+export const connectConsumerScoped = (kafka: Kafka, options: ConsumerConfig) =>
   Effect.acquireRelease(
     Effect.sync(() => kafka.consumer(options)).pipe(
       Effect.tap(connect),

@@ -13,15 +13,15 @@ export const RouteTypeId: Router.RouteTypeId = Symbol.for("effect-kafka/MessageR
 const isRouter = (u: unknown): u is Router.MessageRouter<unknown, unknown> => Predicate.hasProperty(u, TypeId);
 
 class RouterImpl<E = never, R = never>
-  extends Effectable.StructuralClass<void, E | Error.RouteNotFound, R>
+  extends Effectable.StructuralClass<void, E, R>
   implements Router.MessageRouter<E, R>
 {
   readonly [TypeId]: Router.TypeId;
-  private consumerApp: Effect.Effect<void, E | Error.RouteNotFound, R>;
+  private consumerApp: Effect.Effect<void, E, R>;
   constructor(readonly routes: Chunk.Chunk<Router.Route<E, R>>) {
     super();
     this[TypeId] = TypeId;
-    this.consumerApp = toConsumerApp(this) as any;
+    this.consumerApp = toConsumerApp(this);
   }
   commit() {
     return this.consumerApp;
@@ -49,14 +49,14 @@ const matchTopic =
     return route.topic.test(topic);
   };
 
-const toConsumerApp = <E, R>(self: Router.MessageRouter<E, R>): Router.Default<E | Error.RouteNotFound, R> => {
-  return Effect.withFiberRuntime<void, E | Error.RouteNotFound, R>((fiber) => {
+const toConsumerApp = <E, R>(self: Router.MessageRouter<E, R>): Effect.Effect<void, E, R> => {
+  return Effect.withFiberRuntime<void, E, R>((fiber) => {
     const context = fiber.getFiberRef(FiberRef.currentContext);
     const payload = Context.unsafeGet(context, ConsumerRecord.ConsumerRecord);
 
     const result = Chunk.findFirst(self.routes, matchTopic(payload.topic));
     if (Option.isNone(result)) {
-      return Effect.fail(new Error.RouteNotFound({ payload }));
+      return Effect.die(new Error.RouteNotFound({ payload }));
     }
     const route = result.value;
 

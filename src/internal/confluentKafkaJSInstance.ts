@@ -58,7 +58,15 @@ export const disconnect = <Client extends KafkaJS.Consumer | KafkaJS.Producer>(c
   Effect.promise(() => client.disconnect());
 
 /** @internal */
-export const acquireProducer = (kafka: KafkaJS.Kafka, config?: KafkaJS.ProducerConfig) =>
+export const subscribe = (consumer: KafkaJS.Consumer, subscription: KafkaJS.ConsumerSubscribeTopics) =>
+  Effect.promise(() => consumer.subscribe(subscription));
+
+/** @internal */
+export const consume = (consumer: KafkaJS.Consumer, config: KafkaJS.ConsumerRunConfig) =>
+  Effect.promise(() => consumer.run(config));
+
+/** @internal */
+export const connectProducerScoped = (kafka: KafkaJS.Kafka, config?: KafkaJS.ProducerConfig) =>
   Effect.acquireRelease(
     Effect.sync(() => kafka.producer({ kafkaJS: config })).pipe(
       Effect.tap(connect),
@@ -74,7 +82,7 @@ export const acquireProducer = (kafka: KafkaJS.Kafka, config?: KafkaJS.ProducerC
   );
 
 /** @internal */
-export const acquireConsumer = (kafka: KafkaJS.Kafka, config: KafkaJS.ConsumerConfig) =>
+export const connectConsumerScoped = (kafka: KafkaJS.Kafka, config: KafkaJS.ConsumerConfig) =>
   Effect.acquireRelease(
     Effect.sync(() => kafka.consumer({ kafkaJS: config })).pipe(
       Effect.tap(connect),

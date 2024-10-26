@@ -1,8 +1,8 @@
 /**
  * @since 0.2.0
  */
-import { Chunk, Effect, Layer, Queue } from "effect";
-import { EachBatchHandler, Kafka, KafkaConfig } from "kafkajs";
+import { Chunk, Effect, Fiber, Layer, Queue } from "effect";
+import { EachBatchHandler, Kafka, KafkaConfig, logLevel } from "kafkajs";
 import * as Consumer from "./Consumer";
 import * as ConsumerRecord from "./ConsumerRecord";
 import * as internal from "./internal/kafkaJSInstance";
@@ -16,12 +16,12 @@ import * as Producer from "./Producer";
 export const make = (config: KafkaConfig): Effect.Effect<KafkaInstance.KafkaInstance> =>
   Effect.gen(function* () {
     const logger = yield* internal.makeLogger;
-    const kafka = new Kafka({ ...config, logCreator: () => logger });
+    const kafka = new Kafka({ ...config, logCreator: () => logger, logLevel: logLevel.DEBUG });
 
     return KafkaInstance.make({
       producer: (options) =>
         Effect.gen(function* () {
-          const producer = yield* internal.acquireProducer(kafka, options);
+          const producer = yield* internal.connectProducerScoped(kafka, options);
 
           return Producer.make({
             send: (record) => Effect.promise(() => producer.send(record)),
@@ -30,13 +30,13 @@ export const make = (config: KafkaConfig): Effect.Effect<KafkaInstance.KafkaInst
         }),
       consumer: (options) =>
         Effect.gen(function* () {
-          const consumer = yield* internal.acquireConsumer(kafka, options);
+          const consumer = yield* internal.connectConsumerScoped(kafka, options);
 
           return Consumer.make({
             run: (app) =>
               Effect.gen(function* () {
                 const topics = Chunk.toArray(app.routes).map((route) => route.topic);
-                yield* Effect.promise(() => consumer.subscribe({ topics }));
+                yield* internal.subscribe(consumer, { topics });
 
                 const queue = yield* Queue.bounded<ConsumerRecord.ConsumerRecord>(1);
 
@@ -59,13 +59,15 @@ export const make = (config: KafkaConfig): Effect.Effect<KafkaInstance.KafkaInst
                   });
                 };
 
-                yield* app.pipe(
+                const fiber = yield* app.pipe(
                   Effect.provideServiceEffect(ConsumerRecord.ConsumerRecord, Queue.take(queue)),
                   Effect.forever,
                   Effect.fork,
                 );
 
-                yield* Effect.promise(() => consumer.run({ eachBatch }));
+                yield* internal.consume(consumer, { eachBatch });
+
+                yield* Fiber.join(fiber);
               }),
           });
         }),

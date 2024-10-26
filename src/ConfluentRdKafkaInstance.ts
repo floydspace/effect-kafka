@@ -2,7 +2,7 @@
  * @since 0.2.0
  */
 import { GlobalConfig, ProducerGlobalConfig } from "@confluentinc/kafka-javascript";
-import { Array, Chunk, Effect, Layer, Queue } from "effect";
+import { Array, Chunk, Effect, Fiber, Layer, Queue } from "effect";
 import * as Consumer from "./Consumer";
 import * as ConsumerRecord from "./ConsumerRecord";
 import * as internal from "./internal/confluentRdKafkaInstance";
@@ -28,7 +28,7 @@ export const layer = (config: GlobalConfig) =>
           }
           // TODO: map other options
 
-          const producer = yield* internal.acquireProducer(producerConfig);
+          const producer = yield* internal.connectProducerScoped(producerConfig);
 
           const send: Producer.Producer["send"] = (record) =>
             Effect.forEach(record.messages, (message) => {
@@ -46,7 +46,7 @@ export const layer = (config: GlobalConfig) =>
         }),
       consumer: (options) =>
         Effect.gen(function* () {
-          const consumer = yield* internal.acquireConsumer({
+          const consumer = yield* internal.connectConsumerScoped({
             ...config,
             "group.id": options.groupId,
             // TODO: map other options
@@ -56,10 +56,11 @@ export const layer = (config: GlobalConfig) =>
             run: (app) =>
               Effect.gen(function* () {
                 const topics = Chunk.toArray(app.routes).map((route) => route.topic);
+                yield* internal.subscribeScoped(consumer, topics);
 
                 const queue = yield* Queue.bounded<ConsumerRecord.ConsumerRecord>(1);
 
-                consumer.on("data", (payload) =>
+                const eachMessage: internal.ConsumerHandler = (payload) =>
                   Queue.unsafeOffer(
                     queue,
                     ConsumerRecord.make({
@@ -77,16 +78,17 @@ export const layer = (config: GlobalConfig) =>
                       attributes: 0,
                       size: payload.size,
                     }),
-                  ),
-                );
+                  );
 
-                yield* app.pipe(
+                const fiber = yield* app.pipe(
                   Effect.provideServiceEffect(ConsumerRecord.ConsumerRecord, Queue.take(queue)),
                   Effect.forever,
                   Effect.fork,
                 );
 
-                yield* internal.consumeFromTopics(consumer, topics);
+                yield* internal.consume(consumer, { eachMessage });
+
+                yield* Fiber.join(fiber);
               }),
           });
         }),
