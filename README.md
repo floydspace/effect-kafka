@@ -8,6 +8,96 @@ Effect Docs: https://www.effect.website<br>
 Effect Reference: https://effect-ts.github.io/effect<br>
 Effect Kafka Reference: https://floydspace.github.io/effect-kafka
 
+# Installation
+
+Choose your preferred package manager and run one of the following commands in your terminal:
+
+- **Using npm:**
+
+  ```sh
+  npm install effect-kafka
+  ```
+
+- **Using pnpm:**
+
+  ```sh
+  pnpm add effect-kafka
+  ```
+
+- **Using yarn:**
+  ```sh
+  yarn add effect-kafka
+  ```
+
+Next install one of kafka engine packages:
+- [KafkaJS](https://github.com/tulios/kafkajs?tab=readme-ov-file#-getting-started) - Fully JavaScript implementation.
+- [@confluentinc/kafka-javascript](https://github.com/confluentinc/confluent-kafka-javascript?tab=readme-ov-file#requirements) - JavaScript interface for C++ librdkafka implementation, which is more performant, but requires native bindings.
+
+_**Note:** You can use any of the above Kafka engine packages, depending on your preference._
+
+# Usage
+
+Let's write a simple Kafka producer and consumer using `effect-kafka`. Before everything, we need a running instance of Kafka. We can do that by saving the following docker-compose script in the `docker-compose.yml` file and run `docker-compose up`:
+
+```yaml
+version: '2'
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - 22181:2181
+  
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    ports:
+      - 29092:29092
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+```
+
+Now, we can run our `effect-kafka` application:
+```typescript
+import { NodeRuntime } from "@effect/platform-node";
+import { Console, Effect, Random, Schedule, Stream } from "effect";
+import { ConfluentKafkaJSInstance, Consumer, Producer } from "effect-kafka";
+
+const producer = Stream.repeatEffect(Random.nextInt).pipe(
+  Stream.schedule(Schedule.fixed("2 seconds")),
+  Stream.flatMap((random) =>
+    Effect.flatMap(Producer.Producer, (p) =>
+      p.send({
+        topic: "random",
+        messages: [{ key: String(random % 4), value: random.toString() }],
+      }),
+    ),
+  ),
+);
+
+const consumer = Consumer.serveStream("random", { groupId: "group" }).pipe(
+  Stream.tap((record) => Console.log(record.value?.toString())),
+);
+
+const program = Stream.merge(producer, consumer).pipe(Stream.runDrain);
+
+const ProducerLive = Producer.layer({ allowAutoTopicCreation: true });
+const KafkaLive = ConfluentKafkaJSInstance.layer({ brokers: ["localhost:29092"] });
+const MainLive = Effect.scoped(program).pipe(Effect.provide(ProducerLive), Effect.provide(KafkaLive));
+
+NodeRuntime.runMain(MainLive);
+```
+
+See more examples in the [examples](./examples) directory.
+
 # Roadmap
 
 - [x] Consumer
