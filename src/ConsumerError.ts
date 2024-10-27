@@ -3,19 +3,6 @@
  */
 import { Data } from "effect";
 import type * as ConsumerRecord from "./ConsumerRecord";
-import * as internal from "./internal/consumerError";
-
-/**
- * @since 0.1.0
- * @category type id
- */
-export const TypeId: unique symbol = internal.TypeId;
-
-/**
- * @since 0.1.0
- * @category type id
- */
-export type TypeId = typeof TypeId;
 
 /**
  * @since 0.1.0
