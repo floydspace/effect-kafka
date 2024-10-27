@@ -74,7 +74,6 @@ class RouteImpl<E = never, R = never> extends Inspectable.Class implements Route
   constructor(
     readonly topic: Router.Route.Path,
     readonly handler: Router.Route.Handler<E, R>,
-    readonly fromBeginning = false,
   ) {
     super();
     this[RouteTypeId] = RouteTypeId;
@@ -102,16 +101,13 @@ export const fromIterable = <R extends Router.Route<any, any>>(
 export const makeRoute = <E, R>(
   topic: Router.Route.Path,
   handler: Router.Route.Handler<E, R>,
-  options?: { readonly fromBeginning?: boolean | undefined } | undefined,
-): Router.Route<E, Router.MessageRouter.ExcludeProvided<R>> =>
-  new RouteImpl(topic, handler, options?.fromBeginning ?? false) as any;
+): Router.Route<E, Router.MessageRouter.ExcludeProvided<R>> => new RouteImpl(topic, handler) as any;
 
 /** @internal */
 export const subscribe = dual<
   <E1, R1>(
     topic: Router.Route.Path,
     handler: Router.Route.Handler<E1, R1>,
-    options?: { readonly fromBeginning?: boolean | undefined } | undefined,
   ) => <E, R>(
     self: Router.MessageRouter<E, R>,
   ) => Router.MessageRouter<E | E1, R | Router.MessageRouter.ExcludeProvided<R1>>,
@@ -119,10 +115,8 @@ export const subscribe = dual<
     self: Router.MessageRouter<E, R>,
     topic: Router.Route.Path,
     handler: Router.Route.Handler<E1, R1>,
-    options?: { readonly fromBeginning?: boolean | undefined } | undefined,
   ) => Router.MessageRouter<E | E1, R | Router.MessageRouter.ExcludeProvided<R1>>
 >(
   (args) => isRouter(args[0]),
-  (self, topic, handler, options) =>
-    new RouterImpl<any, any>(Chunk.append(self.routes, new RouteImpl(topic, handler, options?.fromBeginning ?? false))),
+  (self, topic, handler) => new RouterImpl<any, any>(Chunk.append(self.routes, new RouteImpl(topic, handler))),
 );

@@ -25,8 +25,8 @@ export const make = (config: KafkaConfig): Effect.Effect<KafkaInstance.KafkaInst
           const producer = yield* internal.connectProducerScoped(kafka, options);
 
           return Producer.make({
-            send: (record) => Effect.promise(() => producer.send(record)),
-            sendBatch: (batch) => Effect.promise(() => producer.sendBatch(batch)),
+            send: (record) => internal.send(producer, record),
+            sendBatch: (batch) => internal.sendBatch(producer, batch),
           });
         }),
       consumer: ({ autoCommit, partitionAssigners: _, fromBeginning, ...options }) =>

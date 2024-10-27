@@ -52,11 +52,7 @@ export declare namespace MessageRouter {
   export interface Service<E, R> {
     readonly router: Effect.Effect<MessageRouter<E, R>>;
     readonly addRoute: (route: Route<E, R>) => Effect.Effect<void>;
-    readonly subscribe: (
-      path: Route.Path,
-      handler: Route.Handler<E, R | Provided>,
-      options?: { readonly fromBeginning?: boolean | undefined } | undefined,
-    ) => Effect.Effect<void>;
+    readonly subscribe: (path: Route.Path, handler: Route.Handler<E, R | Provided>) => Effect.Effect<void>;
     readonly concat: (router: MessageRouter<E, R>) => Effect.Effect<void>;
   }
 
@@ -99,7 +95,6 @@ export interface Route<E = never, R = never> {
   readonly [RouteTypeId]: RouteTypeId;
   readonly topic: Route.Path;
   readonly handler: Route.Handler<E, R>;
-  readonly fromBeginning: boolean;
 }
 
 /**
@@ -139,7 +134,6 @@ export const fromIterable: <R extends Route<any, any>>(
 export const makeRoute: <E, R>(
   topic: Route.Path,
   handler: Route.Handler<E, R>,
-  options?: { readonly fromBeginning?: boolean | undefined } | undefined,
 ) => Route<E, MessageRouter.ExcludeProvided<R>> = internal.makeRoute;
 
 /**
@@ -154,7 +148,6 @@ export const subscribe: {
   <E1, R1>(
     topic: Route.Path,
     handler: Route.Handler<E1, R1>,
-    options?: { readonly fromBeginning?: boolean | undefined } | undefined,
   ): <E, R>(self: MessageRouter<E, R>) => MessageRouter<E1 | E, R | MessageRouter.ExcludeProvided<R1>>;
   /**
    * @since 0.1.0
@@ -164,6 +157,5 @@ export const subscribe: {
     self: MessageRouter<E, R>,
     topic: Route.Path,
     handler: Route.Handler<E1, R1>,
-    options?: { readonly fromBeginning?: boolean | undefined } | undefined,
   ): MessageRouter<E | E1, R | MessageRouter.ExcludeProvided<R1>>;
 } = internal.subscribe;

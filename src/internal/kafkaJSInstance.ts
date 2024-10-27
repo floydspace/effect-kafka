@@ -6,7 +6,10 @@ import type {
   ConsumerSubscribeTopics,
   LogEntry,
   Producer,
+  ProducerBatch,
   ProducerConfig,
+  ProducerRecord,
+  RecordMetadata,
 } from "kafkajs";
 import { Kafka, logLevel } from "kafkajs";
 import * as Error from "../ConsumerError";
@@ -51,6 +54,14 @@ export const connect = <Client extends Consumer | Producer>(
 /** @internal */
 export const disconnect = <Client extends Consumer | Producer>(client: Client): Effect.Effect<void> =>
   Effect.promise(() => client.disconnect());
+
+/** @internal */
+export const send = (producer: Producer, record: ProducerRecord): Effect.Effect<RecordMetadata[]> =>
+  Effect.promise(() => producer.send(record));
+
+/** @internal */
+export const sendBatch = (producer: Producer, batch: ProducerBatch): Effect.Effect<RecordMetadata[]> =>
+  Effect.promise(() => producer.sendBatch(batch));
 
 /** @internal */
 export const subscribe = (consumer: Consumer, subscription: ConsumerSubscribeTopics): Effect.Effect<void> =>

@@ -59,7 +59,7 @@ export declare namespace Consumer {
  */
 export const make: (options: {
   readonly run: (app: MessageRouter.MessageRouter) => Effect.Effect<void, never, Scope.Scope>;
-  readonly runStream?: (
+  readonly runStream: (
     path: MessageRouter.Route.Path,
   ) => Stream.Stream<ConsumerRecord.ConsumerRecord, never, Scope.Scope>;
 }) => Consumer = internal.make;
