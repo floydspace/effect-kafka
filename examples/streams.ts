@@ -14,11 +14,7 @@ class KafkaStreamConsumerTopic extends Context.Tag("@superwall/open-revenue-tran
 const makeKafkaStreamConsumer = Effect.gen(function* () {
   const { topic, groupId } = yield* KafkaStreamConsumerTopic;
 
-  const stream = Consumer.serveStream(topic, {
-    autoCommit: false,
-    groupId,
-    fromBeginning: true,
-  }).pipe(
+  const stream = Consumer.serveStream(topic).pipe(
     Stream.zipWithPrevious,
     Stream.mapEffect(([previous, current]) =>
       Effect.gen(function* () {
@@ -36,6 +32,13 @@ const makeKafkaStreamConsumer = Effect.gen(function* () {
           `topic: ${current.topic}, partition: ${current.partition}, firstOffset: ${current.offset}, highWatermark: ${current.highWatermark}`,
         );
         return current;
+      }),
+    ),
+    Stream.provideSomeLayer(
+      Consumer.layer({
+        autoCommit: false,
+        groupId,
+        fromBeginning: true,
       }),
     ),
   );

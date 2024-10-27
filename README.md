@@ -68,7 +68,7 @@ services:
 Now, we can run our `effect-kafka` application:
 ```typescript
 import { NodeRuntime } from "@effect/platform-node";
-import { Console, Effect, Random, Schedule, Stream } from "effect";
+import { Console, Effect, Layer, Random, Schedule, Stream } from "effect";
 import { ConfluentKafkaJSInstance, Consumer, Producer } from "effect-kafka";
 
 const producer = Stream.repeatEffect(Random.nextInt).pipe(
@@ -83,15 +83,20 @@ const producer = Stream.repeatEffect(Random.nextInt).pipe(
   ),
 );
 
-const consumer = Consumer.serveStream("random", { groupId: "group" }).pipe(
-  Stream.tap((record) => Console.log(record.value?.toString())),
+const consumer = Consumer.serveStream("random").pipe(
+  Stream.tap((record) => Console.log(record.value?.toString()))
 );
 
 const program = Stream.merge(producer, consumer).pipe(Stream.runDrain);
 
 const ProducerLive = Producer.layer({ allowAutoTopicCreation: true });
+const ConsumerLive = Consumer.layer({ groupId: "group" });
+
 const KafkaLive = ConfluentKafkaJSInstance.layer({ brokers: ["localhost:29092"] });
-const MainLive = Effect.scoped(program).pipe(Effect.provide(ProducerLive), Effect.provide(KafkaLive));
+const MainLive = program.pipe(
+  Effect.provide(Layer.merge(ProducerLive, ConsumerLive)),
+  Effect.provide(KafkaLive)
+);
 
 NodeRuntime.runMain(MainLive);
 ```

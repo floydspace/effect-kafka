@@ -25,6 +25,15 @@ export const make = (options: {
 }): Consumer.Consumer => Object.assign(Object.create(consumerProto), options);
 
 /** @internal */
+export const makeConsumer = (
+  options: Consumer.Consumer.ConsumerOptions,
+): Effect.Effect<Consumer.Consumer, Error.ConnectionException, KafkaInstance.KafkaInstance | Scope.Scope> =>
+  Effect.gen(function* () {
+    const instance = yield* KafkaInstance.KafkaInstance;
+    return yield* instance.consumer(options);
+  });
+
+/** @internal */
 export const serve = dual<
   {
     (
@@ -109,12 +118,8 @@ export const serveEffect = dual<
 /** @internal */
 export const serveStream = (
   path: MessageRouter.Route.Path,
-  options: Consumer.Consumer.ConsumerOptions,
-): Stream.Stream<ConsumerRecord.ConsumerRecord, Error.ConnectionException, KafkaInstance.KafkaInstance | Scope.Scope> =>
-  Effect.gen(function* () {
-    const instance = yield* KafkaInstance.KafkaInstance;
-    return yield* instance.consumer(options);
-  }).pipe(
+): Stream.Stream<ConsumerRecord.ConsumerRecord, Error.ConnectionException, Consumer.Consumer | Scope.Scope> =>
+  consumerTag.pipe(
     Effect.map((consumer) => consumer.runStream(path)),
     Stream.flatten(),
   );

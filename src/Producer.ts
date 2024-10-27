@@ -100,21 +100,21 @@ export const make: (options: {
 
 /**
  * @since 0.2.0
- * @category accessors
- */
-export const send: (
-  record: Producer.ProducerRecord,
-) => Effect.Effect<Producer.RecordMetadata[], Error.ConnectionException, KafkaInstance.KafkaInstance | Scope.Scope> =
-  internal.send;
-
-/**
- * @since 0.2.0
  * @category constructors
  */
 export const makeProducer: (
   options?: Producer.ProducerOptions,
 ) => Effect.Effect<Producer, Error.ConnectionException, KafkaInstance.KafkaInstance | Scope.Scope> =
   internal.makeProducer;
+
+/**
+ * @since 0.2.0
+ * @category accessors
+ */
+export const send: (
+  record: Producer.ProducerRecord,
+) => Effect.Effect<Producer.RecordMetadata[], Error.ConnectionException, KafkaInstance.KafkaInstance | Scope.Scope> =
+  internal.send;
 
 /**
  * @since 0.2.0

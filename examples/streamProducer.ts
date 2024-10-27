@@ -1,5 +1,5 @@
 import { NodeRuntime } from "@effect/platform-node";
-import { Clock, Console, Effect, Schedule, Stream } from "effect";
+import { Clock, Console, Effect, Layer, Schedule, Stream } from "effect";
 import { ConfluentKafkaJSInstance, Consumer, Producer } from "../src";
 
 const p = Stream.repeatEffect(Clock.currentTimeMillis).pipe(
@@ -14,7 +14,7 @@ const p = Stream.repeatEffect(Clock.currentTimeMillis).pipe(
   ),
 );
 
-const c = Consumer.serveStream("test-topic", { groupId: "group" }).pipe(
+const c = Consumer.serveStream("test-topic").pipe(
   Stream.tap(({ topic, partition, ...message }) =>
     Console.log({
       topic,
@@ -29,7 +29,9 @@ const c = Consumer.serveStream("test-topic", { groupId: "group" }).pipe(
 const program = Stream.merge(p, c).pipe(Stream.runDrain);
 
 const ProducerLive = Producer.layer({ allowAutoTopicCreation: true });
+const ConsumerLive = Consumer.layer({ groupId: "group" });
+
 const KafkaLive = ConfluentKafkaJSInstance.layer({ brokers: ["localhost:19092"] });
-const MainLive = Effect.scoped(program.pipe(Effect.provide(ProducerLive))).pipe(Effect.provide(KafkaLive));
+const MainLive = program.pipe(Effect.provide(Layer.merge(ProducerLive, ConsumerLive)), Effect.provide(KafkaLive));
 
 NodeRuntime.runMain(MainLive);

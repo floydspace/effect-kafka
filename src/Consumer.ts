@@ -65,6 +65,15 @@ export const make: (options: {
 }) => Consumer = internal.make;
 
 /**
+ * @since 0.3.1
+ * @category constructors
+ */
+export const makeConsumer: (
+  options: Consumer.ConsumerOptions,
+) => Effect.Effect<Consumer, Error.ConnectionException, KafkaInstance.KafkaInstance | Scope.Scope> =
+  internal.makeConsumer;
+
+/**
  * @since 0.1.0
  * @category accessors
  */
@@ -134,9 +143,11 @@ export const serveEffect: {
  */
 export const serveStream: (
   path: MessageRouter.Route.Path,
-  options: Consumer.ConsumerOptions,
-) => Stream.Stream<
-  ConsumerRecord.ConsumerRecord,
-  Error.ConnectionException,
-  KafkaInstance.KafkaInstance | Scope.Scope
-> = internal.serveStream;
+) => Stream.Stream<ConsumerRecord.ConsumerRecord, Error.ConnectionException, Consumer | Scope.Scope> =
+  internal.serveStream;
+
+/**
+ * @since 0.3.1
+ * @category layers
+ */
+export const layer = (options: Consumer.ConsumerOptions) => Layer.scoped(Consumer, makeConsumer(options));
