@@ -58,6 +58,18 @@ export const disconnect = <Client extends KafkaJS.Consumer | KafkaJS.Producer>(c
   Effect.promise(() => client.disconnect());
 
 /** @internal */
+export const send = (
+  producer: KafkaJS.Producer,
+  record: KafkaJS.ProducerRecord,
+): Effect.Effect<KafkaJS.RecordMetadata[]> => Effect.promise(() => producer.send(record));
+
+/** @internal */
+export const sendBatch = (
+  producer: KafkaJS.Producer,
+  batch: KafkaJS.ProducerBatch,
+): Effect.Effect<KafkaJS.RecordMetadata[]> => Effect.promise(() => producer.sendBatch(batch));
+
+/** @internal */
 export const subscribe = (
   consumer: KafkaJS.Consumer,
   subscription: KafkaJS.ConsumerSubscribeTopics,
