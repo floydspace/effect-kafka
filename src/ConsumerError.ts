@@ -1,7 +1,7 @@
 /**
  * @since 0.1.0
  */
-import { Error } from "@effect/platform";
+import { Data } from "effect";
 import type * as ConsumerRecord from "./ConsumerRecord";
 import * as internal from "./internal/consumerError";
 
@@ -27,7 +27,7 @@ export type ConsumerError = RouteNotFound;
  * @since 0.1.0
  * @category error
  */
-export class RouteNotFound extends Error.TypeIdError(TypeId, "RouteNotFound")<{
+export class RouteNotFound extends Data.TaggedError("RouteNotFound")<{
   readonly payload: ConsumerRecord.ConsumerRecord;
 }> {
   constructor(options: { payload: ConsumerRecord.ConsumerRecord }) {
@@ -43,7 +43,7 @@ export class RouteNotFound extends Error.TypeIdError(TypeId, "RouteNotFound")<{
  * @since 0.2.0
  * @category error
  */
-export class ConnectionException extends Error.TypeIdError(TypeId, "ConnectionException")<{
+export class ConnectionException extends Data.TaggedError("ConnectionException")<{
   readonly broker: string;
   readonly message: string;
 }> {

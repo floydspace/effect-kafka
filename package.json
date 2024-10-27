@@ -30,7 +30,6 @@
     "@changesets/cli": "^2.27.9",
     "@confluentinc/kafka-javascript": "0.2.1",
     "@effect/docgen": "^0.4.5",
-    "@effect/platform": "0.68.6",
     "@effect/platform-node": "^0.63.6",
     "@floydspace/projen-components": "next",
     "@types/jest": "^29.5.13",
@@ -57,7 +56,6 @@
   },
   "peerDependencies": {
     "@confluentinc/kafka-javascript": "^v0.2.1",
-    "@effect/platform": "^0.68.6",
     "effect": "^3.9.2",
     "kafkajs": "^2.2.4"
   },

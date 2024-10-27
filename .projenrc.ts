@@ -42,7 +42,7 @@ project.addPackageIgnore("/docker-compose.yml");
 
 // Effect dependencies
 project.addDevDeps("@effect/platform-node");
-project.addPeerDeps("effect", "@effect/platform");
+project.addPeerDeps("effect");
 
 // Kafka dependencies
 project.addPeerDeps("kafkajs", "@confluentinc/kafka-javascript");
