@@ -18,10 +18,8 @@ const consumerProto = {
 
 /** @internal */
 export const make = (options: {
-  readonly run: (app: MessageRouter.MessageRouter) => Effect.Effect<void, never, Scope.Scope>;
-  readonly runStream: (
-    path: MessageRouter.Route.Path,
-  ) => Stream.Stream<ConsumerRecord.ConsumerRecord, never, Scope.Scope>;
+  readonly run: (app: MessageRouter.MessageRouter) => Effect.Effect<void>;
+  readonly runStream: (path: MessageRouter.Route.Path) => Stream.Stream<ConsumerRecord.ConsumerRecord>;
 }): Consumer.Consumer => Object.assign(Object.create(consumerProto), options);
 
 /** @internal */
@@ -118,7 +116,7 @@ export const serveEffect = dual<
 /** @internal */
 export const serveStream = (
   path: MessageRouter.Route.Path,
-): Stream.Stream<ConsumerRecord.ConsumerRecord, Error.ConnectionException, Consumer.Consumer | Scope.Scope> =>
+): Stream.Stream<ConsumerRecord.ConsumerRecord, Error.ConnectionException, Consumer.Consumer> =>
   consumerTag.pipe(
     Effect.map((consumer) => consumer.runStream(path)),
     Stream.flatten(),

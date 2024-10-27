@@ -30,10 +30,10 @@ export interface Consumer {
   readonly run: {
     <E, R>(
       app: MessageRouter.MessageRouter<E, R>,
-    ): Effect.Effect<void, never, Exclude<R, ConsumerRecord.ConsumerRecord> | Scope.Scope>;
+    ): Effect.Effect<void, never, Exclude<R, ConsumerRecord.ConsumerRecord>>;
   };
   readonly runStream: {
-    (path: MessageRouter.Route.Path): Stream.Stream<ConsumerRecord.ConsumerRecord, never, Scope.Scope>;
+    (path: MessageRouter.Route.Path): Stream.Stream<ConsumerRecord.ConsumerRecord>;
   };
 }
 
@@ -58,10 +58,8 @@ export declare namespace Consumer {
  * @category constructors
  */
 export const make: (options: {
-  readonly run: (app: MessageRouter.MessageRouter) => Effect.Effect<void, never, Scope.Scope>;
-  readonly runStream: (
-    path: MessageRouter.Route.Path,
-  ) => Stream.Stream<ConsumerRecord.ConsumerRecord, never, Scope.Scope>;
+  readonly run: (app: MessageRouter.MessageRouter) => Effect.Effect<void>;
+  readonly runStream: (path: MessageRouter.Route.Path) => Stream.Stream<ConsumerRecord.ConsumerRecord>;
 }) => Consumer = internal.make;
 
 /**
@@ -143,8 +141,7 @@ export const serveEffect: {
  */
 export const serveStream: (
   path: MessageRouter.Route.Path,
-) => Stream.Stream<ConsumerRecord.ConsumerRecord, Error.ConnectionException, Consumer | Scope.Scope> =
-  internal.serveStream;
+) => Stream.Stream<ConsumerRecord.ConsumerRecord, Error.ConnectionException, Consumer> = internal.serveStream;
 
 /**
  * @since 0.3.1

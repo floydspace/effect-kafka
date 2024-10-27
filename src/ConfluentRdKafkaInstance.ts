@@ -114,8 +114,9 @@ export const layer = (config: GlobalConfig) =>
                 );
 
                 yield* Fiber.join(fiber);
-              }),
-            runStream: (topic) => subscribeAndConsume([topic]).pipe(Effect.map(Stream.fromQueue), Stream.flatten()),
+              }).pipe(Effect.scoped),
+            runStream: (topic) =>
+              subscribeAndConsume([topic]).pipe(Effect.map(Stream.fromQueue), Stream.scoped, Stream.flatten()),
           });
         }),
     }),
