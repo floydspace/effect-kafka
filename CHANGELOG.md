@@ -1,5 +1,11 @@
 # effect-kafka
 
+## 0.3.1
+
+### Patch Changes
+
+- [`5f5b329`](https://github.com/floydspace/effect-kafka/commit/5f5b329b91c801e826c60d549816ba0769573d47) Thanks [@floydspace](https://github.com/floydspace)! - fix consumer layers usage
+
 ## 0.3.0
 
 ### Minor Changes
