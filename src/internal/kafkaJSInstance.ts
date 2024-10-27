@@ -1,4 +1,4 @@
-import { Cause, Effect, Runtime } from "effect";
+import { Cause, Effect, Runtime, Scope } from "effect";
 import type {
   Consumer,
   ConsumerConfig,
@@ -53,14 +53,18 @@ export const disconnect = <Client extends Consumer | Producer>(client: Client): 
   Effect.promise(() => client.disconnect());
 
 /** @internal */
-export const subscribe = (consumer: Consumer, subscription: ConsumerSubscribeTopics) =>
+export const subscribe = (consumer: Consumer, subscription: ConsumerSubscribeTopics): Effect.Effect<void> =>
   Effect.promise(() => consumer.subscribe(subscription));
 
 /** @internal */
-export const consume = (consumer: Consumer, config: ConsumerRunConfig) => Effect.promise(() => consumer.run(config));
+export const consume = (consumer: Consumer, config: ConsumerRunConfig): Effect.Effect<void> =>
+  Effect.promise(() => consumer.run(config));
 
 /** @internal */
-export const connectProducerScoped = (kafka: Kafka, options?: ProducerConfig) =>
+export const connectProducerScoped = (
+  kafka: Kafka,
+  options?: ProducerConfig,
+): Effect.Effect<Producer, Error.ConnectionException, Scope.Scope> =>
   Effect.acquireRelease(
     Effect.sync(() => kafka.producer(options)).pipe(
       Effect.tap(connect),
@@ -73,7 +77,10 @@ export const connectProducerScoped = (kafka: Kafka, options?: ProducerConfig) =>
   );
 
 /** @internal */
-export const connectConsumerScoped = (kafka: Kafka, options: ConsumerConfig) =>
+export const connectConsumerScoped = (
+  kafka: Kafka,
+  options: ConsumerConfig,
+): Effect.Effect<Consumer, Error.ConnectionException, Scope.Scope> =>
   Effect.acquireRelease(
     Effect.sync(() => kafka.consumer(options)).pipe(
       Effect.tap(connect),

@@ -9,7 +9,7 @@ import type {
   SubscribeTopicList,
 } from "@confluentinc/kafka-javascript";
 import { CODES, KafkaConsumer, Producer as KafkaProducer } from "@confluentinc/kafka-javascript";
-import { Effect } from "effect";
+import { Effect, Scope } from "effect";
 import { LibrdKafkaError } from "../ConfluentRdKafkaErrors";
 import * as Error from "../ConsumerError";
 
@@ -21,20 +21,25 @@ export const connect = <Events extends string>(
   client: Client<Events>,
   metadataOptions?: MetadataOptions,
 ): Effect.Effect<Metadata, LibrdKafkaError> =>
-  Effect.async<Metadata, LibrdKafkaError>((resume) => {
+  Effect.async((resume) => {
     client.connect(metadataOptions, (err, data) =>
       err ? resume(new LibrdKafkaError(err)) : resume(Effect.succeed(data)),
     );
   });
 
 /** @internal */
-export const disconnect = <Events extends string>(client: Client<Events>) =>
-  Effect.async<ClientMetrics, LibrdKafkaError>((resume) => {
+export const disconnect = <Events extends string>(
+  client: Client<Events>,
+): Effect.Effect<ClientMetrics, LibrdKafkaError> =>
+  Effect.async((resume) => {
     client.disconnect((err, data) => (err ? resume(new LibrdKafkaError(err)) : resume(Effect.succeed(data))));
   });
 
 /** @internal */
-export const subscribeScoped = (consumer: KafkaConsumer, topics: SubscribeTopicList) =>
+export const subscribeScoped = (
+  consumer: KafkaConsumer,
+  topics: SubscribeTopicList,
+): Effect.Effect<void, never, Scope.Scope> =>
   Effect.acquireRelease(
     Effect.sync(() => consumer.subscribe(topics)).pipe(
       Effect.tap(() => Effect.logInfo("Consumer subscribed", { timestamp: new Date().toISOString() })),
@@ -43,16 +48,18 @@ export const subscribeScoped = (consumer: KafkaConsumer, topics: SubscribeTopicL
       Effect.sync(() => c.unsubscribe()).pipe(
         Effect.tap(() => Effect.logInfo("Consumer unsubscribed", { timestamp: new Date().toISOString() })),
       ),
-  ).pipe(Effect.annotateLogs({ topics }));
+  ).pipe(Effect.asVoid, Effect.annotateLogs({ topics }));
 
 /** @internal */
-export const consume = (consumer: KafkaConsumer, config: { eachMessage: ConsumerHandler }) =>
+export const consume = (consumer: KafkaConsumer, config: { eachMessage: ConsumerHandler }): Effect.Effect<void> =>
   Effect.sync(() => consumer.on("data", config.eachMessage)).pipe(
-    Effect.tap(() => Effect.sync(() => consumer.consume())),
+    Effect.andThen(() => Effect.sync(() => consumer.consume())),
   );
 
 /** @internal */
-export const connectProducerScoped = (config: ProducerGlobalConfig) =>
+export const connectProducerScoped = (
+  config: ProducerGlobalConfig,
+): Effect.Effect<KafkaProducer, Error.ConnectionException, Scope.Scope> =>
   Effect.acquireRelease(
     Effect.sync(() => new KafkaProducer(config)).pipe(
       Effect.tap((p) => connect(p)),
@@ -71,7 +78,10 @@ export const connectProducerScoped = (config: ProducerGlobalConfig) =>
   );
 
 /** @internal */
-export const connectConsumerScoped = (config: ConsumerGlobalConfig, topicConfig?: ConsumerTopicConfig) =>
+export const connectConsumerScoped = (
+  config: ConsumerGlobalConfig,
+  topicConfig?: ConsumerTopicConfig,
+): Effect.Effect<KafkaConsumer, Error.ConnectionException, Scope.Scope> =>
   Effect.acquireRelease(
     Effect.sync(() => new KafkaConsumer(config, topicConfig)).pipe(
       Effect.tap((c) => connect(c)),

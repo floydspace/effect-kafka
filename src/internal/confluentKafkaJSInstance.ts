@@ -1,5 +1,5 @@
 import { KafkaJS } from "@confluentinc/kafka-javascript";
-import { Cause, Effect, Runtime } from "effect";
+import { Cause, Effect, Runtime, Scope } from "effect";
 import { LibrdKafkaError, isLibrdKafkaError } from "../ConfluentRdKafkaErrors";
 import * as Error from "../ConsumerError";
 
@@ -58,15 +58,20 @@ export const disconnect = <Client extends KafkaJS.Consumer | KafkaJS.Producer>(c
   Effect.promise(() => client.disconnect());
 
 /** @internal */
-export const subscribe = (consumer: KafkaJS.Consumer, subscription: KafkaJS.ConsumerSubscribeTopics) =>
-  Effect.promise(() => consumer.subscribe(subscription));
+export const subscribe = (
+  consumer: KafkaJS.Consumer,
+  subscription: KafkaJS.ConsumerSubscribeTopics,
+): Effect.Effect<void> => Effect.promise(() => consumer.subscribe(subscription));
 
 /** @internal */
-export const consume = (consumer: KafkaJS.Consumer, config: KafkaJS.ConsumerRunConfig) =>
+export const consume = (consumer: KafkaJS.Consumer, config: KafkaJS.ConsumerRunConfig): Effect.Effect<void> =>
   Effect.promise(() => consumer.run(config));
 
 /** @internal */
-export const connectProducerScoped = (kafka: KafkaJS.Kafka, config?: KafkaJS.ProducerConfig) =>
+export const connectProducerScoped = (
+  kafka: KafkaJS.Kafka,
+  config?: KafkaJS.ProducerConfig,
+): Effect.Effect<KafkaJS.Producer, Error.ConnectionException, Scope.Scope> =>
   Effect.acquireRelease(
     Effect.sync(() => kafka.producer({ kafkaJS: config })).pipe(
       Effect.tap(connect),
@@ -82,7 +87,10 @@ export const connectProducerScoped = (kafka: KafkaJS.Kafka, config?: KafkaJS.Pro
   );
 
 /** @internal */
-export const connectConsumerScoped = (kafka: KafkaJS.Kafka, config: KafkaJS.ConsumerConfig) =>
+export const connectConsumerScoped = (
+  kafka: KafkaJS.Kafka,
+  config: KafkaJS.ConsumerConfig,
+): Effect.Effect<KafkaJS.Consumer, Error.ConnectionException, Scope.Scope> =>
   Effect.acquireRelease(
     Effect.sync(() => kafka.consumer({ kafkaJS: config })).pipe(
       Effect.tap(connect),
