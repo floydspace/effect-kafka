@@ -16,6 +16,12 @@ const producerProto = {
 };
 
 /** @internal */
+export type ProducerConstructorProps = {
+  readonly send: (record: Producer.Producer.ProducerRecord) => Effect.Effect<Producer.Producer.RecordMetadata[]>;
+  readonly sendBatch: (batch: Producer.Producer.ProducerBatch) => Effect.Effect<Producer.Producer.RecordMetadata[]>;
+};
+
+/** @internal */
 export const currentProducerOptions = globalValue("effect-kafka/Producer/currentProducerOptions", () =>
   FiberRef.unsafeMake<Producer.Producer.ProducerOptions>({}),
 );
@@ -35,10 +41,8 @@ export const setProducerOptions = (config: Producer.Producer.ProducerOptions) =>
   Layer.locallyScoped(currentProducerOptions, config);
 
 /** @internal */
-export const make = (options: {
-  readonly send: (record: Producer.Producer.ProducerRecord) => Effect.Effect<Producer.Producer.RecordMetadata[]>;
-  readonly sendBatch: (batch: Producer.Producer.ProducerBatch) => Effect.Effect<Producer.Producer.RecordMetadata[]>;
-}): Producer.Producer => Object.assign(Object.create(producerProto), options);
+export const make = (options: ProducerConstructorProps): Producer.Producer =>
+  Object.assign(Object.create(producerProto), options);
 
 /** @internal */
 export const makeProducer = (

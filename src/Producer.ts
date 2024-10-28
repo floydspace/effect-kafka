@@ -23,10 +23,8 @@ export type TypeId = typeof TypeId;
  * @since 0.1.0
  * @category models
  */
-export interface Producer {
+export interface Producer extends internal.ProducerConstructorProps {
   readonly [TypeId]: TypeId;
-  readonly send: (record: Producer.ProducerRecord) => Effect.Effect<Producer.RecordMetadata[]>;
-  readonly sendBatch: (batch: Producer.ProducerBatch) => Effect.Effect<Producer.RecordMetadata[]>;
 }
 
 /**
@@ -93,10 +91,7 @@ export const setProducerOptions: (config: Producer.ProducerOptions) => Layer.Lay
  * @since 0.2.0
  * @category constructors
  */
-export const make: (options: {
-  readonly send: (record: Producer.ProducerRecord) => Effect.Effect<Producer.RecordMetadata[]>;
-  readonly sendBatch: (batch: Producer.ProducerBatch) => Effect.Effect<Producer.RecordMetadata[]>;
-}) => Producer = internal.make;
+export const make: (options: internal.ProducerConstructorProps) => Producer = internal.make;
 
 /**
  * @since 0.2.0

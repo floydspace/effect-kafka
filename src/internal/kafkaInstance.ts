@@ -15,11 +15,15 @@ const instanceProto = {
 };
 
 /** @internal */
-export const make = (options: {
+export type InstanceConstructorProps = {
   readonly producer: {
     (options?: Producer.ProducerOptions): Effect.Effect<Producer, Error.ConnectionException, Scope.Scope>;
   };
   readonly consumer: {
     (options: Consumer.ConsumerOptions): Effect.Effect<Consumer, Error.ConnectionException, Scope.Scope>;
   };
-}): KafkaInstance.KafkaInstance => Object.assign(Object.create(instanceProto), options);
+};
+
+/** @internal */
+export const make = (options: InstanceConstructorProps): KafkaInstance.KafkaInstance =>
+  Object.assign(Object.create(instanceProto), options);
