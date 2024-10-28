@@ -1,5 +1,13 @@
 # effect-kafka
 
+## 0.3.2
+
+### Patch Changes
+
+- [`dd8dea2`](https://github.com/floydspace/effect-kafka/commit/dd8dea249469c480bfbbd3c58e6b73000933802b) Thanks [@floydspace](https://github.com/floydspace)! - remove unnecessary peer to @effect/platform
+
+- [`16610c1`](https://github.com/floydspace/effect-kafka/commit/16610c11b61241917dea9042b99c818b556dbed0) Thanks [@floydspace](https://github.com/floydspace)! - run consumer scoped
+
 ## 0.3.1
 
 ### Patch Changes
