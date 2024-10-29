@@ -1,8 +1,11 @@
-WIP.
-
 # Effect Kafka
 
 [`effect-kafka`](https://github.com/floydspace/effect-kafka) is a Kafka client for [Effect](https://github.com/Effect-TS/effect). It provides a purely functional interface to the Kafka client and integrates effortlessly with Effect ecosystem.
+
+[![npm version](https://img.shields.io/npm/v/effect-kafka?color=brightgreen&label=npm%20package)](https://www.npmjs.com/package/effect-kafka)
+[![npm downloads](https://img.shields.io/npm/dm/effect-kafka)](https://www.npmjs.com/package/effect-kafka)
+[![build status](https://img.shields.io/github/actions/workflow/status/floydspace/effect-kafka/release.yml?branch=main)](https://github.com/floydspace/effect-kafka/actions)
+[![wakatime](https://wakatime.com/badge/github/floydspace/effect-kafka.svg)](https://wakatime.com/badge/github/floydspace/effect-kafka)
 
 Effect Docs: https://www.effect.website<br>
 Effect Reference: https://effect-ts.github.io/effect<br>
