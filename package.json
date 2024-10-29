@@ -45,7 +45,7 @@
     "eslint-plugin-prettier": "^5.2.1",
     "husky": "^9.1.6",
     "is-ci": "^3.0.1",
-    "kafkajs": "2.2.4",
+    "kafkajs": "2.0.0",
     "only-allow": "^1.2.1",
     "prettier": "^3.3.3",
     "projen": "^0.88.3",
@@ -54,9 +54,9 @@
     "vitest": "^2.1.4"
   },
   "peerDependencies": {
-    "@confluentinc/kafka-javascript": "^v0.2.1",
+    "@confluentinc/kafka-javascript": ">=0.2.1 <1.0.0",
     "effect": "^3.9.2",
-    "kafkajs": "^2.2.4"
+    "kafkajs": "^2"
   },
   "pnpm": {},
   "engines": {
