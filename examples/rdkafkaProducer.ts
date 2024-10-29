@@ -2,7 +2,7 @@ import { NodeRuntime } from "@effect/platform-node";
 import { Effect } from "effect";
 import { ConfluentRdKafkaInstance, Producer } from "../src";
 
-const program = Producer.send({
+const program = Producer.sendScoped({
   topic: "test-topic",
   messages: [{ value: "Hello, effect-kafka user!" }, { value: "How are you, effect-kafka user?" }],
 }).pipe(Producer.withProducerOptions({ allowAutoTopicCreation: true }));

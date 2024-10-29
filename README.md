@@ -77,12 +77,10 @@ import { ConfluentKafkaJSInstance, Consumer, Producer } from "effect-kafka";
 const producer = Stream.repeatEffect(Random.nextInt).pipe(
   Stream.schedule(Schedule.fixed("2 seconds")),
   Stream.flatMap((random) =>
-    Effect.flatMap(Producer.Producer, (p) =>
-      p.send({
-        topic: "random",
-        messages: [{ key: String(random % 4), value: random.toString() }],
-      }),
-    ),
+    Producer.send({
+      topic: "random",
+      messages: [{ key: String(random % 4), value: random.toString() }],
+    }),
   ),
 );
 

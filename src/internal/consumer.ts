@@ -116,7 +116,7 @@ export const serveEffect = dual<
 /** @internal */
 export const serveStream = (
   path: MessageRouter.Route.Path,
-): Stream.Stream<ConsumerRecord.ConsumerRecord, Error.ConnectionException, Consumer.Consumer> =>
+): Stream.Stream<ConsumerRecord.ConsumerRecord, never, Consumer.Consumer> =>
   consumerTag.pipe(
     Effect.map((consumer) => consumer.runStream(path)),
     Stream.flatten(),

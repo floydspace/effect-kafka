@@ -5,12 +5,10 @@ import { ConfluentKafkaJSInstance, Consumer, Producer } from "../src";
 const p = Stream.repeatEffect(Clock.currentTimeMillis).pipe(
   Stream.schedule(Schedule.spaced("1 second")),
   Stream.flatMap((time) =>
-    Effect.flatMap(Producer.Producer, (producer) =>
-      producer.send({
-        topic: "test-topic",
-        messages: [{ value: "Hello, effect-kafka user!", timestamp: String(time) }],
-      }),
-    ),
+    Producer.send({
+      topic: "test-topic",
+      messages: [{ value: "Hello, effect-kafka user!", timestamp: String(time) }],
+    }),
   ),
 );
 

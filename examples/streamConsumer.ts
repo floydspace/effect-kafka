@@ -15,6 +15,6 @@ const program = Consumer.serveStream("test-topic").pipe(
 
 const ConsumerLive = Consumer.layer({ groupId: "group" });
 const KafkaLive = KafkaJSInstance.layer({ brokers: ["localhost:19092"] });
-const MainLive = Effect.scoped(program).pipe(Effect.provide(ConsumerLive), Effect.provide(KafkaLive));
+const MainLive = program.pipe(Effect.provide(ConsumerLive), Effect.provide(KafkaLive));
 
 NodeRuntime.runMain(MainLive);

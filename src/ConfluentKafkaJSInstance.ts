@@ -91,4 +91,4 @@ export const make = (config: KafkaJS.KafkaConfig): Effect.Effect<KafkaInstance.K
  * @since 0.2.0
  * @category layers
  */
-export const layer = (config: KafkaJS.KafkaConfig) => Layer.scoped(KafkaInstance.KafkaInstance, make(config));
+export const layer = (config: KafkaJS.KafkaConfig) => Layer.effect(KafkaInstance.KafkaInstance, make(config));

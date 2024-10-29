@@ -141,7 +141,7 @@ export const serveEffect: {
  */
 export const serveStream: (
   path: MessageRouter.Route.Path,
-) => Stream.Stream<ConsumerRecord.ConsumerRecord, Error.ConnectionException, Consumer> = internal.serveStream;
+) => Stream.Stream<ConsumerRecord.ConsumerRecord, never, Consumer> = internal.serveStream;
 
 /**
  * @since 0.3.1

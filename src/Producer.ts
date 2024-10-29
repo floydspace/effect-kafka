@@ -106,10 +106,17 @@ export const makeProducer: (
  * @since 0.2.0
  * @category accessors
  */
-export const send: (
+export const send: (record: Producer.ProducerRecord) => Effect.Effect<Producer.RecordMetadata[], never, Producer> =
+  internal.send;
+
+/**
+ * @since 0.4.0
+ * @category accessors
+ */
+export const sendScoped: (
   record: Producer.ProducerRecord,
 ) => Effect.Effect<Producer.RecordMetadata[], Error.ConnectionException, KafkaInstance.KafkaInstance | Scope.Scope> =
-  internal.send;
+  internal.sendScoped;
 
 /**
  * @since 0.2.0

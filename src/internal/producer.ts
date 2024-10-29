@@ -56,6 +56,15 @@ export const makeProducer = (
 /** @internal */
 export const send = (
   record: Producer.Producer.ProducerRecord,
+): Effect.Effect<Producer.Producer.RecordMetadata[], never, Producer.Producer> =>
+  Effect.gen(function* () {
+    const producer = yield* producerTag;
+    return yield* producer.send(record);
+  });
+
+/** @internal */
+export const sendScoped = (
+  record: Producer.Producer.ProducerRecord,
 ): Effect.Effect<
   Producer.Producer.RecordMetadata[],
   Error.ConnectionException,
