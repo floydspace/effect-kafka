@@ -1,5 +1,15 @@
 # effect-kafka
 
+## 0.4.0
+
+### Minor Changes
+
+- [`4783992`](https://github.com/floydspace/effect-kafka/commit/4783992fdbea657d6ab061604979c733a8845d74) Thanks [@floydspace](https://github.com/floydspace)! - rename producer `send` as `sendScoped`, and define different `send` signature
+
+### Patch Changes
+
+- [`af964dd`](https://github.com/floydspace/effect-kafka/commit/af964dd81a6eb1c6766145d497d2990834f78481) Thanks [@floydspace](https://github.com/floydspace)! - allow wider range of kafka engines versions
+
 ## 0.3.2
 
 ### Patch Changes
