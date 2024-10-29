@@ -32,10 +32,10 @@
     "@effect/docgen": "^0.4.5",
     "@effect/platform-node": "^0.63.6",
     "@floydspace/projen-components": "next",
-    "@types/jest": "^29.5.13",
     "@types/node": "ts5.5",
     "@typescript-eslint/eslint-plugin": "^7",
     "@typescript-eslint/parser": "^7",
+    "@vitest/coverage-v8": "^2.1.4",
     "constructs": "^10.0.0",
     "effect": "3.9.2",
     "eslint": "^8",
@@ -45,14 +45,13 @@
     "eslint-plugin-prettier": "^5.2.1",
     "husky": "^9.1.6",
     "is-ci": "^3.0.1",
-    "jest": "^29.7.0",
     "kafkajs": "2.2.4",
     "only-allow": "^1.2.1",
     "prettier": "^3.3.3",
     "projen": "^0.88.3",
-    "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
-    "typescript": "~5.5.4"
+    "typescript": "~5.5.4",
+    "vitest": "^2.1.4"
   },
   "peerDependencies": {
     "@confluentinc/kafka-javascript": "^v0.2.1",

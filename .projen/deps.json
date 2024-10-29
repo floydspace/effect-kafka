@@ -22,10 +22,6 @@
       "type": "build"
     },
     {
-      "name": "@types/jest",
-      "type": "build"
-    },
-    {
       "name": "@types/node",
       "version": "ts5.5",
       "type": "build"
@@ -38,6 +34,10 @@
     {
       "name": "@typescript-eslint/parser",
       "version": "^7",
+      "type": "build"
+    },
+    {
+      "name": "@vitest/coverage-v8",
       "type": "build"
     },
     {
@@ -75,10 +75,6 @@
       "type": "build"
     },
     {
-      "name": "jest",
-      "type": "build"
-    },
-    {
       "name": "only-allow",
       "type": "build"
     },
@@ -91,16 +87,16 @@
       "type": "build"
     },
     {
-      "name": "ts-jest",
-      "type": "build"
-    },
-    {
       "name": "ts-node",
       "type": "build"
     },
     {
       "name": "typescript",
       "version": "~5.5.4",
+      "type": "build"
+    },
+    {
+      "name": "vitest",
       "type": "build"
     },
     {

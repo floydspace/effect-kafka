@@ -1,12 +1,13 @@
+import { Vitest } from "@floydspace/projen-components";
 import { JsonFile, javascript, typescript } from "projen";
 
-type PredefinedProps = "defaultReleaseBranch" | "authorName" | "authorEmail";
+type PredefinedProps = "defaultReleaseBranch" | "authorName" | "authorEmail" | "jest" | "jestOptions";
 
 export type TypeScriptLibProjectOptions = Omit<typescript.TypeScriptProjectOptions, PredefinedProps> &
   Partial<Pick<typescript.TypeScriptProjectOptions, PredefinedProps>>;
 
 export class TypeScriptLibProject extends typescript.TypeScriptProject {
-  constructor({ jestOptions: { jestConfig, ...jestOptions } = {}, ...options }: TypeScriptLibProjectOptions) {
+  constructor(options: TypeScriptLibProjectOptions) {
     const parent = options.parent as javascript.NodeProject | undefined;
     super({
       defaultReleaseBranch: "main",
@@ -23,12 +24,7 @@ export class TypeScriptLibProject extends typescript.TypeScriptProject {
       package: false, // It will be created by @changesets/cli
       depsUpgrade: false,
       clobber: false, // enable it and run `pnpm default && pnpm clobber`, if you need to reset the project
-      jest: true,
-      jestOptions: {
-        ...jestOptions,
-        configFilePath: "jest.config.json",
-        junitReporting: false,
-      },
+      jest: false,
       tsconfig: {
         compilerOptions: {
           moduleResolution: javascript.TypeScriptModuleResolution.NODE,
@@ -39,6 +35,8 @@ export class TypeScriptLibProject extends typescript.TypeScriptProject {
       name: `${options.name}`,
       devDeps: [...(options.devDeps ?? []), "only-allow"],
     });
+
+    new Vitest(this, { junitReporting: false });
 
     this.addScripts({
       preinstall: `npx only-allow ${this.package.packageManager}`,

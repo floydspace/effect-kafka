@@ -129,6 +129,14 @@
   "overrides": [
     {
       "files": [
+        "vitest.config.ts"
+      ],
+      "rules": {
+        "import/no-extraneous-dependencies": "off"
+      }
+    },
+    {
+      "files": [
         "examples/**/*.ts"
       ],
       "rules": {
