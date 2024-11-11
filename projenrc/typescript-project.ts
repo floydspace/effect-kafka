@@ -17,7 +17,7 @@ export class TypeScriptLibProject extends typescript.TypeScriptProject {
       projenrcTs: true,
       license: "MIT",
       packageManager: javascript.NodePackageManager.PNPM,
-      pnpmVersion: "9",
+      pnpmVersion: "9.12.3",
       prettier: true,
       projenVersion: parent?.deps.getDependency("projen").version,
       typescriptVersion: parent?.deps.getDependency("typescript").version,
