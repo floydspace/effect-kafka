@@ -23,9 +23,15 @@ importers:
       '@effect/platform-node':
         specifier: ^0.63.6
         version: 0.63.6(@effect/platform@0.68.6(@effect/schema@0.75.5(effect@3.9.2))(effect@3.9.2))(effect@3.9.2)
+      '@effect/vitest':
+        specifier: ^0.12.1
+        version: 0.12.1(effect@3.9.2)(vitest@2.1.4(@types/node@22.7.6))
       '@floydspace/projen-components':
         specifier: next
         version: 1.0.0-next.11(projen@0.88.5(constructs@10.4.2))
+      '@fluffy-spoon/substitute':
+        specifier: ^1.208.0
+        version: 1.208.0
       '@types/node':
         specifier: ts5.5
         version: 22.7.6
@@ -418,6 +424,12 @@ packages:
     peerDependencies:
       effect: ^3.9.2
 
+  '@effect/vitest@0.12.1':
+    resolution: {integrity: sha512-dUzg1CVgro8aeAVYeCEEMQlnx60CXxbztxH9KDG6/oLRZ/YixHWNytA9PGsC9UPYSgHAahjsn446HgQAnCpX4Q==}
+    peerDependencies:
+      effect: ^3.9.2
+      vitest: ^2.0.5
+
   '@esbuild/aix-ppc64@0.21.5':
     resolution: {integrity: sha512-1SDgH6ZSPTlggy1yI6+Dbkiz8xzpHJEVAlF/AM1tHPLsf5STom9rwtjE4hKAF20FfXXNTFqEYXyJNWh1GiZedQ==}
     engines: {node: '>=12'}
@@ -734,6 +746,10 @@ packages:
       - shelljs
       - shelljs-plugin-authors
       - traverse
+
+  '@fluffy-spoon/substitute@1.208.0':
+    resolution: {integrity: sha512-BU5vKRoK4OYlKzDtyg4HbtWnUNLOvV0ntqEZIphz+mq2G0HlVFywwJ7M+FbIcnJVDbUReS01FyL5x8R01r7zBg==}
+    engines: {node: '>=10'}
 
   '@google-cloud/kms@4.5.0':
     resolution: {integrity: sha512-i2vC0DI7bdfEhQszqASTw0KVvbB7HsO2CwTBod423NawAu7FWi+gVVa7NLfXVNGJaZZayFfci2Hu+om/HmyEjQ==}
@@ -4401,6 +4417,11 @@ snapshots:
       effect: 3.9.2
       fast-check: 3.22.0
 
+  '@effect/vitest@0.12.1(effect@3.9.2)(vitest@2.1.4(@types/node@22.7.6))':
+    dependencies:
+      effect: 3.9.2
+      vitest: 2.1.4(@types/node@22.7.6)
+
   '@esbuild/aix-ppc64@0.21.5':
     optional: true
 
@@ -4568,6 +4589,8 @@ snapshots:
   '@floydspace/projen-components@1.0.0-next.11(projen@0.88.5(constructs@10.4.2))':
     dependencies:
       projen: 0.88.5(constructs@10.4.2)
+
+  '@fluffy-spoon/substitute@1.208.0': {}
 
   '@google-cloud/kms@4.5.0':
     dependencies:

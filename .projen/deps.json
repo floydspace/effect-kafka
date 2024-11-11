@@ -17,8 +17,16 @@
       "type": "build"
     },
     {
+      "name": "@effect/vitest",
+      "type": "build"
+    },
+    {
       "name": "@floydspace/projen-components",
       "version": "next",
+      "type": "build"
+    },
+    {
+      "name": "@fluffy-spoon/substitute",
       "type": "build"
     },
     {

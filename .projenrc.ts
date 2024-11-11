@@ -41,7 +41,7 @@ new Examples(project);
 project.addPackageIgnore("/docker-compose.yml");
 
 // Effect dependencies
-project.addDevDeps("@effect/platform-node");
+project.addDevDeps("@effect/platform-node", "@effect/vitest", "@fluffy-spoon/substitute");
 project.addPeerDeps("effect");
 
 // Kafka dependencies
