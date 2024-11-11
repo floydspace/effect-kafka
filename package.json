@@ -70,6 +70,7 @@
   },
   "version": "0.4.0",
   "types": "lib/index.d.ts",
+  "packageManager": "pnpm@9.12.3",
   "module": "lib/esm/index.js",
   "sideEffects": [],
   "peerDependenciesMeta": {

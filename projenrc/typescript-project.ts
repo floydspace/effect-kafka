@@ -43,6 +43,7 @@ export class TypeScriptLibProject extends typescript.TypeScriptProject {
     });
 
     this.package.addEngine("pnpm", ">=9 <10");
+    this.package.addField("packageManager", "pnpm@9.12.3");
 
     // Add tsconfig for esm
     new JsonFile(this, "tsconfig.esm.json", {
