@@ -1,5 +1,13 @@
 # effect-kafka
 
+## 0.4.1
+
+### Patch Changes
+
+- [`b72be89`](https://github.com/floydspace/effect-kafka/commit/b72be89bcb82b83614afcae7743eb4bbbb5b674b) Thanks [@floydspace](https://github.com/floydspace)! - fix bug when message offered to the queue was not suspended in case of back pressure
+
+- [`b72be89`](https://github.com/floydspace/effect-kafka/commit/b72be89bcb82b83614afcae7743eb4bbbb5b674b) Thanks [@floydspace](https://github.com/floydspace)! - add layerConfig for kafka instance implementations
+
 ## 0.4.0
 
 ### Minor Changes
