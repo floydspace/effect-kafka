@@ -38,6 +38,7 @@ recommendations.addRecommendations("effectful-tech.effect-vscode");
 
 new Examples(project);
 
+project.addGitIgnore(".direnv/"); // flake environment creates .direnv folder
 project.addPackageIgnore("/docker-compose.yml");
 
 // Effect dependencies

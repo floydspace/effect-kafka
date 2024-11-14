@@ -49,6 +49,7 @@ jspm_packages/
 !/.github/workflows/pages.yml
 !/.changeset/config.json
 !/.github/workflows/release.yml
+.direnv/
 !/.projenrc.ts
 !/.husky/pre-push
 !/.vscode/extensions.json
