@@ -1,7 +1,7 @@
 /**
  * @since 0.2.0
  */
-import { Chunk, Effect, Fiber, Layer, Queue, Stream } from "effect";
+import { Chunk, Config, Effect, Fiber, Layer, Queue, Runtime, Stream } from "effect";
 import { EachBatchHandler, Kafka, KafkaConfig, logLevel } from "kafkajs";
 import * as Consumer from "./Consumer";
 import * as ConsumerRecord from "./ConsumerRecord";
@@ -35,14 +35,16 @@ export const make = (config: KafkaConfig): Effect.Effect<KafkaInstance.KafkaInst
 
           const subscribeAndConsume = (topics: MessageRouter.Route.Path[]) =>
             Effect.gen(function* () {
+              const runtime = yield* Effect.runtime();
+
               yield* internal.subscribe(consumer, { topics, fromBeginning });
 
               const queue = yield* Queue.bounded<ConsumerRecord.ConsumerRecord>(1);
 
               const eachBatch: EachBatchHandler = async (payload) => {
-                payload.batch.messages.forEach((message) => {
-                  Queue.unsafeOffer(
-                    queue,
+                await Queue.offerAll(
+                  queue,
+                  payload.batch.messages.map((message) =>
                     ConsumerRecord.make({
                       topic: payload.batch.topic,
                       partition: payload.batch.partition,
@@ -57,8 +59,8 @@ export const make = (config: KafkaConfig): Effect.Effect<KafkaInstance.KafkaInst
                       heartbeat: () => Effect.promise(() => payload.heartbeat()),
                       commit: () => Effect.promise(() => payload.commitOffsetsIfNecessary()),
                     }),
-                  );
-                });
+                  ),
+                ).pipe(Runtime.runPromise(runtime));
               };
 
               yield* internal.consume(consumer, { eachBatch, autoCommit });
@@ -92,3 +94,10 @@ export const make = (config: KafkaConfig): Effect.Effect<KafkaInstance.KafkaInst
  * @category layers
  */
 export const layer = (config: KafkaConfig) => Layer.effect(KafkaInstance.KafkaInstance, make(config));
+
+/**
+ * @since 0.4.1
+ * @category layers
+ */
+export const layerConfig = (config: Config.Config.Wrap<KafkaConfig>) =>
+  Layer.effect(KafkaInstance.KafkaInstance, Config.unwrap(config).pipe(Effect.flatMap(make)));
