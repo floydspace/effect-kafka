@@ -1,5 +1,11 @@
 # effect-kafka
 
+## 0.4.2
+
+### Patch Changes
+
+- [`0ef48b3`](https://github.com/floydspace/effect-kafka/commit/0ef48b3e299e340b266d2bc4961c3c4bc232c2dd) Thanks [@floydspace](https://github.com/floydspace)! - forward rdkafka logs, use `Logger.withMinimumLogLevel` to enable desired log levels, closes #11
+
 ## 0.4.1
 
 ### Patch Changes
