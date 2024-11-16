@@ -25,7 +25,7 @@ tsconfig.tsbuildinfo
 /docgen.json
 /.changeset/
 /examples
-/.direnv/
+/.envrc
 /flake.lock
 /flake.nix
 /docker-compose.yml

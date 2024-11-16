@@ -39,7 +39,7 @@ recommendations.addRecommendations("effectful-tech.effect-vscode");
 new Examples(project);
 
 project.addGitIgnore(".direnv/"); // flake environment creates .direnv folder
-project.addPackageIgnore("/.direnv/");
+project.addPackageIgnore("/.envrc");
 project.addPackageIgnore("/flake.lock");
 project.addPackageIgnore("/flake.nix");
 project.addPackageIgnore("/docker-compose.yml");
