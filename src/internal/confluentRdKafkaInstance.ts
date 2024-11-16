@@ -9,12 +9,75 @@ import type {
   SubscribeTopicList,
 } from "@confluentinc/kafka-javascript";
 import { CODES, KafkaConsumer, Producer as KafkaProducer } from "@confluentinc/kafka-javascript";
-import { Effect, Scope } from "effect";
+import { Effect, Runtime, Scope } from "effect";
 import { LibrdKafkaError } from "../ConfluentRdKafkaErrors";
 import * as Error from "../ConsumerError";
 
 /** @internal */
 export type ConsumerHandler = Parameters<Client<"data">["on"]>["1"];
+
+/** @internal */
+export type LogEventData = {
+  message: string;
+  severity: number;
+  fac: string;
+  name: string;
+};
+
+/** @internal */
+export type LoggingConfig = {
+  logger: (eventData: LogEventData) => void;
+};
+
+/** @internal */
+export type ProducerConfig = ProducerGlobalConfig & LoggingConfig;
+
+/** @internal */
+export type ConsumerConfig = ConsumerGlobalConfig & LoggingConfig;
+
+const tracingFacs = [
+  "APIVERSION",
+  "METADATA",
+  "CONF",
+  "FETCH",
+  "SEND",
+  "RECV",
+  "HEARTBEAT",
+  "OFFSET",
+  "DUMP",
+  "DUMP_ALL",
+  "DUMP_PND",
+  "DUMP_QRY",
+  "DUMP_REM",
+  "ASSIGN",
+  "ASSIGNOR",
+  "ASSIGNMENT",
+  "ASSIGNDONE",
+  "CLEARASSIGN",
+  "GRPASSIGNMENT",
+];
+
+/** @internal */
+export const makeLogger = Effect.map(Effect.runtime(), (runtime) => {
+  const runSync = Runtime.runSync(runtime);
+
+  return ({ message, severity, ...event }: LogEventData) => {
+    const extra = { ...event, timestamp: Date.now() };
+    if (severity >= 7) {
+      if (tracingFacs.includes(event.fac)) {
+        Effect.logTrace(message, extra).pipe(runSync);
+      } else {
+        Effect.logDebug(message, extra).pipe(runSync);
+      }
+    } else if (severity >= 6) {
+      Effect.logInfo(message, extra).pipe(runSync);
+    } else if (severity >= 4) {
+      Effect.logWarning(message, extra).pipe(runSync);
+    } else if (severity > 0) {
+      Effect.logError(message, extra).pipe(runSync);
+    }
+  };
+});
 
 /** @internal */
 export const connect = <Events extends string>(
@@ -57,11 +120,13 @@ export const consume = (consumer: KafkaConsumer, config: { eachMessage: Consumer
   );
 
 /** @internal */
-export const connectProducerScoped = (
-  config: ProducerGlobalConfig,
-): Effect.Effect<KafkaProducer, Error.ConnectionException, Scope.Scope> =>
+export const connectProducerScoped = ({
+  logger,
+  ...config
+}: ProducerConfig): Effect.Effect<KafkaProducer, Error.ConnectionException, Scope.Scope> =>
   Effect.acquireRelease(
     Effect.sync(() => new KafkaProducer(config)).pipe(
+      Effect.tap((p) => p.on("event.log", logger)),
       Effect.tap((p) => connect(p)),
       Effect.tap(() => Effect.logInfo("Producer connected", { timestamp: new Date().toISOString() })),
       Effect.catchTag("LibrdKafkaError", (err) =>
@@ -79,11 +144,12 @@ export const connectProducerScoped = (
 
 /** @internal */
 export const connectConsumerScoped = (
-  config: ConsumerGlobalConfig,
+  { logger, ...config }: ConsumerConfig,
   topicConfig?: ConsumerTopicConfig,
 ): Effect.Effect<KafkaConsumer, Error.ConnectionException, Scope.Scope> =>
   Effect.acquireRelease(
     Effect.sync(() => new KafkaConsumer(config, topicConfig)).pipe(
+      Effect.tap((p) => p.on("event.log", logger)),
       Effect.tap((c) => connect(c)),
       Effect.tap(() => Effect.logInfo("Consumer connected", { timestamp: new Date().toISOString() })),
       Effect.catchTag("LibrdKafkaError", (err) =>

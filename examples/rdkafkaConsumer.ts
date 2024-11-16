@@ -1,5 +1,5 @@
 import { NodeRuntime } from "@effect/platform-node";
-import { Console, Effect, Layer } from "effect";
+import { Console, Effect, Layer, Logger, LogLevel } from "effect";
 import { ConfluentRdKafkaInstance, Consumer, ConsumerRecord, MessageRouter } from "../src";
 
 const ConsumerLive = MessageRouter.empty.pipe(
@@ -19,4 +19,4 @@ const ConsumerLive = MessageRouter.empty.pipe(
 const KafkaLive = ConfluentRdKafkaInstance.layer({ "metadata.broker.list": "localhost:19092" });
 const MainLive = ConsumerLive.pipe(Layer.provide(KafkaLive));
 
-NodeRuntime.runMain(Layer.launch(MainLive));
+NodeRuntime.runMain(Layer.launch(MainLive).pipe(Logger.withMinimumLogLevel(LogLevel.Debug)));
