@@ -34,3 +34,7 @@ export * as ConfluentKafkaJSInstance from "./ConfluentKafkaJSInstance";
  * @since 0.2.0
  */
 export * as ConfluentRdKafkaInstance from "./ConfluentRdKafkaInstance";
+/**
+ * @since 0.4.3
+ */
+export * as InMemoryKafkaInstance from "./InMemoryKafkaInstance";
