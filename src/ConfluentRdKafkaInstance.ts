@@ -1,7 +1,7 @@
 /**
  * @since 0.2.0
  */
-import { ConsumerTopicConfig, GlobalConfig } from "@confluentinc/kafka-javascript";
+import { ConsumerTopicConfig, GlobalConfig, ProducerTopicConfig } from "@confluentinc/kafka-javascript";
 import { Array, Chunk, Config, Effect, Fiber, Layer, Queue, Runtime, Stream } from "effect";
 import * as Consumer from "./Consumer";
 import * as ConsumerRecord from "./ConsumerRecord";
@@ -28,9 +28,38 @@ export const make = (config: GlobalConfig): Effect.Effect<KafkaInstance.KafkaIns
           if (options && "idempotent" in options) {
             producerConfig["enable.idempotence"] = options.idempotent;
           }
+          if (options && "queueBuffering" in options) {
+            if (options.queueBuffering && "maxMessages" in options.queueBuffering) {
+              producerConfig["queue.buffering.max.messages"] = options.queueBuffering.maxMessages;
+            }
+            if (options.queueBuffering && "maxKbytes" in options.queueBuffering) {
+              producerConfig["queue.buffering.max.kbytes"] = options.queueBuffering.maxKbytes;
+            }
+            if (options.queueBuffering && "maxMs" in options.queueBuffering) {
+              producerConfig["queue.buffering.max.ms"] = options.queueBuffering.maxMs;
+            }
+          }
+          if (options && "batching" in options) {
+            if (options.batching && "maxMessages" in options.batching) {
+              producerConfig["batch.num.messages"] = options.batching.maxMessages;
+            }
+            if (options.batching && "maxBytes" in options.batching) {
+              producerConfig["batch.size"] = options.batching.maxBytes;
+            }
+          }
+          if (options && "stickyPartitioning" in options) {
+            if (options.stickyPartitioning && "lingerMs" in options.stickyPartitioning) {
+              producerConfig["sticky.partitioning.linger.ms"] = options.stickyPartitioning.lingerMs;
+            }
+          }
           // TODO: map other options
 
-          const producer = yield* internal.connectProducerScoped(producerConfig);
+          const producerTopicConfig: ProducerTopicConfig = {};
+          if (options && "partitioner" in options) {
+            producerTopicConfig.partitioner = options.partitioner;
+          }
+
+          const producer = yield* internal.connectProducerScoped(producerConfig, producerTopicConfig);
 
           const send: Producer.Producer["send"] = (record) =>
             Effect.forEach(record.messages, (message) => {
@@ -56,6 +85,21 @@ export const make = (config: GlobalConfig): Effect.Effect<KafkaInstance.KafkaIns
           };
           if (options && "autoCommit" in options) {
             consumerConfig["enable.auto.commit"] = options.autoCommit;
+          }
+          if (options && "autoCommitInterval" in options) {
+            consumerConfig["auto.commit.interval.ms"] = options.autoCommitInterval;
+          }
+          if (options && "maxBytesPerPartition" in options) {
+            consumerConfig["max.partition.fetch.bytes"] = options.maxBytesPerPartition;
+          }
+          if (options && "maxBytes" in options) {
+            consumerConfig["fetch.max.bytes"] = options.maxBytes;
+          }
+          if (options && "minBytes" in options) {
+            consumerConfig["fetch.min.bytes"] = options.minBytes;
+          }
+          if (options && "readUncommitted" in options) {
+            consumerConfig["isolation.level"] = options.readUncommitted ? "read_uncommitted" : "read_committed";
           }
           // TODO: map other options
 

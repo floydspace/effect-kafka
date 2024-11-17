@@ -6,6 +6,7 @@ import type {
   Metadata,
   MetadataOptions,
   ProducerGlobalConfig,
+  ProducerTopicConfig,
   SubscribeTopicList,
 } from "@confluentinc/kafka-javascript";
 import { CODES, KafkaConsumer, Producer as KafkaProducer } from "@confluentinc/kafka-javascript";
@@ -120,12 +121,12 @@ export const consume = (consumer: KafkaConsumer, config: { eachMessage: Consumer
   );
 
 /** @internal */
-export const connectProducerScoped = ({
-  logger,
-  ...config
-}: ProducerConfig): Effect.Effect<KafkaProducer, Error.ConnectionException, Scope.Scope> =>
+export const connectProducerScoped = (
+  { logger, ...config }: ProducerConfig,
+  topicConfig?: ProducerTopicConfig,
+): Effect.Effect<KafkaProducer, Error.ConnectionException, Scope.Scope> =>
   Effect.acquireRelease(
-    Effect.sync(() => new KafkaProducer(config)).pipe(
+    Effect.sync(() => new KafkaProducer(config, topicConfig)).pipe(
       Effect.tap((p) => p.on("event.log", logger)),
       Effect.tap((p) => connect(p)),
       Effect.tap(() => Effect.logInfo("Producer connected", { timestamp: new Date().toISOString() })),
