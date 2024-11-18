@@ -70,7 +70,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.4.2",
+  "version": "0.4.3",
   "types": "lib/index.d.ts",
   "packageManager": "pnpm@9.12.3",
   "module": "lib/esm/index.js",

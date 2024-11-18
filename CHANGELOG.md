@@ -1,5 +1,13 @@
 # effect-kafka
 
+## 0.4.3
+
+### Patch Changes
+
+- [#18](https://github.com/floydspace/effect-kafka/pull/18) [`64bbd83`](https://github.com/floydspace/effect-kafka/commit/64bbd831db69692e5ed765340766cef6b01f518b) Thanks [@floydspace](https://github.com/floydspace)! - proxy more config options for rdkafka
+
+- [`7bd1b0c`](https://github.com/floydspace/effect-kafka/commit/7bd1b0ce1e6b018a0bfe7e5afda0dc42b9b8ef50) Thanks [@floydspace](https://github.com/floydspace)! - implement in memory kafka instance, closes #9
+
 ## 0.4.2
 
 ### Patch Changes
