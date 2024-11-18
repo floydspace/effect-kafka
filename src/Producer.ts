@@ -41,6 +41,11 @@ export declare namespace Producer {
    * @since 0.2.0
    */
   export interface ProducerOptions {
+    /**
+     * Period of time in milliseconds at which topic and broker metadata is refreshed in order to proactively discover any new brokers, topics, partitions or partition leader changes. Use -1 to disable the intervalled refresh (not recommended). If there are no locally referenced topics (no topic objects created, no messages produced, no subscription or no assignment) then only the broker list will be refreshed every interval but no more often than every 10s.
+     *
+     * @default 300000
+     */
     metadataMaxAge?: number;
     /**
      * Allow automatic topic creation on the broker when subscribing to or assigning non-existent topics. The broker must also be configured with `auto.create.topics.enable=true` for this configuration to take effect. Note: the default value (true) for the producer is different from the default value (false) for the consumer. Further, the consumer default value is different from the Java consumer (true), and this property is not supported by the Java producer. Requires broker version >= 0.11.0.0, for older broker versions only the broker configuration applies.
@@ -54,15 +59,42 @@ export declare namespace Producer {
      * @default false
      */
     idempotent?: boolean;
+    /**
+     * Enables the transactional producer. The transactional.id is used to identify the same transactional producer instance across process restarts. It allows the producer to guarantee that transactions corresponding to earlier instances of the same producer have been finalized prior to starting any new transactions, and that any zombie instances are fenced off. If no transactional.id is provided, then the producer is limited to idempotent delivery (if enable.idempotence is set). Requires broker version >= 0.11.0.
+     */
     transactionalId?: string;
+    /**
+     * The maximum amount of time in milliseconds that the transaction coordinator will wait for a transaction status update from the producer before proactively aborting the ongoing transaction. If this value is larger than the `transaction.max.timeout.ms` setting in the broker, the init_transactions() call will fail with ERR_INVALID_TRANSACTION_TIMEOUT. The transaction timeout automatically adjusts `message.timeout.ms` and `socket.timeout.ms`, unless explicitly configured in which case they must not exceed the transaction timeout (`socket.timeout.ms` must be at least 100ms lower than `transaction.timeout.ms`). This is also the default timeout value if no timeout (-1) is supplied to the transactional API methods.
+     *
+     * @default 60000
+     */
     transactionTimeout?: number;
+    /**
+     * Maximum number of in-flight requests per broker connection. This is a generic property applied to all broker communication, however it is primarily relevant to produce requests. In particular, note that other mechanisms limit the number of outstanding consumer fetch request per broker to one.
+     *
+     * @default 1000000
+     */
     maxInFlightRequests?: number;
+    /**
+     * This field indicates the number of acknowledgements the leader broker must receive from ISR brokers before responding to the request: *0*=Broker does not send any response/ack to client, *-1* or *all*=Broker will block until message is committed by all in sync replicas (ISRs). If there are less than `min.insync.replicas` (broker configuration) in the ISR set the produce request will fail.
+     * The number of required acks before a Produce succeeds. **This is set on a per-producer level, not on a per `send` level**. -1 denotes it will wait for all brokers in the in-sync replica set.
+     *
+     * @default -1
+     */
     acks?: number;
+    /**
+     * compression codec to use for compressing message sets. This is the default value for all topics, may be overridden by the topic configuration property `compression.codec`.
+     *
+     * @default none
+     */
     compression?: KafkaJS.CompressionTypes;
+    /**
+     * The ack timeout of the producer request in milliseconds. This value is only enforced by the broker and relies on `acks` being != 0.
+     *
+     * @default 30000
+     */
     timeout?: number;
     retry?: KafkaJS.RetryOptions;
-    logLevel?: KafkaJS.logLevel;
-    logger?: KafkaJS.Logger;
 
     // RdKafka specific options
     /**

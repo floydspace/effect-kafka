@@ -31,10 +31,10 @@ export type LoggingConfig = {
 };
 
 /** @internal */
-export type ProducerConfig = ProducerGlobalConfig & LoggingConfig;
+export type ProducerConfig = ProducerGlobalConfig & ProducerTopicConfig & LoggingConfig;
 
 /** @internal */
-export type ConsumerConfig = ConsumerGlobalConfig & LoggingConfig;
+export type ConsumerConfig = ConsumerGlobalConfig & ConsumerTopicConfig & LoggingConfig;
 
 const tracingFacs = [
   "APIVERSION",
@@ -121,12 +121,12 @@ export const consume = (consumer: KafkaConsumer, config: { eachMessage: Consumer
   );
 
 /** @internal */
-export const connectProducerScoped = (
-  { logger, ...config }: ProducerConfig,
-  topicConfig?: ProducerTopicConfig,
-): Effect.Effect<KafkaProducer, Error.ConnectionException, Scope.Scope> =>
+export const connectProducerScoped = ({
+  logger,
+  ...config
+}: ProducerConfig): Effect.Effect<KafkaProducer, Error.ConnectionException, Scope.Scope> =>
   Effect.acquireRelease(
-    Effect.sync(() => new KafkaProducer(config, topicConfig)).pipe(
+    Effect.sync(() => new KafkaProducer(config)).pipe(
       Effect.tap((p) => p.on("event.log", logger)),
       Effect.tap((p) => connect(p)),
       Effect.tap(() => Effect.logInfo("Producer connected", { timestamp: new Date().toISOString() })),
@@ -144,12 +144,12 @@ export const connectProducerScoped = (
   );
 
 /** @internal */
-export const connectConsumerScoped = (
-  { logger, ...config }: ConsumerConfig,
-  topicConfig?: ConsumerTopicConfig,
-): Effect.Effect<KafkaConsumer, Error.ConnectionException, Scope.Scope> =>
+export const connectConsumerScoped = ({
+  logger,
+  ...config
+}: ConsumerConfig): Effect.Effect<KafkaConsumer, Error.ConnectionException, Scope.Scope> =>
   Effect.acquireRelease(
-    Effect.sync(() => new KafkaConsumer(config, topicConfig)).pipe(
+    Effect.sync(() => new KafkaConsumer(config)).pipe(
       Effect.tap((p) => p.on("event.log", logger)),
       Effect.tap((c) => connect(c)),
       Effect.tap(() => Effect.logInfo("Consumer connected", { timestamp: new Date().toISOString() })),

@@ -1,7 +1,7 @@
 /**
  * @since 0.2.0
  */
-import { ConsumerTopicConfig, GlobalConfig, ProducerTopicConfig } from "@confluentinc/kafka-javascript";
+import { GlobalConfig } from "@confluentinc/kafka-javascript";
 import { Array, Chunk, Config, Effect, Fiber, Layer, Queue, Runtime, Stream } from "effect";
 import * as Consumer from "./Consumer";
 import * as ConsumerRecord from "./ConsumerRecord";
@@ -21,7 +21,12 @@ export const make = (config: GlobalConfig): Effect.Effect<KafkaInstance.KafkaIns
     return KafkaInstance.make({
       producer: (options) =>
         Effect.gen(function* () {
-          const producerConfig: internal.ProducerConfig = { ...config, debug: "all", logger };
+          const producerConfig: internal.ProducerConfig = {
+            ...config,
+            retries: options?.retry?.retries ?? 5,
+            debug: "all",
+            logger,
+          };
           if (options && "allowAutoTopicCreation" in options) {
             producerConfig["allow.auto.create.topics"] = options.allowAutoTopicCreation;
           }
@@ -52,14 +57,32 @@ export const make = (config: GlobalConfig): Effect.Effect<KafkaInstance.KafkaIns
               producerConfig["sticky.partitioning.linger.ms"] = options.stickyPartitioning.lingerMs;
             }
           }
-          // TODO: map other options
-
-          const producerTopicConfig: ProducerTopicConfig = {};
+          if (options && "metadataMaxAge" in options) {
+            producerConfig["topic.metadata.refresh.interval.ms"] = options.metadataMaxAge;
+          }
+          if (options && "transactionTimeout" in options) {
+            producerConfig["transaction.timeout.ms"] = options.transactionTimeout;
+          }
+          if (options && "maxInFlightRequests" in options) {
+            producerConfig["max.in.flight"] = options.maxInFlightRequests;
+          }
+          if (options && "transactionalId" in options) {
+            producerConfig["transactional.id"] = options.transactionalId;
+          }
+          if (options && "compression" in options) {
+            producerConfig["compression.codec"] = options.compression;
+          }
           if (options && "partitioner" in options) {
-            producerTopicConfig.partitioner = options.partitioner;
+            producerConfig.partitioner = options.partitioner;
+          }
+          if (options && "acks" in options) {
+            producerConfig.acks = options.acks;
+          }
+          if (options && "timeout" in options) {
+            producerConfig["request.timeout.ms"] = options.timeout;
           }
 
-          const producer = yield* internal.connectProducerScoped(producerConfig, producerTopicConfig);
+          const producer = yield* internal.connectProducerScoped(producerConfig);
 
           const send: Producer.Producer["send"] = (record) =>
             Effect.forEach(record.messages, (message) => {
@@ -80,6 +103,11 @@ export const make = (config: GlobalConfig): Effect.Effect<KafkaInstance.KafkaIns
           const consumerConfig: internal.ConsumerConfig = {
             ...config,
             "group.id": options.groupId,
+            "allow.auto.create.topics": options.allowAutoTopicCreation ?? true,
+            "session.timeout.ms": options.sessionTimeout ?? 30000,
+            "fetch.wait.max.ms": options.maxWaitTimeInMs ?? 5000,
+            "max.poll.interval.ms": options.rebalanceTimeout ?? 300000,
+            "partition.assignment.strategy": options.partitionAssigners?.join(",") ?? "roundrobin",
             debug: "all",
             logger,
           };
@@ -101,15 +129,17 @@ export const make = (config: GlobalConfig): Effect.Effect<KafkaInstance.KafkaIns
           if (options && "readUncommitted" in options) {
             consumerConfig["isolation.level"] = options.readUncommitted ? "read_uncommitted" : "read_committed";
           }
-          // TODO: map other options
-
-          const consumerTopicConfig: ConsumerTopicConfig = {};
           if (options && "fromBeginning" in options) {
-            consumerTopicConfig["auto.offset.reset"] = options.fromBeginning ? "earliest" : "latest";
+            consumerConfig["auto.offset.reset"] = options.fromBeginning ? "earliest" : "latest";
           }
-          // TODO: map other options
+          if (options && "heartbeatInterval" in options) {
+            consumerConfig["heartbeat.interval.ms"] = options.heartbeatInterval;
+          }
+          if (options && "metadataMaxAge" in options) {
+            consumerConfig["topic.metadata.refresh.interval.ms"] = options.metadataMaxAge;
+          }
 
-          const consumer = yield* internal.connectConsumerScoped(consumerConfig, consumerTopicConfig);
+          const consumer = yield* internal.connectConsumerScoped(consumerConfig);
 
           const subscribeAndConsume = (topics: MessageRouter.Route.Path[]) =>
             Effect.gen(function* () {
