@@ -12,7 +12,7 @@ const consumerRecordProto = {
 };
 
 /** @internal */
-export const make = (payload: {
+export type ConsumerRecordConstructorProps = {
   readonly topic: string;
   readonly partition: number;
   readonly highWatermark: string;
@@ -25,4 +25,8 @@ export const make = (payload: {
   readonly size?: number;
   readonly heartbeat: () => Effect.Effect<void>;
   readonly commit: () => Effect.Effect<void>;
-}): ConsumerRecord.ConsumerRecord => Object.assign(Object.create(consumerRecordProto), payload);
+};
+
+/** @internal */
+export const make = (payload: ConsumerRecordConstructorProps): ConsumerRecord.ConsumerRecord =>
+  Object.assign(Object.create(consumerRecordProto), payload);

@@ -2,8 +2,9 @@ import { Context, Effect, FiberRef, Layer, Scope } from "effect";
 import { dual } from "effect/Function";
 import { globalValue } from "effect/GlobalValue";
 import type * as Error from "../ConsumerError";
-import * as KafkaInstance from "../KafkaInstance";
+import type * as KafkaInstance from "../KafkaInstance";
 import type * as Producer from "../Producer";
+import { instanceTag } from "./kafkaInstance";
 
 /** @internal */
 export const TypeId: Producer.TypeId = Symbol.for("effect-kafka/Producer") as Producer.TypeId;
@@ -49,7 +50,7 @@ export const makeProducer = (
   options?: Producer.Producer.ProducerOptions,
 ): Effect.Effect<Producer.Producer, Error.ConnectionException, KafkaInstance.KafkaInstance | Scope.Scope> =>
   Effect.gen(function* () {
-    const instance = yield* KafkaInstance.KafkaInstance;
+    const instance = yield* instanceTag;
     return yield* instance.producer(options);
   });
 
