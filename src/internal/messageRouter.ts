@@ -65,7 +65,11 @@ const toConsumerApp = <E, R>(self: Router.MessageRouter<E, R>): Effect.Effect<vo
       span.value.attribute("consumer.route", route.topic);
     }
 
-    return Effect.interruptible(route.handler) as Effect.Effect<void, E, Router.MessageRouter.ExcludeProvided<R>>;
+    return Effect.uninterruptible(Effect.scoped(route.handler)) as Effect.Effect<
+      void,
+      E,
+      Router.MessageRouter.ExcludeProvided<R>
+    >;
   });
 };
 

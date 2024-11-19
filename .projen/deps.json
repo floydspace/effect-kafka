@@ -17,6 +17,10 @@
       "type": "build"
     },
     {
+      "name": "@effect/platform",
+      "type": "build"
+    },
+    {
       "name": "@effect/platform-node",
       "type": "build"
     },

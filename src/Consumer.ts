@@ -24,16 +24,8 @@ export type TypeId = typeof TypeId;
  * @since 0.1.0
  * @category models
  */
-export interface Consumer {
+export interface Consumer extends internal.ConsumerConstructorProps {
   readonly [TypeId]: TypeId;
-  readonly run: {
-    <E, R>(
-      app: MessageRouter.MessageRouter<E, R>,
-    ): Effect.Effect<void, never, Exclude<R, ConsumerRecord.ConsumerRecord>>;
-  };
-  readonly runStream: {
-    (path: MessageRouter.Route.Path): Stream.Stream<ConsumerRecord.ConsumerRecord>;
-  };
 }
 
 /**
@@ -151,10 +143,7 @@ export declare namespace Consumer {
  * @since 0.1.0
  * @category constructors
  */
-export const make: (options: {
-  readonly run: (app: MessageRouter.MessageRouter) => Effect.Effect<void>;
-  readonly runStream: (path: MessageRouter.Route.Path) => Stream.Stream<ConsumerRecord.ConsumerRecord>;
-}) => Consumer = internal.make;
+export const make: (options: internal.ConsumerConstructorProps) => Consumer = internal.make;
 
 /**
  * @since 0.3.1

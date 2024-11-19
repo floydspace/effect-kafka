@@ -2,11 +2,10 @@
  * @since 0.2.0
  */
 import { KafkaJS } from "@confluentinc/kafka-javascript";
-import { Chunk, Config, Effect, Fiber, Layer, Queue, Runtime, Stream } from "effect";
+import { Config, Effect, Layer, Queue, Runtime } from "effect";
 import * as Consumer from "../Consumer.js";
 import * as ConsumerRecord from "../ConsumerRecord.js";
 import * as KafkaInstance from "../KafkaInstance.js";
-import type * as MessageRouter from "../MessageRouter.js";
 import * as Producer from "../Producer.js";
 import * as internal from "./internal/confluentKafkaJSInstance.js";
 
@@ -33,57 +32,40 @@ export const make = (config: KafkaJS.KafkaConfig): Effect.Effect<KafkaInstance.K
         Effect.gen(function* () {
           const consumer = yield* internal.connectConsumerScoped(kafka, options as KafkaJS.ConsumerConfig);
 
-          const subscribeAndConsume = (topics: MessageRouter.Route.Path[]) =>
-            Effect.gen(function* () {
-              const runtime = yield* Effect.runtime();
-
-              yield* internal.subscribe(consumer, { topics });
-
-              const queue = yield* Queue.bounded<ConsumerRecord.ConsumerRecord>(1);
-
-              const eachBatch: KafkaJS.EachBatchHandler = async (payload) => {
-                await Queue.offerAll(
-                  queue,
-                  payload.batch.messages.map((message) =>
-                    ConsumerRecord.make({
-                      topic: payload.batch.topic,
-                      partition: payload.batch.partition,
-                      highWatermark: payload.batch.highWatermark,
-                      key: message.key,
-                      value: message.value,
-                      timestamp: message.timestamp,
-                      attributes: message.attributes,
-                      offset: message.offset,
-                      headers: message.headers,
-                      size: message.size,
-                      heartbeat: () => Effect.promise(() => payload.heartbeat()),
-                      commit: () => Effect.promise(() => payload.commitOffsetsIfNecessary()),
-                    }),
-                  ),
-                ).pipe(Runtime.runPromise(runtime));
-              };
-
-              yield* internal.consume(consumer, { eachBatch });
-
-              return queue;
-            });
-
           return Consumer.make({
-            run: (app) =>
+            subscribe: (topics) => internal.subscribe(consumer, { topics }),
+            consume: () =>
               Effect.gen(function* () {
-                const topics = Chunk.toArray(app.routes).map((route) => route.topic);
+                const queue = yield* Queue.bounded<ConsumerRecord.ConsumerRecord>(1);
 
-                const queue = yield* subscribeAndConsume(topics);
+                const runtime = yield* Effect.runtime();
 
-                const fiber = yield* app.pipe(
-                  Effect.provideServiceEffect(ConsumerRecord.ConsumerRecord, Queue.take(queue)),
-                  Effect.forever,
-                  Effect.fork,
-                );
+                const eachBatch: KafkaJS.EachBatchHandler = async (payload) => {
+                  await Queue.offerAll(
+                    queue,
+                    payload.batch.messages.map((message) =>
+                      ConsumerRecord.make({
+                        topic: payload.batch.topic,
+                        partition: payload.batch.partition,
+                        highWatermark: payload.batch.highWatermark,
+                        key: message.key,
+                        value: message.value,
+                        timestamp: message.timestamp,
+                        attributes: message.attributes,
+                        offset: message.offset,
+                        headers: message.headers,
+                        size: message.size,
+                        heartbeat: () => Effect.promise(() => payload.heartbeat()),
+                        commit: () => Effect.promise(() => payload.commitOffsetsIfNecessary()),
+                      }),
+                    ),
+                  ).pipe(Runtime.runPromise(runtime));
+                };
 
-                yield* Fiber.join(fiber);
+                yield* internal.consume(consumer, { eachBatch });
+
+                return queue;
               }),
-            runStream: (topic) => subscribeAndConsume([topic]).pipe(Effect.map(Stream.fromQueue), Stream.flatten()),
           });
         }),
     });
