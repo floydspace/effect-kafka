@@ -1,5 +1,11 @@
 # effect-kafka
 
+## 0.5.1
+
+### Patch Changes
+
+- [`d9a8d4d`](https://github.com/floydspace/effect-kafka/commit/d9a8d4d78bb87d6df0c14c8df26bac7ddaf75e22) Thanks [@floydspace](https://github.com/floydspace)! - fix bug in internal types
+
 ## 0.5.0
 
 ### Minor Changes
