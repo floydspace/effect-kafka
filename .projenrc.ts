@@ -8,6 +8,21 @@ const repo = `${org}/${name}`;
 
 const project = new TypeScriptLibProject({
   name: name,
+  description: "📨 Effectful Kafka",
+  keywords: [
+    "ecosystem",
+    "typescript",
+    "kafka",
+    "kafka-consumer",
+    "kafka-producer",
+    "kafka-client",
+    "effect",
+    "confluent-kafka",
+    "kafkajs",
+    "rdkafka",
+    "effect-ts",
+  ],
+  repository: `https://github.com/${org}/${name}.git`,
   homepage: `https://${org}.github.io/${name}`,
   typescriptVersion: "~5.5.4",
   prettierOptions: { settings: { printWidth: 120 } },
@@ -56,5 +71,13 @@ project.addFields({
     "@confluentinc/kafka-javascript": { optional: true },
   },
 });
+
+// Build utils
+project.addDevDeps("@effect/build-utils");
+project.package.manifest.pnpm.patchedDependencies = {
+  "@effect/build-utils": "patches/@effect__build-utils.patch",
+};
+project.postCompileTask.exec("build-utils pack-v2");
+project.addFields({ publishConfig: { access: "public", directory: "dist" } });
 
 project.synth();

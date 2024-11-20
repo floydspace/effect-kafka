@@ -37,7 +37,7 @@ jspm_packages/
 !/tsconfig.json
 !/tsconfig.dev.json
 !/src/
-/lib
+/build
 /dist/
 !/.eslintrc.json
 /coverage/
