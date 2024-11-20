@@ -1,5 +1,11 @@
 # effect-kafka
 
+## 0.5.0
+
+### Minor Changes
+
+- [#22](https://github.com/floydspace/effect-kafka/pull/22) [`42f2df9`](https://github.com/floydspace/effect-kafka/commit/42f2df9a7338ec1e9f90a429eb9a4349e8a77dd5) Thanks [@floydspace](https://github.com/floydspace)! - Improve build configuration, expose sub packages and fix optional peer dependencies bug, closes #21
+
 ## 0.4.3
 
 ### Patch Changes
