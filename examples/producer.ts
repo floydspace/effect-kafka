@@ -1,6 +1,7 @@
 import { NodeRuntime } from "@effect/platform-node";
 import { Effect } from "effect";
-import { KafkaJSInstance, Producer } from "../src";
+import { Producer } from "../src";
+import { KafkaJS } from "../src/KafkaJS";
 
 // const program = Effect.gen(function* () {
 //   const p = yield* Producer.Producer;
@@ -16,7 +17,7 @@ const program = Producer.send({
 });
 
 const ProducerLive = Producer.layer({ allowAutoTopicCreation: true });
-const KafkaLive = KafkaJSInstance.layer({ brokers: ["localhost:19092"] });
+const KafkaLive = KafkaJS.layer({ brokers: ["localhost:19092"] });
 const MainLive = program.pipe(Effect.provide(ProducerLive), Effect.provide(KafkaLive));
 
 NodeRuntime.runMain(MainLive);

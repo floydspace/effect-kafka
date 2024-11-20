@@ -1,6 +1,7 @@
 import { NodeRuntime } from "@effect/platform-node";
 import { Console, Effect, Layer } from "effect";
-import { Consumer, ConsumerRecord, KafkaJSInstance, MessageRouter } from "../src";
+import { Consumer, ConsumerRecord, MessageRouter } from "../src";
+import { KafkaJS } from "../src/KafkaJS";
 
 const ConsumerLive = MessageRouter.empty.pipe(
   MessageRouter.subscribe(
@@ -17,7 +18,7 @@ const ConsumerLive = MessageRouter.empty.pipe(
   Consumer.serve({ groupId: "group" }),
 );
 
-const KafkaLive = KafkaJSInstance.layer({ brokers: ["localhost:19092"] });
+const KafkaLive = KafkaJS.layer({ brokers: ["localhost:19092"] });
 const MainLive = ConsumerLive.pipe(Layer.provide(KafkaLive));
 
 NodeRuntime.runMain(Layer.launch(MainLive));
