@@ -1,6 +1,7 @@
 import { NodeRuntime } from "@effect/platform-node";
 import { Context, Effect, Layer, Option, Stream } from "effect";
-import { ConfluentKafkaJSInstance, Consumer } from "../src";
+import { Consumer } from "../src";
+import { ConfluentKafkaJS } from "../src/ConfluentKafka";
 
 type TConsumerTopicObject = {
   topic: string;
@@ -95,7 +96,7 @@ const Main = KafkaStreamConsumer.pipe(
   Effect.andThen((x) => Stream.runCollect(x.stream)),
   Effect.tap((x) => Effect.log("Stream result", x)),
   Effect.provide(TestLive),
-  Effect.provide(ConfluentKafkaJSInstance.layer({ brokers: ["localhost:19092"] })),
+  Effect.provide(ConfluentKafkaJS.layer({ brokers: ["localhost:19092"] })),
 );
 
 NodeRuntime.runMain(Main);

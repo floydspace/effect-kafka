@@ -3,12 +3,12 @@
  */
 import { Chunk, Config, Effect, Fiber, Layer, Queue, Runtime, Stream } from "effect";
 import { EachBatchHandler, Kafka, KafkaConfig, logLevel } from "kafkajs";
-import * as Consumer from "./Consumer";
-import * as ConsumerRecord from "./ConsumerRecord";
+import * as Consumer from "../Consumer";
+import * as ConsumerRecord from "../ConsumerRecord";
+import * as KafkaInstance from "../KafkaInstance";
+import type * as MessageRouter from "../MessageRouter";
+import * as Producer from "../Producer";
 import * as internal from "./internal/kafkaJSInstance";
-import * as KafkaInstance from "./KafkaInstance";
-import type * as MessageRouter from "./MessageRouter";
-import * as Producer from "./Producer";
 
 /**
  * @since 0.2.0

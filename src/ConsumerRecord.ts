@@ -2,7 +2,6 @@
  * @since 0.1.0
  */
 import type { KafkaJS } from "@confluentinc/kafka-javascript"; // TODO: use generic type
-import { Effect } from "effect";
 import type * as Context from "effect/Context";
 import * as internal from "./internal/consumerRecord";
 
@@ -22,22 +21,8 @@ export type TypeId = typeof TypeId;
  * @since 0.1.0
  * @category models
  */
-export interface ConsumerRecord {
+export interface ConsumerRecord extends internal.ConsumerRecordConstructorProps {
   readonly [TypeId]: TypeId;
-  readonly topic: string;
-  readonly partition: number;
-  readonly highWatermark: string;
-  readonly key: Buffer | null;
-  readonly value: Buffer | null;
-  readonly timestamp: string;
-  readonly attributes: number;
-  readonly offset: string;
-  readonly headers?: ConsumerRecord.Headers;
-  readonly size?: number;
-  // readonly resolveOffset: (offset: string) => void;
-  readonly heartbeat: () => Effect.Effect<void>;
-  // readonly pause: () => () => void;
-  readonly commit: () => Effect.Effect<void>;
 }
 
 /**
@@ -60,17 +45,4 @@ export declare namespace ConsumerRecord {
  * @since 0.1.0
  * @category constructors
  */
-export const make: (payload: {
-  readonly topic: string;
-  readonly partition: number;
-  readonly highWatermark: string;
-  readonly key: Buffer | null;
-  readonly value: Buffer | null;
-  readonly timestamp: string;
-  readonly attributes: number;
-  readonly offset: string;
-  readonly headers?: ConsumerRecord.Headers;
-  readonly size?: number;
-  readonly heartbeat: () => Effect.Effect<void>;
-  readonly commit: () => Effect.Effect<void>;
-}) => ConsumerRecord = internal.make;
+export const make: (payload: internal.ConsumerRecordConstructorProps) => ConsumerRecord = internal.make;

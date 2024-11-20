@@ -1,7 +1,7 @@
 import { Effect, Layer } from "effect";
 import type * as KafkaJS from "kafkajs";
-import * as internal from "../../src/internal/kafkaJSInstance";
 import * as KafkaInstance from "../../src/KafkaInstance";
+import * as internal from "../../src/KafkaJS/internal/kafkaJSInstance";
 import * as Producer from "../../src/Producer";
 
 export const testKafkaInstanceLayer = (kafka: KafkaJS.Kafka) =>

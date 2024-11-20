@@ -1,7 +1,7 @@
 import { KafkaJS } from "@confluentinc/kafka-javascript";
 import { Cause, Effect, Runtime, Scope } from "effect";
+import * as Error from "../../ConsumerError";
 import { LibrdKafkaError, isLibrdKafkaError } from "../ConfluentRdKafkaErrors";
-import * as Error from "../ConsumerError";
 
 class DefaultLogger implements KafkaJS.Logger {
   static create(runtime: Runtime.Runtime<never>): DefaultLogger {

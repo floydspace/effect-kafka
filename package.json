@@ -1,5 +1,10 @@
 {
   "name": "effect-kafka",
+  "description": "📨 Effectful Kafka",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/floydspace/effect-kafka.git"
+  },
   "scripts": {
     "build": "npx projen build",
     "bump": "npx projen bump",
@@ -29,6 +34,7 @@
     "@changesets/changelog-github": "^0.5.0",
     "@changesets/cli": "^2.27.9",
     "@confluentinc/kafka-javascript": "0.2.1",
+    "@effect/build-utils": "^0.7.8",
     "@effect/docgen": "^0.4.5",
     "@effect/platform-node": "^0.63.6",
     "@effect/vitest": "^0.12.1",
@@ -60,20 +66,38 @@
     "effect": "^3.9.2",
     "kafkajs": "^2"
   },
-  "pnpm": {},
+  "pnpm": {
+    "patchedDependencies": {
+      "@effect/build-utils": "patches/@effect__build-utils.patch"
+    }
+  },
+  "keywords": [
+    "confluent-kafka",
+    "ecosystem",
+    "effect",
+    "effect-ts",
+    "kafka",
+    "kafka-client",
+    "kafka-consumer",
+    "kafka-producer",
+    "kafkajs",
+    "rdkafka",
+    "typescript"
+  ],
   "engines": {
     "pnpm": ">=9 <10"
   },
-  "main": "lib/index.js",
+  "main": "build/cjs/index.js",
   "license": "MIT",
   "homepage": "https://floydspace.github.io/effect-kafka",
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "directory": "dist"
   },
   "version": "0.4.3",
-  "types": "lib/index.d.ts",
+  "types": "build/dts/index.d.ts",
   "packageManager": "pnpm@9.12.3",
-  "module": "lib/esm/index.js",
+  "module": "build/esm/index.js",
   "sideEffects": [],
   "peerDependenciesMeta": {
     "kafkajs": {

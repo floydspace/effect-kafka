@@ -25,12 +25,16 @@ export class TypeScriptLibProject extends typescript.TypeScriptProject {
       depsUpgrade: false,
       clobber: false, // enable it and run `pnpm default && pnpm clobber`, if you need to reset the project
       jest: false,
+      libdir: "build",
       tsconfig: {
         compilerOptions: {
           moduleResolution: javascript.TypeScriptModuleResolution.NODE,
           lib: ["es2019", "dom"],
+          outDir: "build/cjs",
+          declaration: false, // Declaration is set in esm tsconfig
         },
       },
+      tsconfigDev: { compilerOptions: { outDir: undefined } },
       ...options,
       name: `${options.name}`,
       devDeps: [...(options.devDeps ?? []), "only-allow"],
@@ -44,16 +48,19 @@ export class TypeScriptLibProject extends typescript.TypeScriptProject {
 
     this.package.addEngine("pnpm", ">=9 <10");
     this.package.addField("packageManager", "pnpm@9.12.3");
+    this.package.addField("main", `${this.libdir}/cjs/index.js`);
+    this.package.addField("types", `${this.libdir}/dts/index.d.ts`);
 
     // Add tsconfig for esm
     new JsonFile(this, "tsconfig.esm.json", {
       obj: {
         extends: "./tsconfig.json",
         compilerOptions: {
-          outDir: "./lib/esm",
+          outDir: `${this.libdir}/esm`,
           module: "es6", // esm
           resolveJsonModule: false, // JSON modules are not supported in esm
-          declaration: false, // Declaration are generated for cjs
+          declaration: true,
+          declarationDir: `${this.libdir}/dts`,
         },
       },
     });
@@ -65,7 +72,7 @@ export class TypeScriptLibProject extends typescript.TypeScriptProject {
 
     this.addFields({
       // Reference to esm index for root imports
-      module: "lib/esm/index.js",
+      module: `${this.libdir}/esm/index.js`,
       publishConfig: { access: "public" },
       sideEffects: [],
     });

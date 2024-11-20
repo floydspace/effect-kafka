@@ -1,8 +1,8 @@
 import { Chunk, Context, Effect, Effectable, FiberRef, Inspectable, Option, Predicate, Tracer } from "effect";
 import { dual } from "effect/Function";
 import * as Error from "../ConsumerError";
-import * as ConsumerRecord from "../ConsumerRecord";
 import type * as Router from "../MessageRouter";
+import { consumerRecordTag } from "./consumerRecord";
 
 /** @internal */
 export const TypeId: Router.TypeId = Symbol.for("effect-kafka/MessageRouter") as Router.TypeId;
@@ -52,7 +52,7 @@ const matchTopic =
 const toConsumerApp = <E, R>(self: Router.MessageRouter<E, R>): Effect.Effect<void, E, R> => {
   return Effect.withFiberRuntime<void, E, R>((fiber) => {
     const context = fiber.getFiberRef(FiberRef.currentContext);
-    const payload = Context.unsafeGet(context, ConsumerRecord.ConsumerRecord);
+    const payload = Context.unsafeGet(context, consumerRecordTag);
 
     const result = Chunk.findFirst(self.routes, matchTopic(payload.topic));
     if (Option.isNone(result)) {
