@@ -16,7 +16,6 @@ const producerProto = {
   [TypeId]: TypeId,
 };
 
-/** @internal */
 export type ProducerConstructorProps = {
   readonly send: (record: Producer.Producer.ProducerRecord) => Effect.Effect<Producer.Producer.RecordMetadata[]>;
   readonly sendBatch: (batch: Producer.Producer.ProducerBatch) => Effect.Effect<Producer.Producer.RecordMetadata[]>;

@@ -1,7 +1,6 @@
 /**
  * @since 0.2.0
  */
-import type { KafkaJS } from "@confluentinc/kafka-javascript"; // TODO: use generic type
 import { Context, Effect, FiberRef, Layer, Scope } from "effect";
 import type * as Error from "./ConsumerError";
 import * as internal from "./internal/producer";
@@ -87,14 +86,18 @@ export declare namespace Producer {
      *
      * @default none
      */
-    compression?: KafkaJS.CompressionTypes;
+    compression?: "none" | "gzip" | "snappy" | "lz4" | "zstd";
     /**
      * The ack timeout of the producer request in milliseconds. This value is only enforced by the broker and relies on `acks` being != 0.
      *
      * @default 30000
      */
     timeout?: number;
-    retry?: KafkaJS.RetryOptions;
+    retry?: {
+      maxRetryTime?: number;
+      initialRetryTime?: number;
+      retries?: number;
+    };
 
     // RdKafka specific options
     /**
@@ -155,19 +158,46 @@ export declare namespace Producer {
   }
 
   /**
-   * @since 0.2.0
+   * @since 0.5.0
    */
-  export type ProducerRecord = KafkaJS.ProducerRecord;
+  export type Message = {
+    key?: Buffer | string | null;
+    value: Buffer | string | null;
+    partition?: number;
+    headers?: {
+      [key: string]: Buffer | string | (Buffer | string)[] | undefined;
+    };
+    timestamp?: string;
+  };
 
   /**
    * @since 0.2.0
    */
-  export type ProducerBatch = KafkaJS.ProducerBatch;
+  export type ProducerRecord = {
+    topic: string;
+    messages: Message[];
+  };
 
   /**
    * @since 0.2.0
    */
-  export type RecordMetadata = KafkaJS.RecordMetadata;
+  export type ProducerBatch = {
+    topicMessages?: ProducerRecord[];
+  };
+
+  /**
+   * @since 0.2.0
+   */
+  export type RecordMetadata = {
+    topicName: string;
+    partition: number;
+    errorCode: number;
+    offset?: string;
+    timestamp?: string;
+    baseOffset?: string;
+    logAppendTime?: string;
+    logStartOffset?: string;
+  };
 }
 
 /**

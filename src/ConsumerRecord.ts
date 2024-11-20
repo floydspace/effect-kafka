@@ -1,7 +1,6 @@
 /**
  * @since 0.1.0
  */
-import type { KafkaJS } from "@confluentinc/kafka-javascript"; // TODO: use generic type
 import type * as Context from "effect/Context";
 import * as internal from "./internal/consumerRecord";
 
@@ -38,7 +37,9 @@ export declare namespace ConsumerRecord {
   /**
    * @since 0.2.0
    */
-  export interface Headers extends KafkaJS.IHeaders {}
+  export interface Headers {
+    [key: string]: Buffer | string | (Buffer | string)[] | undefined;
+  }
 }
 
 /**

@@ -22,7 +22,7 @@ export const make = (config: KafkaJS.KafkaConfig): Effect.Effect<KafkaInstance.K
     return KafkaInstance.make({
       producer: (options) =>
         Effect.gen(function* () {
-          const producer = yield* internal.connectProducerScoped(kafka, options);
+          const producer = yield* internal.connectProducerScoped(kafka, options as KafkaJS.ProducerConfig);
 
           return Producer.make({
             send: (record) => internal.send(producer, record),
@@ -31,7 +31,7 @@ export const make = (config: KafkaJS.KafkaConfig): Effect.Effect<KafkaInstance.K
         }),
       consumer: (options) =>
         Effect.gen(function* () {
-          const consumer = yield* internal.connectConsumerScoped(kafka, options);
+          const consumer = yield* internal.connectConsumerScoped(kafka, options as KafkaJS.ConsumerConfig);
 
           const subscribeAndConsume = (topics: MessageRouter.Route.Path[]) =>
             Effect.gen(function* () {

@@ -14,7 +14,6 @@ const instanceProto = {
   [TypeId]: TypeId,
 };
 
-/** @internal */
 export type InstanceConstructorProps = {
   readonly producer: {
     (options?: Producer.ProducerOptions): Effect.Effect<Producer, Error.ConnectionException, Scope.Scope>;

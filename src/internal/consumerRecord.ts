@@ -11,7 +11,6 @@ const consumerRecordProto = {
   [TypeId]: TypeId,
 };
 
-/** @internal */
 export type ConsumerRecordConstructorProps = {
   readonly topic: string;
   readonly partition: number;

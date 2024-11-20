@@ -1,7 +1,6 @@
 /**
  * @since 0.1.0
  */
-import type { KafkaJS } from "@confluentinc/kafka-javascript"; // TODO: use generic type
 import { Context, Effect, Layer, Scope, Stream } from "effect";
 import type * as Error from "./ConsumerError";
 import type * as ConsumerRecord from "./ConsumerRecord";
@@ -104,7 +103,11 @@ export declare namespace Consumer {
      * @default 5000
      */
     maxWaitTimeInMs?: number;
-    retry?: KafkaJS.RetryOptions;
+    retry?: {
+      maxRetryTime?: number;
+      initialRetryTime?: number;
+      retries?: number;
+    };
     /**
      * Allow automatic topic creation on the broker when subscribing to or assigning non-existent topics.
      *
@@ -140,7 +143,7 @@ export declare namespace Consumer {
      *
      * @default roundrobin
      */
-    partitionAssigners?: KafkaJS.PartitionAssigners[];
+    partitionAssigners?: ("roundrobin" | "range" | "cooperative-sticky")[];
   }
 }
 
