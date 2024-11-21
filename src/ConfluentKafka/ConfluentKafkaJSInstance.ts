@@ -9,6 +9,24 @@ import * as KafkaInstance from "../KafkaInstance.js";
 import * as Producer from "../Producer.js";
 import * as internal from "./internal/confluentKafkaJSInstance.js";
 
+const mapBatchToConsumerRecords = (payload: KafkaJS.EachBatchPayload): ConsumerRecord.ConsumerRecord[] =>
+  payload.batch.messages.map((message) =>
+    ConsumerRecord.make({
+      topic: payload.batch.topic,
+      partition: payload.batch.partition,
+      highWatermark: payload.batch.highWatermark,
+      key: message.key,
+      value: message.value,
+      timestamp: message.timestamp,
+      attributes: message.attributes,
+      offset: message.offset,
+      headers: message.headers,
+      size: message.size,
+      heartbeat: () => Effect.promise(() => payload.heartbeat()),
+      commit: () => Effect.promise(() => payload.commitOffsetsIfNecessary()),
+    }),
+  );
+
 /**
  * @since 0.2.0
  * @category constructors
@@ -41,25 +59,7 @@ export const make = (config: KafkaJS.KafkaConfig): Effect.Effect<KafkaInstance.K
                 const runtime = yield* Effect.runtime();
 
                 const eachBatch: KafkaJS.EachBatchHandler = async (payload) => {
-                  await Queue.offerAll(
-                    queue,
-                    payload.batch.messages.map((message) =>
-                      ConsumerRecord.make({
-                        topic: payload.batch.topic,
-                        partition: payload.batch.partition,
-                        highWatermark: payload.batch.highWatermark,
-                        key: message.key,
-                        value: message.value,
-                        timestamp: message.timestamp,
-                        attributes: message.attributes,
-                        offset: message.offset,
-                        headers: message.headers,
-                        size: message.size,
-                        heartbeat: () => Effect.promise(() => payload.heartbeat()),
-                        commit: () => Effect.promise(() => payload.commitOffsetsIfNecessary()),
-                      }),
-                    ),
-                  ).pipe(Runtime.runPromise(runtime));
+                  await Queue.offerAll(queue, mapBatchToConsumerRecords(payload)).pipe(Runtime.runPromise(runtime));
                 };
 
                 yield* internal.consume(consumer, { eachBatch });
