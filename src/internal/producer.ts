@@ -1,10 +1,10 @@
 import { Context, Effect, FiberRef, Layer, Scope } from "effect";
 import { dual } from "effect/Function";
 import { globalValue } from "effect/GlobalValue";
-import type * as Error from "../ConsumerError";
-import type * as KafkaInstance from "../KafkaInstance";
-import type * as Producer from "../Producer";
-import { instanceTag } from "./kafkaInstance";
+import type * as Error from "../ConsumerError.js";
+import type * as KafkaInstance from "../KafkaInstance.js";
+import type * as Producer from "../Producer.js";
+import { instanceTag } from "./kafkaInstance.js";
 
 /** @internal */
 export const TypeId: Producer.TypeId = Symbol.for("effect-kafka/Producer") as Producer.TypeId;

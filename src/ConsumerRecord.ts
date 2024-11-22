@@ -2,7 +2,7 @@
  * @since 0.1.0
  */
 import type * as Context from "effect/Context";
-import * as internal from "./internal/consumerRecord";
+import * as internal from "./internal/consumerRecord.js";
 
 /**
  * @since 0.1.0

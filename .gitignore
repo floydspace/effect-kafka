@@ -43,6 +43,7 @@ jspm_packages/
 /coverage/
 !/vitest.config.ts
 !/tsconfig.esm.json
+!/tsconfig.cjs.json
 !/.github/FUNDING.yml
 !/docgen.json
 /docs

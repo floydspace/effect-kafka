@@ -1,28 +1,28 @@
 /**
  * @since 0.1.0
  */
-export * as Consumer from "./Consumer";
+export * as Consumer from "./Consumer.js";
 /**
  * @since 0.1.0
  */
-export * as ConsumerError from "./ConsumerError";
+export * as ConsumerError from "./ConsumerError.js";
 /**
  * @since 0.1.0
  */
-export * as ConsumerRecord from "./ConsumerRecord";
+export * as ConsumerRecord from "./ConsumerRecord.js";
 /**
  * @since 0.1.0
  */
-export * as MessageRouter from "./MessageRouter";
+export * as MessageRouter from "./MessageRouter.js";
 /**
  * @since 0.2.0
  */
-export * as Producer from "./Producer";
+export * as Producer from "./Producer.js";
 /**
  * @since 0.2.0
  */
-export * as KafkaInstance from "./KafkaInstance";
+export * as KafkaInstance from "./KafkaInstance.js";
 /**
  * @since 0.4.3
  */
-export * as InMemoryKafkaInstance from "./InMemoryKafkaInstance";
+export * as InMemoryKafkaInstance from "./InMemoryKafkaInstance.js";

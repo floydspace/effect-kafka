@@ -1,7 +1,19 @@
 /**
  * @since 0.2.0
  */
-import { KafkaJSConnectionError, KafkaJSNonRetriableError } from "kafkajs";
+import KafkaJS from "kafkajs";
+
+/**
+ * @since 0.2.0
+ */
+type KafkaJSConnectionError = KafkaJS.KafkaJSConnectionError;
+const KafkaJSConnectionError = KafkaJS.KafkaJSConnectionError;
+
+/**
+ * @since 0.2.0
+ */
+type KafkaJSNonRetriableError = KafkaJS.KafkaJSNonRetriableError;
+const KafkaJSNonRetriableError = KafkaJS.KafkaJSNonRetriableError;
 
 declare module "kafkajs" {
   interface KafkaJSConnectionError {

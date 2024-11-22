@@ -12,8 +12,8 @@ import type {
   RecordMetadata,
 } from "kafkajs";
 import { Kafka, logLevel } from "kafkajs";
-import * as Error from "../../ConsumerError";
-import { KafkaJSConnectionError, KafkaJSNonRetriableError } from "../KafkaJSErrors";
+import * as Error from "../../ConsumerError.js";
+import { KafkaJSConnectionError, KafkaJSNonRetriableError } from "../KafkaJSErrors.js";
 
 /** @internal */
 export const makeLogger = Effect.map(Effect.runtime(), (runtime) => {

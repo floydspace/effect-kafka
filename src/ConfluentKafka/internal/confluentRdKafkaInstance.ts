@@ -11,8 +11,8 @@ import type {
 } from "@confluentinc/kafka-javascript";
 import { CODES, KafkaConsumer, Producer as KafkaProducer } from "@confluentinc/kafka-javascript";
 import { Effect, Runtime, Scope } from "effect";
-import * as Error from "../../ConsumerError";
-import { LibrdKafkaError } from "../ConfluentRdKafkaErrors";
+import * as Error from "../../ConsumerError.js";
+import { LibrdKafkaError } from "../ConfluentRdKafkaErrors.js";
 
 /** @internal */
 export type ConsumerHandler = Parameters<Client<"data">["on"]>["1"];

@@ -19,6 +19,7 @@
     ".vscode/extensions.json",
     "docgen.json",
     "LICENSE",
+    "tsconfig.cjs.json",
     "tsconfig.dev.json",
     "tsconfig.esm.json",
     "tsconfig.json",

@@ -2,11 +2,11 @@
  * @since 0.4.3
  */
 import { Array, Chunk, Effect, Fiber, Layer, PubSub, Queue, Scope, Stream } from "effect";
-import * as Consumer from "./Consumer";
-import * as ConsumerRecord from "./ConsumerRecord";
-import * as KafkaInstance from "./KafkaInstance";
-import type * as MessageRouter from "./MessageRouter";
-import * as Producer from "./Producer";
+import * as Consumer from "./Consumer.js";
+import * as ConsumerRecord from "./ConsumerRecord.js";
+import * as KafkaInstance from "./KafkaInstance.js";
+import type * as MessageRouter from "./MessageRouter.js";
+import * as Producer from "./Producer.js";
 
 let offset = 0;
 

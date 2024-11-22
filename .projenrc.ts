@@ -33,8 +33,10 @@ const project = new TypeScriptLibProject({
   pullRequestTemplate: false,
   workflowNodeVersion: "lts/*",
   workflowPackageCache: true,
-  devDeps: ["@floydspace/projen-components@next"],
+  devDeps: ["@floydspace/projen-components@next", "tsx"],
 });
+
+project.defaultTask?.reset("tsx .projenrc.ts");
 
 new YamlFile(project, ".github/FUNDING.yml", { obj: { github: org } });
 

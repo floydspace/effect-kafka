@@ -1,5 +1,5 @@
 import { Context, Effect } from "effect";
-import type * as ConsumerRecord from "../ConsumerRecord";
+import type * as ConsumerRecord from "../ConsumerRecord.js";
 
 /** @internal */
 export const TypeId: ConsumerRecord.TypeId = Symbol.for("effect-kafka/ConsumerRecord") as ConsumerRecord.TypeId;
