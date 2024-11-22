@@ -1,7 +1,7 @@
 /**
  * @since 0.4.3
  */
-import { Array, Chunk, Effect, Fiber, Layer, PubSub, Queue, Scope, Stream } from "effect";
+import { Effect, Layer, PubSub, Queue, Scope } from "effect";
 import * as Consumer from "./Consumer.js";
 import * as ConsumerRecord from "./ConsumerRecord.js";
 import * as KafkaInstance from "./KafkaInstance.js";
@@ -63,51 +63,33 @@ export const make = (): Effect.Effect<KafkaInstance.KafkaInstance, never, Scope.
         }),
       consumer: () =>
         Effect.gen(function* () {
-          const subscribeAndConsume = (topics: MessageRouter.Route.Path[]) =>
-            Effect.gen(function* () {
-              const queue = yield* Effect.acquireRelease(
-                Queue.bounded<ConsumerRecord.ConsumerRecord>(1).pipe(
-                  Effect.tap(() => Effect.logInfo("Consumer Queue acquired")),
-                ),
-                (q) =>
-                  q.shutdown.pipe(
-                    Effect.tap(() => q.awaitShutdown),
-                    Effect.tap(() => Effect.logInfo("Consumer Queue released")),
-                  ),
-              );
-
-              const subscription = yield* pubSub.subscribe;
-
-              yield* subscription.pipe(
-                Effect.tap((record) =>
-                  matchAnyTopic(topics, record.topic)
-                    ? queue.offerAll(mapProducerToConsumerRecords(record))
-                    : Effect.void,
-                ),
-                Effect.forever,
-                Effect.forkScoped,
-              );
-
-              return queue;
-            });
+          const queue = yield* Effect.acquireRelease(
+            Queue.bounded<ConsumerRecord.ConsumerRecord>(1).pipe(
+              Effect.tap(() => Effect.logInfo("Consumer Queue acquired")),
+            ),
+            (q) =>
+              q.shutdown.pipe(
+                Effect.tap(() => q.awaitShutdown),
+                Effect.tap(() => Effect.logInfo("Consumer Queue released")),
+              ),
+          );
 
           return Consumer.make({
-            run: (app) =>
+            subscribe: (topics) =>
               Effect.gen(function* () {
-                const topics = Chunk.toArray(app.routes).map((route) => route.topic);
+                const subscription = yield* pubSub.subscribe;
 
-                const queue = yield* subscribeAndConsume(topics);
-
-                const fiber = yield* app.pipe(
-                  Effect.provideServiceEffect(ConsumerRecord.ConsumerRecord, queue),
+                yield* subscription.pipe(
+                  Effect.tap((record) =>
+                    matchAnyTopic(topics, record.topic)
+                      ? queue.offerAll(mapProducerToConsumerRecords(record))
+                      : Effect.void,
+                  ),
                   Effect.forever,
-                  Effect.fork,
+                  Effect.forkScoped,
                 );
-
-                yield* Fiber.join(fiber);
-              }).pipe(Effect.scoped),
-            runStream: (topic) =>
-              subscribeAndConsume(Array.of(topic)).pipe(Effect.map(Stream.fromQueue), Stream.scoped, Stream.flatten()),
+              }),
+            consume: () => Effect.succeed(queue),
           });
         }),
     });

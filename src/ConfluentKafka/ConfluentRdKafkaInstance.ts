@@ -1,14 +1,33 @@
 /**
  * @since 0.2.0
  */
-import { GlobalConfig } from "@confluentinc/kafka-javascript";
-import { Array, Chunk, Config, Effect, Fiber, Layer, Queue, Runtime, Stream } from "effect";
+import type { GlobalConfig, KafkaConsumer, Message } from "@confluentinc/kafka-javascript";
+import { Array, Config, Effect, Layer, Queue, Runtime } from "effect";
 import * as Consumer from "../Consumer.js";
 import * as ConsumerRecord from "../ConsumerRecord.js";
 import * as KafkaInstance from "../KafkaInstance.js";
-import type * as MessageRouter from "../MessageRouter.js";
 import * as Producer from "../Producer.js";
 import * as internal from "./internal/confluentRdKafkaInstance.js";
+
+const mapToConsumerRecord = (payload: Message, consumer: KafkaConsumer): ConsumerRecord.ConsumerRecord =>
+  ConsumerRecord.make({
+    topic: payload.topic,
+    partition: payload.partition,
+    highWatermark: "-1001", // Not supported
+    key: typeof payload.key === "string" ? Buffer.from(payload.key) : (payload.key ?? null),
+    value: payload.value,
+    headers: payload.headers?.reduce((acc, header) => {
+      const [key] = Object.keys(header);
+      acc[key] = header[key];
+      return acc;
+    }, {}),
+    timestamp: payload.timestamp?.toString() ?? "",
+    offset: payload.offset.toString(),
+    attributes: 0,
+    size: payload.size,
+    heartbeat: () => Effect.void, // Not supported
+    commit: () => Effect.sync(() => consumer.commit()),
+  });
 
 /**
  * @since 0.4.1
@@ -141,59 +160,21 @@ export const make = (config: GlobalConfig): Effect.Effect<KafkaInstance.KafkaIns
 
           const consumer = yield* internal.connectConsumerScoped(consumerConfig);
 
-          const subscribeAndConsume = (topics: MessageRouter.Route.Path[]) =>
-            Effect.gen(function* () {
-              const runtime = yield* Effect.runtime();
-
-              yield* internal.subscribeScoped(consumer, topics);
-
-              const queue = yield* Queue.bounded<ConsumerRecord.ConsumerRecord>(1);
-
-              const eachMessage: internal.ConsumerHandler = (payload) =>
-                Queue.offer(
-                  queue,
-                  ConsumerRecord.make({
-                    topic: payload.topic,
-                    partition: payload.partition,
-                    highWatermark: "-1001", // Not supported
-                    key: typeof payload.key === "string" ? Buffer.from(payload.key) : (payload.key ?? null),
-                    value: payload.value,
-                    headers: payload.headers?.reduce((acc, header) => {
-                      const [key] = Object.keys(header);
-                      acc[key] = header[key];
-                      return acc;
-                    }, {}),
-                    timestamp: payload.timestamp?.toString() ?? "",
-                    offset: payload.offset.toString(),
-                    attributes: 0,
-                    size: payload.size,
-                    heartbeat: () => Effect.void, // Not supported
-                    commit: () => Effect.sync(() => consumer.commit()),
-                  }),
-                ).pipe(Runtime.runFork(runtime));
-
-              yield* internal.consume(consumer, { eachMessage });
-
-              return queue;
-            });
-
           return Consumer.make({
-            run: (app) =>
+            subscribe: (topics) => internal.subscribeScoped(consumer, topics),
+            consume: () =>
               Effect.gen(function* () {
-                const topics = Chunk.toArray(app.routes).map((route) => route.topic);
+                const queue = yield* Queue.bounded<ConsumerRecord.ConsumerRecord>(1);
 
-                const queue = yield* subscribeAndConsume(topics);
+                const runtime = yield* Effect.runtime();
 
-                const fiber = yield* app.pipe(
-                  Effect.provideServiceEffect(ConsumerRecord.ConsumerRecord, Queue.take(queue)),
-                  Effect.forever,
-                  Effect.fork,
-                );
+                const eachMessage: internal.ConsumerHandler = (payload) =>
+                  Queue.offer(queue, mapToConsumerRecord(payload, consumer)).pipe(Runtime.runFork(runtime));
 
-                yield* Fiber.join(fiber);
-              }).pipe(Effect.scoped),
-            runStream: (topic) =>
-              subscribeAndConsume([topic]).pipe(Effect.map(Stream.fromQueue), Stream.scoped, Stream.flatten()),
+                yield* internal.consume(consumer, { eachMessage });
+
+                return queue;
+              }),
           });
         }),
     });

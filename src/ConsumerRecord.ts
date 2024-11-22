@@ -47,3 +47,9 @@ export declare namespace ConsumerRecord {
  * @category constructors
  */
 export const make: (payload: internal.ConsumerRecordConstructorProps) => ConsumerRecord = internal.make;
+
+/**
+ * @since 0.5.0
+ * @category constructors
+ */
+export const empty: ConsumerRecord = internal.empty;

@@ -1,4 +1,4 @@
-import { Context, Effect } from "effect";
+import { Context, Effect, String } from "effect";
 import type * as ConsumerRecord from "../ConsumerRecord.js";
 
 /** @internal */
@@ -29,3 +29,19 @@ export type ConsumerRecordConstructorProps = {
 /** @internal */
 export const make = (payload: ConsumerRecordConstructorProps): ConsumerRecord.ConsumerRecord =>
   Object.assign(Object.create(consumerRecordProto), payload);
+
+const noop = () => Effect.void;
+
+/** @internal */
+export const empty: ConsumerRecord.ConsumerRecord = make({
+  topic: String.empty,
+  partition: 0,
+  highWatermark: "0",
+  key: null,
+  value: null,
+  timestamp: "0",
+  attributes: 0,
+  offset: "0",
+  heartbeat: noop,
+  commit: noop,
+});

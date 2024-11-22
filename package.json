@@ -36,6 +36,7 @@
     "@confluentinc/kafka-javascript": "0.2.1",
     "@effect/build-utils": "^0.7.8",
     "@effect/docgen": "^0.4.5",
+    "@effect/platform": "^0.68.6",
     "@effect/platform-node": "^0.63.6",
     "@effect/vitest": "^0.12.1",
     "@floydspace/projen-components": "next",
