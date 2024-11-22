@@ -2,8 +2,8 @@
  * @since 0.1.0
  */
 import { Chunk, Context, Effect, Inspectable, Layer, Scope } from "effect";
-import type * as ConsumerRecord from "./ConsumerRecord";
-import * as internal from "./internal/messageRouter";
+import type * as ConsumerRecord from "./ConsumerRecord.js";
+import * as internal from "./internal/messageRouter.js";
 
 /**
  * @since 0.1.0

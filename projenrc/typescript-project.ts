@@ -28,7 +28,8 @@ export class TypeScriptLibProject extends typescript.TypeScriptProject {
       libdir: "build",
       tsconfig: {
         compilerOptions: {
-          moduleResolution: javascript.TypeScriptModuleResolution.NODE,
+          moduleResolution: javascript.TypeScriptModuleResolution.NODE_NEXT,
+          module: javascript.TypeScriptModuleResolution.NODE_NEXT,
           lib: ["es2019", "dom"],
           outDir: "build/cjs",
           declaration: false, // Declaration is set in esm tsconfig
@@ -50,6 +51,7 @@ export class TypeScriptLibProject extends typescript.TypeScriptProject {
     this.package.addField("packageManager", "pnpm@9.12.3");
     this.package.addField("main", `${this.libdir}/cjs/index.js`);
     this.package.addField("types", `${this.libdir}/dts/index.d.ts`);
+    this.package.addField("type", "module");
 
     // Add tsconfig for esm
     new JsonFile(this, "tsconfig.esm.json", {
@@ -57,7 +59,6 @@ export class TypeScriptLibProject extends typescript.TypeScriptProject {
         extends: "./tsconfig.json",
         compilerOptions: {
           outDir: `${this.libdir}/esm`,
-          module: "es6", // esm
           resolveJsonModule: false, // JSON modules are not supported in esm
           declaration: true,
           declarationDir: `${this.libdir}/dts`,
@@ -65,9 +66,22 @@ export class TypeScriptLibProject extends typescript.TypeScriptProject {
       },
     });
 
-    // Build both cjs and esm
-    this.compileTask.reset("tsc -b ./tsconfig.json ./tsconfig.esm.json");
+    // Add tsconfig for cjs
+    new JsonFile(this, "tsconfig.cjs.json", {
+      obj: {
+        extends: "./tsconfig.json",
+        compilerOptions: {
+          outDir: `${this.libdir}/cjs`,
+          moduleResolution: javascript.TypeScriptModuleResolution.NODE,
+          module: "CommonJS",
+        },
+      },
+    });
 
+    // Build both cjs and esm
+    this.compileTask.reset("tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json");
+
+    this.addPackageIgnore("/tsconfig.cjs.json");
     this.addPackageIgnore("/tsconfig.esm.json");
 
     this.addFields({

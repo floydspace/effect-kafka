@@ -1,8 +1,8 @@
 import { Chunk, Context, Effect, Effectable, FiberRef, Inspectable, Option, Predicate, Tracer } from "effect";
 import { dual } from "effect/Function";
-import * as Error from "../ConsumerError";
-import type * as Router from "../MessageRouter";
-import { consumerRecordTag } from "./consumerRecord";
+import * as Error from "../ConsumerError.js";
+import type * as Router from "../MessageRouter.js";
+import { consumerRecordTag } from "./consumerRecord.js";
 
 /** @internal */
 export const TypeId: Router.TypeId = Symbol.for("effect-kafka/MessageRouter") as Router.TypeId;

@@ -1,8 +1,8 @@
 import { Context, Effect, Scope } from "effect";
-import type { Consumer } from "../Consumer";
-import type * as Error from "../ConsumerError";
-import type * as KafkaInstance from "../KafkaInstance";
-import type { Producer } from "../Producer";
+import type { Consumer } from "../Consumer.js";
+import type * as Error from "../ConsumerError.js";
+import type * as KafkaInstance from "../KafkaInstance.js";
+import type { Producer } from "../Producer.js";
 
 /** @internal */
 export const TypeId: KafkaInstance.TypeId = Symbol.for("effect-kafka/KafkaInstance") as KafkaInstance.TypeId;

@@ -103,6 +103,10 @@
       "type": "build"
     },
     {
+      "name": "tsx",
+      "type": "build"
+    },
+    {
       "name": "typescript",
       "version": "~5.5.4",
       "type": "build"

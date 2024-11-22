@@ -2,7 +2,7 @@
  * @since 0.1.0
  */
 import { Data } from "effect";
-import type * as ConsumerRecord from "./ConsumerRecord";
+import type * as ConsumerRecord from "./ConsumerRecord.js";
 
 /**
  * @since 0.1.0

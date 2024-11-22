@@ -50,7 +50,7 @@
       "description": "Only compile",
       "steps": [
         {
-          "exec": "tsc -b ./tsconfig.json ./tsconfig.esm.json"
+          "exec": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json"
         }
       ]
     },
@@ -59,7 +59,7 @@
       "description": "Synthesize project files",
       "steps": [
         {
-          "exec": "ts-node --project tsconfig.dev.json .projenrc.ts"
+          "exec": "tsx .projenrc.ts"
         }
       ]
     },

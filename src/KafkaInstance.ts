@@ -2,7 +2,7 @@
  * @since 0.2.0
  */
 import { Context } from "effect";
-import * as internal from "./internal/kafkaInstance";
+import * as internal from "./internal/kafkaInstance.js";
 
 /**
  * @since 0.2.0

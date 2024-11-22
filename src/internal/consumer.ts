@@ -1,10 +1,10 @@
 import { Context, Effect, Layer, Scope, Stream } from "effect";
 import { dual } from "effect/Function";
-import type * as Consumer from "../Consumer";
-import type * as Error from "../ConsumerError";
-import type * as ConsumerRecord from "../ConsumerRecord";
-import * as KafkaInstance from "../KafkaInstance";
-import type * as MessageRouter from "../MessageRouter";
+import type * as Consumer from "../Consumer.js";
+import type * as Error from "../ConsumerError.js";
+import type * as ConsumerRecord from "../ConsumerRecord.js";
+import * as KafkaInstance from "../KafkaInstance.js";
+import type * as MessageRouter from "../MessageRouter.js";
 
 /** @internal */
 export const TypeId: Consumer.TypeId = Symbol.for("effect-kafka/Consumer") as Consumer.TypeId;

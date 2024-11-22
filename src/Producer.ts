@@ -2,9 +2,9 @@
  * @since 0.2.0
  */
 import { Context, Effect, FiberRef, Layer, Scope } from "effect";
-import type * as Error from "./ConsumerError";
-import * as internal from "./internal/producer";
-import type * as KafkaInstance from "./KafkaInstance";
+import type * as Error from "./ConsumerError.js";
+import * as internal from "./internal/producer.js";
+import type * as KafkaInstance from "./KafkaInstance.js";
 
 /**
  * @since 0.1.0

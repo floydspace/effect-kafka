@@ -19,6 +19,7 @@ tsconfig.tsbuildinfo
 /.eslintrc.json
 /coverage/
 /vitest.config.ts
+/tsconfig.cjs.json
 /tsconfig.esm.json
 /.husky/
 /docs
