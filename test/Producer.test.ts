@@ -1,22 +1,21 @@
 import { afterEach, beforeEach, describe, expect, it } from "@effect/vitest";
 import Substitute, { Arg, SubstituteOf } from "@fluffy-spoon/substitute";
 import { Effect } from "effect";
-import type * as KafkaJS from "kafkajs";
 import { Producer } from "../src";
-import { testKafkaInstanceLayer } from "./mocks/TestKafkaInstance";
+import { TestInstance, testKafkaInstanceLayer, TestProducer } from "./mocks/TestKafkaInstance";
 
 describe("Producer", () => {
-  let kafkaSub: SubstituteOf<KafkaJS.Kafka>;
-  let producerSub: SubstituteOf<KafkaJS.Producer>;
+  let kafkaSub: SubstituteOf<TestInstance>;
+  let producerSub: SubstituteOf<TestProducer>;
 
   beforeEach(() => {
-    kafkaSub = Substitute.for<KafkaJS.Kafka>();
-    producerSub = Substitute.for<KafkaJS.Producer>();
-    producerSub.connect().resolves();
-    producerSub.disconnect().resolves();
-    producerSub.send(Arg.any()).resolves([]);
-    producerSub.sendBatch(Arg.any()).resolves([]);
-    kafkaSub.producer(Arg.any()).returns(producerSub);
+    kafkaSub = Substitute.for<TestInstance>();
+    producerSub = Substitute.for<TestProducer>();
+    producerSub.connect().returns(Effect.void);
+    producerSub.disconnect().returns(Effect.void);
+    producerSub.send(Arg.any()).returns(Effect.succeed([]));
+    producerSub.sendBatch(Arg.any()).returns(Effect.succeed([]));
+    kafkaSub.producer().returns(producerSub);
   });
 
   afterEach(() => {
@@ -24,8 +23,8 @@ describe("Producer", () => {
     producerSub.received(1).disconnect();
   });
 
-  it.effect("send", () =>
-    Effect.gen(function* (_) {
+  it.effect("should send message", () =>
+    Effect.gen(function* () {
       const result = yield* Producer.send({
         topic: "test-topic",
         messages: [{ value: "Hello, effect-kafka user!" }, { value: "How are you, effect-kafka user?" }],
@@ -43,15 +42,15 @@ describe("Producer", () => {
     }).pipe(Effect.provide(Producer.layer()), Effect.provide(testKafkaInstanceLayer(kafkaSub))),
   );
 
-  it.effect("sendScoped", () =>
-    Effect.gen(function* (_) {
+  it.effect("should send message scoped", () =>
+    Effect.gen(function* () {
       const result = yield* Producer.sendScoped({
         topic: "test-topic",
         messages: [{ value: "Hello, effect-kafka user!" }, { value: "How are you, effect-kafka user?" }],
       }).pipe(Effect.scoped);
 
       expect(result).toEqual([]);
-      kafkaSub.received(1).producer({});
+      kafkaSub.received(1).producer();
       producerSub.received(1).connect();
       producerSub.received(1).disconnect();
       producerSub.received(1).send({

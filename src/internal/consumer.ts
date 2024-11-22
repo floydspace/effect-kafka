@@ -38,6 +38,53 @@ export const makeConsumer = (
   });
 
 /** @internal */
+export const serveOnceEffect = dual<
+  {
+    (
+      options: Consumer.Consumer.ConsumerOptions,
+    ): <E, R>(
+      app: MessageRouter.MessageRouter<E, R>,
+    ) => Effect.Effect<
+      void,
+      Error.ConnectionException,
+      KafkaInstance.KafkaInstance | Scope.Scope | Exclude<R, ConsumerRecord.ConsumerRecord>
+    >;
+  },
+  {
+    <E, R>(
+      app: MessageRouter.MessageRouter<E, R>,
+      options: Consumer.Consumer.ConsumerOptions,
+    ): Effect.Effect<
+      void,
+      Error.ConnectionException,
+      KafkaInstance.KafkaInstance | Scope.Scope | Exclude<R, ConsumerRecord.ConsumerRecord>
+    >;
+  }
+>(
+  (args) => Effect.isEffect(args[0]),
+  <E, R>(
+    app: MessageRouter.MessageRouter<E, R>,
+    options: Consumer.Consumer.ConsumerOptions,
+  ): Effect.Effect<
+    void,
+    Error.ConnectionException,
+    KafkaInstance.KafkaInstance | Scope.Scope | Exclude<R, ConsumerRecord.ConsumerRecord>
+  > =>
+    Effect.gen(function* () {
+      const instance = yield* instanceTag;
+      const consumer = yield* instance.consumer(options);
+
+      const topics = Chunk.toArray(app.routes).map((route) => route.topic);
+
+      yield* consumer.subscribe(topics);
+
+      const queue = yield* consumer.consume();
+
+      yield* app.pipe(Effect.provideServiceEffect(consumerRecordTag, queue)).pipe(Effect.orDie);
+    }),
+);
+
+/** @internal */
 export const serveEffect = dual<
   {
     (

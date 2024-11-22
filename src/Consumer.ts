@@ -187,6 +187,38 @@ export const serve: {
 } = internal.serve;
 
 /**
+ * @since 0.5.0
+ * @category accessors
+ */
+export const serveOnceEffect: {
+  /**
+   * @since 0.5.0
+   * @category accessors
+   */
+  (
+    options: Consumer.ConsumerOptions,
+  ): <E, R>(
+    app: MessageRouter.MessageRouter<E, R>,
+  ) => Effect.Effect<
+    void,
+    Error.ConnectionException,
+    Scope.Scope | KafkaInstance.KafkaInstance | Exclude<R, ConsumerRecord.ConsumerRecord>
+  >;
+  /**
+   * @since 0.5.0
+   * @category accessors
+   */
+  <E, R>(
+    app: MessageRouter.MessageRouter<E, R>,
+    options: Consumer.ConsumerOptions,
+  ): Effect.Effect<
+    void,
+    Error.ConnectionException,
+    Scope.Scope | KafkaInstance.KafkaInstance | Exclude<R, ConsumerRecord.ConsumerRecord>
+  >;
+} = internal.serveOnceEffect;
+
+/**
  * @since 0.1.0
  * @category accessors
  */
