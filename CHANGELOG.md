@@ -1,5 +1,11 @@
 # effect-kafka
 
+## 0.5.2
+
+### Patch Changes
+
+- [#25](https://github.com/floydspace/effect-kafka/pull/25) [`21df29a`](https://github.com/floydspace/effect-kafka/commit/21df29a96e301f3eae740b3b3c8a0cc6a8af5a82) Thanks [@floydspace](https://github.com/floydspace)! - fix esm distro
+
 ## 0.5.1
 
 ### Patch Changes
