@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-shadow */
 /**
  * @since 0.6.0
  */
+/* eslint-disable @typescript-eslint/no-shadow */
 import { KafkaJS } from "@confluentinc/kafka-javascript";
 
 /**

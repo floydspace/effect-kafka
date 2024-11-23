@@ -1,3 +1,6 @@
+/**
+ * @since 0.6.0
+ */
 import { Data } from "effect";
 
 /**
