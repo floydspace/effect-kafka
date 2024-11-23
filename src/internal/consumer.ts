@@ -1,8 +1,8 @@
 import { Chunk, Context, Effect, Fiber, Layer, Queue, Scope, Stream } from "effect";
 import { dual } from "effect/Function";
 import type * as Consumer from "../Consumer.js";
-import type * as Error from "../ConsumerError.js";
 import type * as ConsumerRecord from "../ConsumerRecord.js";
+import type * as Error from "../KafkaError.js";
 import type * as KafkaInstance from "../KafkaInstance.js";
 import type * as MessageRouter from "../MessageRouter.js";
 import { consumerRecordTag } from "./consumerRecord.js";

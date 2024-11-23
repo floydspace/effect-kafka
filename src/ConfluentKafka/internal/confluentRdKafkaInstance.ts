@@ -9,10 +9,16 @@ import type {
   ProducerTopicConfig,
   SubscribeTopicList,
 } from "@confluentinc/kafka-javascript";
-import { CODES, KafkaConsumer, Producer as KafkaProducer } from "@confluentinc/kafka-javascript";
+import pkg from "@confluentinc/kafka-javascript";
 import { Effect, Runtime, Scope } from "effect";
-import * as Error from "../../ConsumerError.js";
+import * as Error from "../../KafkaError.js";
 import { LibrdKafkaError } from "../ConfluentRdKafkaErrors.js";
+
+const CODES = pkg.CODES;
+const KafkaConsumer = pkg.KafkaConsumer;
+type KafkaConsumer = pkg.KafkaConsumer;
+const KafkaProducer = pkg.Producer;
+type KafkaProducer = pkg.Producer;
 
 /** @internal */
 export type ConsumerHandler = Parameters<Client<"data">["on"]>["1"];

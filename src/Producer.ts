@@ -2,9 +2,10 @@
  * @since 0.2.0
  */
 import { Context, Effect, FiberRef, Layer, Scope } from "effect";
-import type * as Error from "./ConsumerError.js";
 import * as internal from "./internal/producer.js";
+import type * as Error from "./KafkaError.js";
 import type * as KafkaInstance from "./KafkaInstance.js";
+import type * as ProducerError from "./ProducerError.js";
 
 /**
  * @since 0.1.0
@@ -248,8 +249,9 @@ export const makeProducer: (
  * @since 0.2.0
  * @category accessors
  */
-export const send: (record: Producer.ProducerRecord) => Effect.Effect<Producer.RecordMetadata[], never, Producer> =
-  internal.send;
+export const send: (
+  record: Producer.ProducerRecord,
+) => Effect.Effect<Producer.RecordMetadata[], ProducerError.ProducerError, Producer> = internal.send;
 
 /**
  * @since 0.4.0
@@ -257,8 +259,11 @@ export const send: (record: Producer.ProducerRecord) => Effect.Effect<Producer.R
  */
 export const sendScoped: (
   record: Producer.ProducerRecord,
-) => Effect.Effect<Producer.RecordMetadata[], Error.ConnectionException, KafkaInstance.KafkaInstance | Scope.Scope> =
-  internal.sendScoped;
+) => Effect.Effect<
+  Producer.RecordMetadata[],
+  Error.ConnectionException | ProducerError.ProducerError,
+  KafkaInstance.KafkaInstance | Scope.Scope
+> = internal.sendScoped;
 
 /**
  * @since 0.2.0

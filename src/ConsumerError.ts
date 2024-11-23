@@ -25,17 +25,3 @@ export class RouteNotFound extends Data.TaggedError("RouteNotFound")<{
     return `${this.payload.topic} handler not found`;
   }
 }
-
-/**
- * @since 0.2.0
- * @category error
- */
-export class ConnectionException extends Data.TaggedError("ConnectionException")<{
-  readonly broker: string;
-  readonly message: string;
-}> {
-  constructor(options: { readonly broker: string; readonly message: string; readonly stack?: string }) {
-    super(options);
-    (this as any).stack = options.stack ?? `${this.name}: ${this.message}`;
-  }
-}

@@ -12,7 +12,7 @@ import type {
   RecordMetadata,
 } from "kafkajs";
 import { Kafka, logLevel } from "kafkajs";
-import * as Error from "../../ConsumerError.js";
+import * as Error from "../../KafkaError.js";
 import { KafkaJSConnectionError, KafkaJSNonRetriableError } from "../KafkaJSErrors.js";
 
 /** @internal */

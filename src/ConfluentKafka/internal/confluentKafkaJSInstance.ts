@@ -1,7 +1,9 @@
 import { KafkaJS } from "@confluentinc/kafka-javascript";
 import { Cause, Effect, Runtime, Scope } from "effect";
-import * as Error from "../../ConsumerError.js";
-import { LibrdKafkaError, isLibrdKafkaError } from "../ConfluentRdKafkaErrors.js";
+import * as Error from "../../KafkaError.js";
+import * as ProducerError from "../../ProducerError.js";
+import { isKafkaJSError } from "../ConfluentKafkaJSErrors.js";
+import { isLibrdKafkaError, LibrdKafkaError } from "../ConfluentRdKafkaErrors.js";
 
 class DefaultLogger implements KafkaJS.Logger {
   static create(runtime: Runtime.Runtime<never>): DefaultLogger {
@@ -61,13 +63,21 @@ export const disconnect = <Client extends KafkaJS.Consumer | KafkaJS.Producer>(c
 export const send = (
   producer: KafkaJS.Producer,
   record: KafkaJS.ProducerRecord,
-): Effect.Effect<KafkaJS.RecordMetadata[]> => Effect.promise(() => producer.send(record));
+): Effect.Effect<KafkaJS.RecordMetadata[], ProducerError.UnknownProducerError> =>
+  Effect.tryPromise({
+    try: () => producer.send(record),
+    catch: (err) => (isKafkaJSError(err) ? err : new Cause.UnknownException(err)),
+  }).pipe(Effect.catchAll((err) => new ProducerError.UnknownProducerError(err)));
 
 /** @internal */
 export const sendBatch = (
   producer: KafkaJS.Producer,
   batch: KafkaJS.ProducerBatch,
-): Effect.Effect<KafkaJS.RecordMetadata[]> => Effect.promise(() => producer.sendBatch(batch));
+): Effect.Effect<KafkaJS.RecordMetadata[], ProducerError.UnknownProducerError> =>
+  Effect.tryPromise({
+    try: () => producer.sendBatch(batch),
+    catch: (err) => (isKafkaJSError(err) ? err : new Cause.UnknownException(err)),
+  }).pipe(Effect.catchAll((err) => new ProducerError.UnknownProducerError(err)));
 
 /** @internal */
 export const subscribe = (

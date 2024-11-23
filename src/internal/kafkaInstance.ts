@@ -1,6 +1,6 @@
 import { Context, Effect, Scope } from "effect";
 import type { Consumer } from "../Consumer.js";
-import type * as Error from "../ConsumerError.js";
+import type * as Error from "../KafkaError.js";
 import type * as KafkaInstance from "../KafkaInstance.js";
 import type { Producer } from "../Producer.js";
 
