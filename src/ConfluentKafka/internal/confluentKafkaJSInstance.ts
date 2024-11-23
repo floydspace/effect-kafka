@@ -3,7 +3,7 @@ import { Cause, Effect, Runtime, Scope } from "effect";
 import * as Error from "../../KafkaError.js";
 import * as ProducerError from "../../ProducerError.js";
 import { isKafkaJSError } from "../ConfluentKafkaJSErrors.js";
-import { isLibrdKafkaError, LibrdKafkaError } from "../ConfluentRdKafkaErrors.js";
+import { isLibRdKafkaError, LibRdKafkaError } from "../ConfluentRdKafkaErrors.js";
 
 class DefaultLogger implements KafkaJS.Logger {
   static create(runtime: Runtime.Runtime<never>): DefaultLogger {
@@ -49,10 +49,10 @@ export const makeLogger = Effect.map(Effect.runtime(), DefaultLogger.create);
 /** @internal */
 export const connect = <Client extends KafkaJS.Consumer | KafkaJS.Producer>(
   client: Client,
-): Effect.Effect<void, LibrdKafkaError | Cause.UnknownException> =>
+): Effect.Effect<void, LibRdKafkaError | Cause.UnknownException> =>
   Effect.tryPromise({
     try: () => client.connect(),
-    catch: (err) => (isLibrdKafkaError(err) ? new LibrdKafkaError(err) : new Cause.UnknownException(err)),
+    catch: (err) => (isLibRdKafkaError(err) ? new LibRdKafkaError(err) : new Cause.UnknownException(err)),
   });
 
 /** @internal */
@@ -98,7 +98,7 @@ export const connectProducerScoped = (
     Effect.sync(() => kafka.producer({ kafkaJS: config })).pipe(
       Effect.tap(connect),
       Effect.catchTags({
-        LibrdKafkaError: (err) =>
+        LibRdKafkaError: (err) =>
           err.message === "broker transport failure"
             ? new Error.ConnectionException({ broker: err.origin, message: err.message, stack: err.stack })
             : Effect.die(err),
@@ -117,7 +117,7 @@ export const connectConsumerScoped = (
     Effect.sync(() => kafka.consumer({ kafkaJS: config })).pipe(
       Effect.tap(connect),
       Effect.catchTags({
-        LibrdKafkaError: (err) =>
+        LibRdKafkaError: (err) =>
           err.message === "broker transport failure"
             ? new Error.ConnectionException({ broker: err.origin, message: err.message, stack: err.stack })
             : Effect.die(err),

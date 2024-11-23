@@ -3,6 +3,7 @@ import type {
   ClientMetrics,
   ConsumerGlobalConfig,
   ConsumerTopicConfig,
+  KafkaJS,
   Metadata,
   MetadataOptions,
   ProducerGlobalConfig,
@@ -10,9 +11,10 @@ import type {
   SubscribeTopicList,
 } from "@confluentinc/kafka-javascript";
 import pkg from "@confluentinc/kafka-javascript";
-import { Effect, Runtime, Scope } from "effect";
+import { Cause, Effect, Runtime, Scope } from "effect";
 import * as Error from "../../KafkaError.js";
-import { LibrdKafkaError } from "../ConfluentRdKafkaErrors.js";
+import * as ProducerError from "../../ProducerError.js";
+import { isLibRdKafkaError, LibRdKafkaError } from "../ConfluentRdKafkaErrors.js";
 
 const CODES = pkg.CODES;
 const KafkaConsumer = pkg.KafkaConsumer;
@@ -90,20 +92,39 @@ export const makeLogger = Effect.map(Effect.runtime(), (runtime) => {
 export const connect = <Events extends string>(
   client: Client<Events>,
   metadataOptions?: MetadataOptions,
-): Effect.Effect<Metadata, LibrdKafkaError> =>
+): Effect.Effect<Metadata, LibRdKafkaError> =>
   Effect.async((resume) => {
     client.connect(metadataOptions, (err, data) =>
-      err ? resume(new LibrdKafkaError(err)) : resume(Effect.succeed(data)),
+      err ? resume(new LibRdKafkaError(err)) : resume(Effect.succeed(data)),
     );
   });
 
 /** @internal */
 export const disconnect = <Events extends string>(
   client: Client<Events>,
-): Effect.Effect<ClientMetrics, LibrdKafkaError> =>
+): Effect.Effect<ClientMetrics, LibRdKafkaError> =>
   Effect.async((resume) => {
-    client.disconnect((err, data) => (err ? resume(new LibrdKafkaError(err)) : resume(Effect.succeed(data))));
+    client.disconnect((err, data) => (err ? resume(new LibRdKafkaError(err)) : resume(Effect.succeed(data))));
   });
+
+/** @internal */
+export const produce = (
+  producer: KafkaProducer,
+  record: KafkaJS.ProducerRecord,
+): Effect.Effect<any, ProducerError.UnknownProducerError> =>
+  Effect.forEach(record.messages, (message) => {
+    const messageValue = typeof message.value === "string" ? Buffer.from(message.value) : message.value;
+    const timestamp = message.timestamp ? Number(message.timestamp) : null;
+    return Effect.try({
+      try: () => producer.produce(record.topic, message.partition, messageValue, message.key, timestamp),
+      catch: (err) => (isLibRdKafkaError(err) ? new LibRdKafkaError(err) : new Cause.UnknownException(err)),
+    });
+  }).pipe(
+    Effect.catchTags({
+      LibRdKafkaError: (err) => new ProducerError.UnknownProducerError(err),
+      UnknownException: Effect.die,
+    }),
+  );
 
 /** @internal */
 export const subscribeScoped = (
@@ -136,7 +157,7 @@ export const connectProducerScoped = ({
       Effect.tap((p) => p.on("event.log", logger)),
       Effect.tap((p) => connect(p)),
       Effect.tap(() => Effect.logInfo("Producer connected", { timestamp: new Date().toISOString() })),
-      Effect.catchTag("LibrdKafkaError", (err) =>
+      Effect.catchTag("LibRdKafkaError", (err) =>
         err.code === CODES.ERRORS.ERR__TRANSPORT
           ? new Error.ConnectionException({ broker: err.origin, message: err.message, stack: err.stack })
           : Effect.die(err),
@@ -159,7 +180,7 @@ export const connectConsumerScoped = ({
       Effect.tap((p) => p.on("event.log", logger)),
       Effect.tap((c) => connect(c)),
       Effect.tap(() => Effect.logInfo("Consumer connected", { timestamp: new Date().toISOString() })),
-      Effect.catchTag("LibrdKafkaError", (err) =>
+      Effect.catchTag("LibRdKafkaError", (err) =>
         err.code === CODES.ERRORS.ERR__TRANSPORT
           ? new Error.ConnectionException({ broker: err.origin, message: err.message, stack: err.stack })
           : Effect.die(err),

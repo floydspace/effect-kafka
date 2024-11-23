@@ -8,7 +8,7 @@ import { Data } from "effect";
  * @since 0.2.0
  * @category errors
  */
-export class LibrdKafkaError extends Data.TaggedError("LibrdKafkaError")<LibrdKafkaError$> {
+export class LibRdKafkaError extends Data.TaggedError("LibRdKafkaError")<LibrdKafkaError$> {
   constructor(options: LibrdKafkaError$) {
     super(options);
     (this as any).stack = options.stack ?? `${this.name}: ${this.message}`;
@@ -19,5 +19,5 @@ export class LibrdKafkaError extends Data.TaggedError("LibrdKafkaError")<LibrdKa
  * @since 0.2.0
  * @category refinements
  */
-export const isLibrdKafkaError = (u: unknown): u is LibrdKafkaError =>
+export const isLibRdKafkaError = (u: unknown): u is LibRdKafkaError =>
   u instanceof Error && "errno" in u && "code" in u && "origin" in u;

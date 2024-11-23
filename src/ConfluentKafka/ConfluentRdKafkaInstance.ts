@@ -103,17 +103,9 @@ export const make = (config: GlobalConfig): Effect.Effect<KafkaInstance.KafkaIns
 
           const producer = yield* internal.connectProducerScoped(producerConfig);
 
-          const send: Producer.Producer["send"] = (record) =>
-            Effect.forEach(record.messages, (message) => {
-              const messageValue = typeof message.value === "string" ? Buffer.from(message.value) : message.value;
-              const timestamp = message.timestamp ? Number(message.timestamp) : null;
-              return Effect.sync(() =>
-                producer.produce(record.topic, message.partition, messageValue, message.key, timestamp),
-              );
-            });
-
+          const send: Producer.Producer["send"] = (record) => internal.produce(producer, record);
           const sendBatch: Producer.Producer["sendBatch"] = (batch) =>
-            Effect.forEach(batch.topicMessages!, send).pipe(Effect.map(Array.flatten));
+            Effect.forEach(batch.topicMessages ?? [], send).pipe(Effect.map(Array.flatten));
 
           return Producer.make({ send, sendBatch });
         }),
