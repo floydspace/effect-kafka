@@ -38,9 +38,10 @@ export const makeConsumer = (
   });
 
 /** @internal */
-export const serveOnceEffect = dual<
+export const serveUpToEffect = dual<
   {
     (
+      max: number,
       options: Consumer.Consumer.ConsumerOptions,
     ): <E, R>(
       app: MessageRouter.MessageRouter<E, R>,
@@ -53,6 +54,7 @@ export const serveOnceEffect = dual<
   {
     <E, R>(
       app: MessageRouter.MessageRouter<E, R>,
+      max: number,
       options: Consumer.Consumer.ConsumerOptions,
     ): Effect.Effect<
       void,
@@ -64,6 +66,7 @@ export const serveOnceEffect = dual<
   (args) => Effect.isEffect(args[0]),
   <E, R>(
     app: MessageRouter.MessageRouter<E, R>,
+    max: number,
     options: Consumer.Consumer.ConsumerOptions,
   ): Effect.Effect<
     void,
@@ -80,7 +83,9 @@ export const serveOnceEffect = dual<
 
       const queue = yield* consumer.consume();
 
-      yield* app.pipe(Effect.provideServiceEffect(consumerRecordTag, queue)).pipe(Effect.orDie);
+      yield* Effect.forEach(yield* queue.takeUpTo(max), (record) =>
+        app.pipe(Effect.provideService(consumerRecordTag, record)),
+      ).pipe(Effect.orDie);
     }),
 );
 

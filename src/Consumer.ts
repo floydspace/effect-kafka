@@ -187,15 +187,18 @@ export const serve: {
 } = internal.serve;
 
 /**
+ * Serves consumer to receive up to a maximum number of records. Useful for testing and non-blocking consumption.
+ *
  * @since 0.6.0
  * @category accessors
  */
-export const serveOnceEffect: {
+export const serveUpToEffect: {
   /**
    * @since 0.6.0
    * @category accessors
    */
   (
+    max: number,
     options: Consumer.ConsumerOptions,
   ): <E, R>(
     app: MessageRouter.MessageRouter<E, R>,
@@ -210,13 +213,14 @@ export const serveOnceEffect: {
    */
   <E, R>(
     app: MessageRouter.MessageRouter<E, R>,
+    max: number,
     options: Consumer.ConsumerOptions,
   ): Effect.Effect<
     void,
     Error.ConnectionException,
     Scope.Scope | KafkaInstance.KafkaInstance | Exclude<R, ConsumerRecord.ConsumerRecord>
   >;
-} = internal.serveOnceEffect;
+} = internal.serveUpToEffect;
 
 /**
  * @since 0.1.0

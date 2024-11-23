@@ -47,7 +47,7 @@ export const testKafkaInstanceLayer = (kafka: TestInstance) =>
             subscribe: (topics) => consumer.subscribe(topics),
             consume: () =>
               Effect.gen(function* () {
-                const queue = yield* Queue.bounded<ConsumerRecord.ConsumerRecord>(1);
+                const queue = yield* Queue.unbounded<ConsumerRecord.ConsumerRecord>();
 
                 yield* Queue.offerAll(queue, consumer.results);
 
