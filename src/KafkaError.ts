@@ -1,7 +1,7 @@
 import { Data } from "effect";
 
 /**
- * @since 0.5.0
+ * @since 0.6.0
  * @category error
  */
 export type KafkaError = ConnectionException;

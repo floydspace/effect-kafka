@@ -187,12 +187,12 @@ export const serve: {
 } = internal.serve;
 
 /**
- * @since 0.5.0
+ * @since 0.6.0
  * @category accessors
  */
 export const serveOnceEffect: {
   /**
-   * @since 0.5.0
+   * @since 0.6.0
    * @category accessors
    */
   (
@@ -205,7 +205,7 @@ export const serveOnceEffect: {
     Scope.Scope | KafkaInstance.KafkaInstance | Exclude<R, ConsumerRecord.ConsumerRecord>
   >;
   /**
-   * @since 0.5.0
+   * @since 0.6.0
    * @category accessors
    */
   <E, R>(

@@ -3,7 +3,7 @@
  */
 export * as Consumer from "./Consumer.js";
 /**
- * @since 0.5.0
+ * @since 0.6.0
  */
 export * as ConsumerApp from "./ConsumerApp.js";
 /**
@@ -23,7 +23,7 @@ export * as MessageRouter from "./MessageRouter.js";
  */
 export * as Producer from "./Producer.js";
 /**
- * @since 0.5.0
+ * @since 0.6.0
  */
 export * as ProducerError from "./ProducerError.js";
 /**
@@ -31,7 +31,7 @@ export * as ProducerError from "./ProducerError.js";
  */
 export * as KafkaInstance from "./KafkaInstance.js";
 /**
- * @since 0.5.0
+ * @since 0.6.0
  */
 export * as KafkaError from "./KafkaError.js";
 /**
