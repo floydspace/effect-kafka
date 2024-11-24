@@ -24,7 +24,7 @@ const project = new TypeScriptLibProject({
   ],
   repository: `https://github.com/${org}/${name}.git`,
   homepage: `https://${org}.github.io/${name}`,
-  typescriptVersion: "~5.5.4",
+  typescriptVersion: "~5.6.3", // Limited by @typescript-eslint v8
   prettierOptions: { settings: { printWidth: 120 } },
   github: true,
   githubOptions: { mergify: false, pullRequestLint: false },

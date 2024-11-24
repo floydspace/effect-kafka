@@ -39,17 +39,17 @@
     },
     {
       "name": "@types/node",
-      "version": "ts5.5",
+      "version": "ts5.6",
       "type": "build"
     },
     {
       "name": "@typescript-eslint/eslint-plugin",
-      "version": "^7",
+      "version": "^8",
       "type": "build"
     },
     {
       "name": "@typescript-eslint/parser",
-      "version": "^7",
+      "version": "^8",
       "type": "build"
     },
     {
@@ -79,7 +79,7 @@
     },
     {
       "name": "eslint",
-      "version": "^8",
+      "version": "^9",
       "type": "build"
     },
     {
@@ -112,7 +112,7 @@
     },
     {
       "name": "typescript",
-      "version": "~5.5.4",
+      "version": "~5.6.3",
       "type": "build"
     },
     {
