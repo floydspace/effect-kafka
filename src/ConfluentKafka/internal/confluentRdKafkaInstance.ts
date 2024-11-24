@@ -3,7 +3,6 @@ import type {
   ClientMetrics,
   ConsumerGlobalConfig,
   ConsumerTopicConfig,
-  KafkaJS,
   Metadata,
   MetadataOptions,
   ProducerGlobalConfig,
@@ -13,8 +12,9 @@ import type {
 import pkg from "@confluentinc/kafka-javascript";
 import { Cause, Effect, Runtime, Scope } from "effect";
 import * as Error from "../../KafkaError.js";
+import type * as Producer from "../../Producer.js";
 import * as ProducerError from "../../ProducerError.js";
-import { isLibRdKafkaError, LibRdKafkaError } from "../ConfluentRdKafkaErrors.js";
+import { isLibRdKafkaError, LibRdKafkaError, QueueFullError } from "../ConfluentRdKafkaErrors.js";
 
 const CODES = pkg.CODES;
 const KafkaConsumer = pkg.KafkaConsumer;
@@ -110,17 +110,30 @@ export const disconnect = <Events extends string>(
 /** @internal */
 export const produce = (
   producer: KafkaProducer,
-  record: KafkaJS.ProducerRecord,
+  record: Producer.Producer.ProducerRecord,
 ): Effect.Effect<any, ProducerError.UnknownProducerError> =>
   Effect.forEach(record.messages, (message) => {
     const messageValue = typeof message.value === "string" ? Buffer.from(message.value) : message.value;
     const timestamp = message.timestamp ? Number(message.timestamp) : null;
     return Effect.try({
-      try: () => producer.produce(record.topic, message.partition, messageValue, message.key, timestamp),
-      catch: (err) => (isLibRdKafkaError(err) ? new LibRdKafkaError(err) : new Cause.UnknownException(err)),
-    });
+      try: () =>
+        producer.produce(record.topic, message.partition, messageValue, message.key, timestamp, message.opaque),
+      catch: (err) => {
+        if (isLibRdKafkaError(err)) {
+          if (err.code === CODES.ERRORS.ERR__QUEUE_FULL) {
+            return new QueueFullError(err);
+          }
+          return new LibRdKafkaError(err);
+        }
+        return new Cause.UnknownException(err);
+      },
+    }).pipe(
+      Effect.tapErrorTag("QueueFullError", () => Effect.sync(() => producer.poll())),
+      Effect.retry({ while: (err) => err._tag === "QueueFullError", delay: 50, times: 10 }),
+    );
   }).pipe(
     Effect.catchTags({
+      QueueFullError: (err) => new ProducerError.UnknownProducerError(err), // TODO: Use generic `NumberOfRetriesExceeded` error
       LibRdKafkaError: (err) => new ProducerError.UnknownProducerError(err),
       UnknownException: Effect.die,
     }),

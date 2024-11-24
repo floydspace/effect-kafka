@@ -168,6 +168,7 @@ export declare namespace Producer {
     headers?: {
       [key: string]: Buffer | string | (Buffer | string)[] | undefined;
     };
+    opaque?: any;
     timestamp?: string;
   };
 
