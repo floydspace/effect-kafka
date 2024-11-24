@@ -1,5 +1,17 @@
 # effect-kafka
 
+## 0.6.0
+
+### Minor Changes
+
+- [#29](https://github.com/floydspace/effect-kafka/pull/29) [`d3c8fc0`](https://github.com/floydspace/effect-kafka/commit/d3c8fc07e5acba32f7b40ccd74bd96c1179b8717) Thanks [@floydspace](https://github.com/floydspace)! - define UnknownProducerError and use it as fallback for all errors happend in producer engine
+
+### Patch Changes
+
+- [#29](https://github.com/floydspace/effect-kafka/pull/29) [`d3c8fc0`](https://github.com/floydspace/effect-kafka/commit/d3c8fc07e5acba32f7b40ccd74bd96c1179b8717) Thanks [@floydspace](https://github.com/floydspace)! - Poll and retry in case QueueFull error raised
+
+- [#20](https://github.com/floydspace/effect-kafka/pull/20) [`4c5f113`](https://github.com/floydspace/effect-kafka/commit/4c5f1130eae68c431d22e6d76e510164b2809909) Thanks [@floydspace](https://github.com/floydspace)! - implement an ability to catch errors raised in MessageRouter handler
+
 ## 0.5.2
 
 ### Patch Changes
