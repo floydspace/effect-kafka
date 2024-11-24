@@ -202,19 +202,19 @@ export const subscribe: {
 } = internal.subscribe;
 
 /**
- * @since 0.5.0
+ * @since 0.6.0
  * @category combinators
  */
 export const transform: {
   /**
-   * @since 0.5.0
+   * @since 0.6.0
    * @category combinators
    */
   <E, R, R1, E1>(
     f: (self: Route.Handler<E, R>) => App.Default<E1, R1>,
   ): (self: MessageRouter<E, R>) => MessageRouter<E1, MessageRouter.ExcludeProvided<R1>>;
   /**
-   * @since 0.5.0
+   * @since 0.6.0
    * @category combinators
    */
   <E, R, R1, E1>(
@@ -224,19 +224,19 @@ export const transform: {
 } = internal.transform;
 
 /**
- * @since 0.5.0
+ * @since 0.6.0
  * @category combinators
  */
 export const catchAll: {
   /**
-   * @since 0.5.0
+   * @since 0.6.0
    * @category combinators
    */
   <E, E2, R2>(
     f: (e: E) => Route.Handler<E2, R2>,
   ): <R>(self: MessageRouter<E, R>) => MessageRouter<E2, R | MessageRouter.ExcludeProvided<R2>>;
   /**
-   * @since 0.5.0
+   * @since 0.6.0
    * @category combinators
    */
   <E, R, E2, R2>(
@@ -246,19 +246,19 @@ export const catchAll: {
 } = internal.catchAll;
 
 /**
- * @since 0.5.0
+ * @since 0.6.0
  * @category combinators
  */
 export const catchAllCause: {
   /**
-   * @since 0.5.0
+   * @since 0.6.0
    * @category combinators
    */
   <E, E2, R2>(
     f: (e: Cause.Cause<E>) => Route.Handler<E2, R2>,
   ): <R>(self: MessageRouter<E, R>) => MessageRouter<E2, R | MessageRouter.ExcludeProvided<R2>>;
   /**
-   * @since 0.5.0
+   * @since 0.6.0
    * @category combinators
    */
   <E, R, E2, R2>(
@@ -268,12 +268,12 @@ export const catchAllCause: {
 } = internal.catchAllCause;
 
 /**
- * @since 0.5.0
+ * @since 0.6.0
  * @category combinators
  */
 export const catchTag: {
   /**
-   * @since 0.5.0
+   * @since 0.6.0
    * @category combinators
    */
   <K extends E extends { _tag: string } ? E["_tag"] : never, E, E1, R1>(
@@ -283,7 +283,7 @@ export const catchTag: {
     self: MessageRouter<E, R>,
   ) => MessageRouter<E1 | Exclude<E, { _tag: K }>, R | MessageRouter.ExcludeProvided<R1>>;
   /**
-   * @since 0.5.0
+   * @since 0.6.0
    * @category combinators
    */
   <E, R, K extends E extends { _tag: string } ? E["_tag"] : never, E1, R1>(
@@ -294,12 +294,12 @@ export const catchTag: {
 } = internal.catchTag;
 
 /**
- * @since 0.5.0
+ * @since 0.6.0
  * @category combinators
  */
 export const catchTags: {
   /**
-   * @since 0.5.0
+   * @since 0.6.0
    * @category combinators
    */
   <
@@ -324,7 +324,7 @@ export const catchTags: {
       >
   >;
   /**
-   * @since 0.5.0
+   * @since 0.6.0
    * @category combinators
    */
   <
@@ -353,12 +353,12 @@ export const catchTags: {
 } = internal.catchTags;
 
 /**
- * @since 0.5.0
+ * @since 0.6.0
  * @category combinators
  */
 export const provideService: {
   /**
-   * @since 0.5.0
+   * @since 0.6.0
    * @category combinators
    */
   <T extends Context.Tag<any, any>>(
@@ -366,7 +366,7 @@ export const provideService: {
     service: Context.Tag.Service<T>,
   ): <E, R>(self: MessageRouter<E, R>) => MessageRouter<E, Exclude<R, Context.Tag.Identifier<T>>>;
   /**
-   * @since 0.5.0
+   * @since 0.6.0
    * @category combinators
    */
   <E, R, T extends Context.Tag<any, any>>(
@@ -377,12 +377,12 @@ export const provideService: {
 } = internal.provideService;
 
 /**
- * @since 0.5.0
+ * @since 0.6.0
  * @category combinators
  */
 export const provideServiceEffect: {
   /**
-   * @since 0.5.0
+   * @since 0.6.0
    * @category combinators
    */
   <T extends Context.Tag<any, any>, R1, E1>(
@@ -395,7 +395,7 @@ export const provideServiceEffect: {
     Exclude<R, Context.Tag.Identifier<T>> | Exclude<MessageRouter.ExcludeProvided<R1>, Context.Tag.Identifier<T>>
   >;
   /**
-   * @since 0.5.0
+   * @since 0.6.0
    * @category combinators
    */
   <E, R, T extends Context.Tag<any, any>, R1, E1>(
@@ -409,7 +409,7 @@ export const provideServiceEffect: {
 } = internal.provideServiceEffect;
 
 /**
- * @since 0.5.0
+ * @since 0.6.0
  * @category tags
  */
 export const Tag: <const Name extends string>(
@@ -417,7 +417,7 @@ export const Tag: <const Name extends string>(
 ) => <Self, R = never, E = unknown>() => MessageRouter.TagClass<Self, Name, E, R> = internal.Tag;
 
 /**
- * @since 0.5.0
+ * @since 0.6.0
  * @category tags
  */
 export class Default extends Tag("effect-kafka/MessageRouter/Default")<Default>() {}

@@ -2,9 +2,9 @@
  * @since 0.1.0
  */
 import { Context, Effect, Layer, Scope, Stream } from "effect";
-import type * as Error from "./ConsumerError.js";
 import type * as ConsumerRecord from "./ConsumerRecord.js";
 import * as internal from "./internal/consumer.js";
+import type * as Error from "./KafkaError.js";
 import type * as KafkaInstance from "./KafkaInstance.js";
 import type * as MessageRouter from "./MessageRouter.js";
 
@@ -187,15 +187,18 @@ export const serve: {
 } = internal.serve;
 
 /**
- * @since 0.5.0
+ * Serves consumer to receive up to a maximum number of records. Useful for testing and non-blocking consumption.
+ *
+ * @since 0.6.0
  * @category accessors
  */
-export const serveOnceEffect: {
+export const serveUpToEffect: {
   /**
-   * @since 0.5.0
+   * @since 0.6.0
    * @category accessors
    */
   (
+    max: number,
     options: Consumer.ConsumerOptions,
   ): <E, R>(
     app: MessageRouter.MessageRouter<E, R>,
@@ -205,18 +208,19 @@ export const serveOnceEffect: {
     Scope.Scope | KafkaInstance.KafkaInstance | Exclude<R, ConsumerRecord.ConsumerRecord>
   >;
   /**
-   * @since 0.5.0
+   * @since 0.6.0
    * @category accessors
    */
   <E, R>(
     app: MessageRouter.MessageRouter<E, R>,
+    max: number,
     options: Consumer.ConsumerOptions,
   ): Effect.Effect<
     void,
     Error.ConnectionException,
     Scope.Scope | KafkaInstance.KafkaInstance | Exclude<R, ConsumerRecord.ConsumerRecord>
   >;
-} = internal.serveOnceEffect;
+} = internal.serveUpToEffect;
 
 /**
  * @since 0.1.0

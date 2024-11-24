@@ -1,9 +1,10 @@
 import { Context, Effect, FiberRef, Layer, Scope } from "effect";
 import { dual } from "effect/Function";
 import { globalValue } from "effect/GlobalValue";
-import type * as Error from "../ConsumerError.js";
+import type * as Error from "../KafkaError.js";
 import type * as KafkaInstance from "../KafkaInstance.js";
 import type * as Producer from "../Producer.js";
+import type * as ProducerError from "../ProducerError.js";
 import { instanceTag } from "./kafkaInstance.js";
 
 /** @internal */
@@ -17,8 +18,12 @@ const producerProto = {
 };
 
 export type ProducerConstructorProps = {
-  readonly send: (record: Producer.Producer.ProducerRecord) => Effect.Effect<Producer.Producer.RecordMetadata[]>;
-  readonly sendBatch: (batch: Producer.Producer.ProducerBatch) => Effect.Effect<Producer.Producer.RecordMetadata[]>;
+  readonly send: (
+    record: Producer.Producer.ProducerRecord,
+  ) => Effect.Effect<Producer.Producer.RecordMetadata[], ProducerError.ProducerError>;
+  readonly sendBatch: (
+    batch: Producer.Producer.ProducerBatch,
+  ) => Effect.Effect<Producer.Producer.RecordMetadata[], ProducerError.ProducerError>;
 };
 
 /** @internal */
@@ -56,7 +61,7 @@ export const makeProducer = (
 /** @internal */
 export const send = (
   record: Producer.Producer.ProducerRecord,
-): Effect.Effect<Producer.Producer.RecordMetadata[], never, Producer.Producer> =>
+): Effect.Effect<Producer.Producer.RecordMetadata[], ProducerError.ProducerError, Producer.Producer> =>
   Effect.gen(function* () {
     const producer = yield* producerTag;
     return yield* producer.send(record);
@@ -67,7 +72,7 @@ export const sendScoped = (
   record: Producer.Producer.ProducerRecord,
 ): Effect.Effect<
   Producer.Producer.RecordMetadata[],
-  Error.ConnectionException,
+  Error.ConnectionException | ProducerError.ProducerError,
   KafkaInstance.KafkaInstance | Scope.Scope
 > =>
   Effect.gen(function* () {

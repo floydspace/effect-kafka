@@ -12,8 +12,9 @@ import type {
   RecordMetadata,
 } from "kafkajs";
 import { Kafka, logLevel } from "kafkajs";
-import * as Error from "../../ConsumerError.js";
-import { KafkaJSConnectionError, KafkaJSNonRetriableError } from "../KafkaJSErrors.js";
+import * as Error from "../../KafkaError.js";
+import * as ProducerError from "../../ProducerError.js";
+import { isKafkaJSError, KafkaJSConnectionError, KafkaJSNonRetriableError } from "../KafkaJSErrors.js";
 
 /** @internal */
 export const makeLogger = Effect.map(Effect.runtime(), (runtime) => {
@@ -56,12 +57,34 @@ export const disconnect = <Client extends Consumer | Producer>(client: Client): 
   Effect.promise(() => client.disconnect());
 
 /** @internal */
-export const send = (producer: Producer, record: ProducerRecord): Effect.Effect<RecordMetadata[]> =>
-  Effect.promise(() => producer.send(record));
+export const send = (
+  producer: Producer,
+  record: ProducerRecord,
+): Effect.Effect<RecordMetadata[], ProducerError.UnknownProducerError> =>
+  Effect.tryPromise({
+    try: () => producer.send(record),
+    catch: (err) => {
+      if (err instanceof KafkaJSNonRetriableError && isKafkaJSError(err.cause)) {
+        return err.cause;
+      }
+      return isKafkaJSError(err) ? err : new Cause.UnknownException(err);
+    },
+  }).pipe(Effect.catchAll((err) => new ProducerError.UnknownProducerError(err)));
 
 /** @internal */
-export const sendBatch = (producer: Producer, batch: ProducerBatch): Effect.Effect<RecordMetadata[]> =>
-  Effect.promise(() => producer.sendBatch(batch));
+export const sendBatch = (
+  producer: Producer,
+  batch: ProducerBatch,
+): Effect.Effect<RecordMetadata[], ProducerError.UnknownProducerError> =>
+  Effect.tryPromise({
+    try: () => producer.sendBatch(batch),
+    catch: (err) => {
+      if (err instanceof KafkaJSNonRetriableError && isKafkaJSError(err.cause)) {
+        return err.cause;
+      }
+      return isKafkaJSError(err) ? err : new Cause.UnknownException(err);
+    },
+  }).pipe(Effect.catchAll((err) => new ProducerError.UnknownProducerError(err)));
 
 /** @internal */
 export const subscribe = (consumer: Consumer, subscription: ConsumerSubscribeTopics): Effect.Effect<void> =>

@@ -1,5 +1,5 @@
 /**
- * @since 0.5.0
+ * @since 0.6.0
  */
 import { Effect } from "effect";
 import type * as ConsumerRecord from "./ConsumerRecord.js";
