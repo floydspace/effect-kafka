@@ -31,3 +31,11 @@ export const makeAdmin = (
     const instance = yield* instanceTag;
     return yield* instance.admin(options);
   });
+
+/** @internal */
+export const listTopics = () =>
+  Effect.gen(function* () {
+    const instance = yield* instanceTag;
+    const admin = yield* instance.admin();
+    return yield* admin.listTopics();
+  });
