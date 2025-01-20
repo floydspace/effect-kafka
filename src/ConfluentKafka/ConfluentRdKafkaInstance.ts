@@ -3,6 +3,7 @@
  */
 import type { GlobalConfig, KafkaConsumer, Message } from "@confluentinc/kafka-javascript";
 import { Array, Config, Effect, Layer, Queue, Runtime } from "effect";
+import * as Admin from "../Admin.js";
 import * as Consumer from "../Consumer.js";
 import * as ConsumerRecord from "../ConsumerRecord.js";
 import * as KafkaInstance from "../KafkaInstance.js";
@@ -38,7 +39,21 @@ export const make = (config: GlobalConfig): Effect.Effect<KafkaInstance.KafkaIns
     const logger = yield* internal.makeLogger;
 
     return KafkaInstance.make({
-      admin: (_options) => Effect.die("TODO"),
+      admin: (options) =>
+        Effect.gen(function* () {
+          const adminConfig: internal.AdminConfig = {
+            ...config,
+            ...options,
+            debug: "all",
+            logger,
+          };
+
+          const admin = yield* internal.connectAdminScoped(adminConfig);
+
+          return Admin.make({
+            listTopics: () => internal.listTopics(admin),
+          });
+        }),
       producer: (options) =>
         Effect.gen(function* () {
           const producerConfig: internal.ProducerConfig = {

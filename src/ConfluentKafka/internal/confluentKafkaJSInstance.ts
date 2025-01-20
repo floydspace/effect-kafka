@@ -101,10 +101,10 @@ export const consume = (consumer: KafkaJS.Consumer, config: KafkaJS.ConsumerRunC
 /** @internal */
 export const connectAdminScoped = (
   kafka: KafkaJS.Kafka,
-  config?: KafkaJS.ProducerConfig,
+  config?: KafkaJS.AdminConfig,
 ): Effect.Effect<KafkaJS.Admin, Error.ConnectionException, Scope.Scope> =>
   Effect.acquireRelease(
-    Effect.sync(() => kafka.admin({ kafkaJS: config })).pipe(
+    Effect.sync(() => kafka.admin({ kafkaJS: { ...config } })).pipe(
       Effect.tap(connect),
       Effect.catchTags({
         LibRdKafkaError: (err) =>
@@ -123,7 +123,7 @@ export const connectProducerScoped = (
   config?: KafkaJS.ProducerConfig,
 ): Effect.Effect<KafkaJS.Producer, Error.ConnectionException, Scope.Scope> =>
   Effect.acquireRelease(
-    Effect.sync(() => kafka.producer({ kafkaJS: config })).pipe(
+    Effect.sync(() => kafka.producer({ kafkaJS: { ...config } })).pipe(
       Effect.tap(connect),
       Effect.catchTags({
         LibRdKafkaError: (err) =>
@@ -142,7 +142,7 @@ export const connectConsumerScoped = (
   config: KafkaJS.ConsumerConfig,
 ): Effect.Effect<KafkaJS.Consumer, Error.ConnectionException, Scope.Scope> =>
   Effect.acquireRelease(
-    Effect.sync(() => kafka.consumer({ kafkaJS: config })).pipe(
+    Effect.sync(() => kafka.consumer({ kafkaJS: { ...config } })).pipe(
       Effect.tap(connect),
       Effect.catchTags({
         LibRdKafkaError: (err) =>

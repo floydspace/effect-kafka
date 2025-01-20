@@ -54,14 +54,14 @@ export const make: (options: internal.AdminConstructorProps) => Admin = internal
  * @category constructors
  */
 export const makeAdmin: (
-  options: Admin.AdminOptions,
+  options?: Admin.AdminOptions,
 ) => Effect.Effect<Admin, Error.ConnectionException, KafkaInstance.KafkaInstance | Scope.Scope> = internal.makeAdmin;
 
 /**
  * @since 0.7.0
  * @category layers
  */
-export const layer = (options: Admin.AdminOptions) => Layer.scoped(Admin, makeAdmin(options));
+export const layer = (options?: Admin.AdminOptions) => Layer.scoped(Admin, makeAdmin(options));
 
 /**
  * List all topics in the Kafka cluster.

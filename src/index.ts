@@ -1,7 +1,11 @@
 /**
- * @since 0.6.0
+ * @since 0.7.0
  */
 export * as Admin from "./Admin.js";
+/**
+ * @since 0.7.0
+ */
+export * as AdminError from "./AdminError.js";
 /**
  * @since 0.1.0
  */
