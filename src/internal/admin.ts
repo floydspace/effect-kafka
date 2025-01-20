@@ -17,7 +17,7 @@ const adminProto = {
 
 /** @internal */
 export type AdminConstructorProps = {
-  readonly listTopics: () => Effect.Effect<ReadonlyArray<string>, AdminError.AdminError, Scope.Scope>;
+  readonly listTopics: () => Effect.Effect<ReadonlyArray<string>, AdminError.AdminError>;
 };
 
 /** @internal */
@@ -35,7 +35,6 @@ export const makeAdmin = (
 /** @internal */
 export const listTopics = () =>
   Effect.gen(function* () {
-    const instance = yield* instanceTag;
-    const admin = yield* instance.admin();
+    const admin = yield* adminTag;
     return yield* admin.listTopics();
   });

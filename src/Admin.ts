@@ -69,8 +69,4 @@ export const layer = (options: Admin.AdminOptions) => Layer.scoped(Admin, makeAd
  * @since 0.7.0
  * @category accessors
  */
-export const listTopics: () => Effect.Effect<
-  ReadonlyArray<string>,
-  Error.ConnectionException | AdminError.AdminError,
-  Scope.Scope | KafkaInstance.KafkaInstance
-> = internal.listTopics;
+export const listTopics: () => Effect.Effect<ReadonlyArray<string>, AdminError.AdminError, Admin> = internal.listTopics;
