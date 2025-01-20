@@ -1,4 +1,8 @@
 /**
+ * @since 0.6.0
+ */
+export * as Admin from "./Admin.js";
+/**
  * @since 0.1.0
  */
 export * as Consumer from "./Consumer.js";
