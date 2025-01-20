@@ -38,6 +38,7 @@ export const make = (config: GlobalConfig): Effect.Effect<KafkaInstance.KafkaIns
     const logger = yield* internal.makeLogger;
 
     return KafkaInstance.make({
+      admin: (_options) => Effect.die("TODO"),
       producer: (options) =>
         Effect.gen(function* () {
           const producerConfig: internal.ProducerConfig = {
