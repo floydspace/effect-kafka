@@ -3,6 +3,7 @@
  */
 import { Config, Effect, Layer, Queue, Runtime } from "effect";
 import { EachBatchHandler, EachBatchPayload, Kafka, KafkaConfig, logLevel } from "kafkajs";
+import * as Admin from "../Admin.js";
 import * as Consumer from "../Consumer.js";
 import * as ConsumerRecord from "../ConsumerRecord.js";
 import * as KafkaInstance from "../KafkaInstance.js";
@@ -37,6 +38,14 @@ export const make = (config: KafkaConfig): Effect.Effect<KafkaInstance.KafkaInst
     const kafka = new Kafka({ ...config, logCreator: () => logger, logLevel: logLevel.DEBUG });
 
     return KafkaInstance.make({
+      admin: (options) =>
+        Effect.gen(function* () {
+          const admin = yield* internal.connectAdminScoped(kafka, options);
+
+          return Admin.make({
+            listTopics: () => internal.listTopics(admin),
+          });
+        }),
       producer: (options) =>
         Effect.gen(function* () {
           const producer = yield* internal.connectProducerScoped(kafka, options);

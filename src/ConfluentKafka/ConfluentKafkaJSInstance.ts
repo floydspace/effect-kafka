@@ -3,6 +3,7 @@
  */
 import { KafkaJS } from "@confluentinc/kafka-javascript";
 import { Config, Effect, Layer, Queue, Runtime } from "effect";
+import * as Admin from "../Admin.js";
 import * as Consumer from "../Consumer.js";
 import * as ConsumerRecord from "../ConsumerRecord.js";
 import * as KafkaInstance from "../KafkaInstance.js";
@@ -37,6 +38,14 @@ export const make = (config: KafkaJS.KafkaConfig): Effect.Effect<KafkaInstance.K
     const kafka = new KafkaJS.Kafka({ kafkaJS: { ...config, logger, logLevel: KafkaJS.logLevel.DEBUG } });
 
     return KafkaInstance.make({
+      admin: (options) =>
+        Effect.gen(function* () {
+          const admin = yield* internal.connectAdminScoped(kafka, options as KafkaJS.AdminConfig);
+
+          return Admin.make({
+            listTopics: () => internal.listTopics(admin),
+          });
+        }),
       producer: (options) =>
         Effect.gen(function* () {
           const producer = yield* internal.connectProducerScoped(kafka, options as KafkaJS.ProducerConfig);
