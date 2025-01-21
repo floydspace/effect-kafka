@@ -1,5 +1,11 @@
 # effect-kafka
 
+## 0.7.0
+
+### Minor Changes
+
+- [#30](https://github.com/floydspace/effect-kafka/pull/30) [`7d101fb`](https://github.com/floydspace/effect-kafka/commit/7d101fbc69681de5e335c209733ebf8c7b66e8cc) Thanks [@Almaju](https://github.com/Almaju)! - add admin api
+
 ## 0.6.0
 
 ### Minor Changes
