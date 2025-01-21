@@ -96,7 +96,7 @@
     "access": "public",
     "directory": "dist"
   },
-  "version": "0.6.0",
+  "version": "0.7.0",
   "types": "build/dts/index.d.ts",
   "packageManager": "pnpm@9.12.3",
   "type": "module",
