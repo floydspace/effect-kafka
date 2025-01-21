@@ -1,4 +1,5 @@
 import { Context, Effect, Scope } from "effect";
+import type { Admin } from "../Admin.js";
 import type { Consumer } from "../Consumer.js";
 import type * as Error from "../KafkaError.js";
 import type * as KafkaInstance from "../KafkaInstance.js";
@@ -15,6 +16,9 @@ const instanceProto = {
 };
 
 export type InstanceConstructorProps = {
+  readonly admin: {
+    (options?: Admin.AdminOptions): Effect.Effect<Admin, Error.ConnectionException, Scope.Scope>;
+  };
   readonly producer: {
     (options?: Producer.ProducerOptions): Effect.Effect<Producer, Error.ConnectionException, Scope.Scope>;
   };

@@ -1,5 +1,7 @@
 import { Cause, Effect, Runtime, Scope } from "effect";
 import type {
+  Admin,
+  AdminConfig,
   Consumer,
   ConsumerConfig,
   ConsumerRunConfig,
@@ -12,6 +14,7 @@ import type {
   RecordMetadata,
 } from "kafkajs";
 import { Kafka, logLevel } from "kafkajs";
+import * as AdminError from "../../AdminError.js";
 import * as Error from "../../KafkaError.js";
 import * as ProducerError from "../../ProducerError.js";
 import { isKafkaJSError, KafkaJSConnectionError, KafkaJSNonRetriableError } from "../KafkaJSErrors.js";
@@ -38,7 +41,7 @@ export const makeLogger = Effect.map(Effect.runtime(), (runtime) => {
 });
 
 /** @internal */
-export const connect = <Client extends Consumer | Producer>(
+export const connect = <Client extends Admin | Consumer | Producer>(
   client: Client,
 ): Effect.Effect<void, KafkaJSConnectionError | Cause.UnknownException> =>
   Effect.tryPromise({
@@ -53,8 +56,15 @@ export const connect = <Client extends Consumer | Producer>(
   });
 
 /** @internal */
-export const disconnect = <Client extends Consumer | Producer>(client: Client): Effect.Effect<void> =>
+export const disconnect = <Client extends Admin | Consumer | Producer>(client: Client): Effect.Effect<void> =>
   Effect.promise(() => client.disconnect());
+
+/** @internal */
+export const listTopics = (admin: Admin): Effect.Effect<ReadonlyArray<string>, AdminError.UnknownAdminError> =>
+  Effect.tryPromise({
+    try: () => admin.listTopics(),
+    catch: (err) => (isKafkaJSError(err) ? err : new Cause.UnknownException(err)),
+  }).pipe(Effect.catchAll((err) => new AdminError.UnknownAdminError(err)));
 
 /** @internal */
 export const send = (
@@ -93,6 +103,22 @@ export const subscribe = (consumer: Consumer, subscription: ConsumerSubscribeTop
 /** @internal */
 export const consume = (consumer: Consumer, config: ConsumerRunConfig): Effect.Effect<void> =>
   Effect.promise(() => consumer.run(config));
+
+/** @internal */
+export const connectAdminScoped = (
+  kafka: Kafka,
+  options?: AdminConfig,
+): Effect.Effect<Admin, Error.ConnectionException, Scope.Scope> =>
+  Effect.acquireRelease(
+    Effect.sync(() => kafka.admin(options)).pipe(
+      Effect.tap(connect),
+      Effect.catchTags({
+        KafkaJSConnectionError: (err) => new Error.ConnectionException(err),
+        UnknownException: Effect.die,
+      }),
+    ),
+    disconnect,
+  );
 
 /** @internal */
 export const connectProducerScoped = (

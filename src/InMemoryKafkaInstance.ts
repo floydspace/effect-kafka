@@ -2,6 +2,7 @@
  * @since 0.4.3
  */
 import { Effect, Layer, PubSub, Queue, Scope } from "effect";
+import * as Admin from "./Admin.js";
 import * as Consumer from "./Consumer.js";
 import * as ConsumerRecord from "./ConsumerRecord.js";
 import * as KafkaInstance from "./KafkaInstance.js";
@@ -53,6 +54,12 @@ export const make = (): Effect.Effect<KafkaInstance.KafkaInstance, never, Scope.
     );
 
     return KafkaInstance.make({
+      admin: () =>
+        Effect.gen(function* () {
+          return Admin.make({
+            listTopics: () => Effect.succeed([]),
+          });
+        }),
       producer: () =>
         Effect.gen(function* () {
           return Producer.make({

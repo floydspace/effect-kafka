@@ -1,5 +1,6 @@
 import { KafkaJS } from "@confluentinc/kafka-javascript";
 import { Cause, Effect, Runtime, Scope } from "effect";
+import * as AdminError from "../../AdminError.js";
 import * as Error from "../../KafkaError.js";
 import * as ProducerError from "../../ProducerError.js";
 import { isKafkaJSError } from "../ConfluentKafkaJSErrors.js";
@@ -47,7 +48,7 @@ class DefaultLogger implements KafkaJS.Logger {
 export const makeLogger = Effect.map(Effect.runtime(), DefaultLogger.create);
 
 /** @internal */
-export const connect = <Client extends KafkaJS.Consumer | KafkaJS.Producer>(
+export const connect = <Client extends KafkaJS.Admin | KafkaJS.Consumer | KafkaJS.Producer>(
   client: Client,
 ): Effect.Effect<void, LibRdKafkaError | Cause.UnknownException> =>
   Effect.tryPromise({
@@ -56,8 +57,16 @@ export const connect = <Client extends KafkaJS.Consumer | KafkaJS.Producer>(
   });
 
 /** @internal */
-export const disconnect = <Client extends KafkaJS.Consumer | KafkaJS.Producer>(client: Client): Effect.Effect<void> =>
-  Effect.promise(() => client.disconnect());
+export const disconnect = <Client extends KafkaJS.Admin | KafkaJS.Consumer | KafkaJS.Producer>(
+  client: Client,
+): Effect.Effect<void> => Effect.promise(() => client.disconnect());
+
+/** @internal */
+export const listTopics = (admin: KafkaJS.Admin): Effect.Effect<ReadonlyArray<string>, AdminError.UnknownAdminError> =>
+  Effect.tryPromise({
+    try: () => admin.listTopics(),
+    catch: (err) => (isKafkaJSError(err) ? err : new Cause.UnknownException(err)),
+  }).pipe(Effect.catchAll((err) => new AdminError.UnknownAdminError(err)));
 
 /** @internal */
 export const send = (
@@ -90,12 +99,31 @@ export const consume = (consumer: KafkaJS.Consumer, config: KafkaJS.ConsumerRunC
   Effect.promise(() => consumer.run(config));
 
 /** @internal */
+export const connectAdminScoped = (
+  kafka: KafkaJS.Kafka,
+  config?: KafkaJS.AdminConfig,
+): Effect.Effect<KafkaJS.Admin, Error.ConnectionException, Scope.Scope> =>
+  Effect.acquireRelease(
+    Effect.sync(() => kafka.admin({ kafkaJS: { ...config } })).pipe(
+      Effect.tap(connect),
+      Effect.catchTags({
+        LibRdKafkaError: (err) =>
+          err.message === "broker transport failure"
+            ? new Error.ConnectionException({ broker: err.origin, message: err.message, stack: err.stack })
+            : Effect.die(err),
+        UnknownException: Effect.die,
+      }),
+    ),
+    disconnect,
+  );
+
+/** @internal */
 export const connectProducerScoped = (
   kafka: KafkaJS.Kafka,
   config?: KafkaJS.ProducerConfig,
 ): Effect.Effect<KafkaJS.Producer, Error.ConnectionException, Scope.Scope> =>
   Effect.acquireRelease(
-    Effect.sync(() => kafka.producer({ kafkaJS: config })).pipe(
+    Effect.sync(() => kafka.producer({ kafkaJS: { ...config } })).pipe(
       Effect.tap(connect),
       Effect.catchTags({
         LibRdKafkaError: (err) =>
@@ -114,7 +142,7 @@ export const connectConsumerScoped = (
   config: KafkaJS.ConsumerConfig,
 ): Effect.Effect<KafkaJS.Consumer, Error.ConnectionException, Scope.Scope> =>
   Effect.acquireRelease(
-    Effect.sync(() => kafka.consumer({ kafkaJS: config })).pipe(
+    Effect.sync(() => kafka.consumer({ kafkaJS: { ...config } })).pipe(
       Effect.tap(connect),
       Effect.catchTags({
         LibRdKafkaError: (err) =>
