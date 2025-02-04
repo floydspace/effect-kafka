@@ -82,7 +82,7 @@ export class Docgen extends Component {
           {
             if: condition,
             name: "Upload pages artifact",
-            uses: "actions/upload-pages-artifact@v2",
+            uses: "actions/upload-pages-artifact@v3",
           },
         ],
       });
