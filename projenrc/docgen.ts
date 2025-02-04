@@ -101,7 +101,7 @@ export class Docgen extends Component {
           name: "github-pages",
           url: "${{ steps.deployment.outputs.page_url }}",
         },
-        steps: [{ name: "Deploy to GitHub Pages", id: "deployment", uses: "actions/deploy-pages@v2" }],
+        steps: [{ name: "Deploy to GitHub Pages", id: "deployment", uses: "actions/deploy-pages@v4" }],
       });
     }
   }
