@@ -34,7 +34,7 @@
     "@changesets/changelog-github": "^0.5.0",
     "@changesets/cli": "^2.27.9",
     "@confluentinc/kafka-javascript": "0.2.1",
-    "@effect/build-utils": "^0.7.8",
+    "@effect/build-utils": "^0.7.9",
     "@effect/docgen": "^0.4.5",
     "@effect/platform": "^0.68.6",
     "@effect/platform-node": "^0.63.6",
@@ -68,11 +68,7 @@
     "effect": "^3.9.2",
     "kafkajs": "^2"
   },
-  "pnpm": {
-    "patchedDependencies": {
-      "@effect/build-utils": "patches/@effect__build-utils.patch"
-    }
-  },
+  "pnpm": {},
   "keywords": [
     "confluent-kafka",
     "ecosystem",

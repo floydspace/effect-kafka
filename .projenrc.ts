@@ -76,9 +76,6 @@ project.addFields({
 
 // Build utils
 project.addDevDeps("@effect/build-utils");
-project.package.manifest.pnpm.patchedDependencies = {
-  "@effect/build-utils": "patches/@effect__build-utils.patch",
-};
 project.postCompileTask.exec("build-utils pack-v2");
 project.addFields({ publishConfig: { access: "public", directory: "dist" } });
 
