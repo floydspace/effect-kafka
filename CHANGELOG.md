@@ -1,5 +1,13 @@
 # effect-kafka
 
+## 0.7.1
+
+### Patch Changes
+
+- [#34](https://github.com/floydspace/effect-kafka/pull/34) [`936a300`](https://github.com/floydspace/effect-kafka/commit/936a300b861f35bcf1eb7cbd034bd5b7ef8a60d6) Thanks [@floydspace](https://github.com/floydspace)! - fix hanging stream when handler fails
+
+  closes [#33](https://github.com/floydspace/effect-kafka/issues/33)
+
 ## 0.7.0
 
 ### Minor Changes
