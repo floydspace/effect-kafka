@@ -33,7 +33,7 @@ const project = new TypeScriptLibProject({
   pullRequestTemplate: false,
   workflowNodeVersion: "lts/*",
   workflowPackageCache: true,
-  devDeps: ["@floydspace/projen-components@next", "tsx"],
+  devDeps: ["@floydspace/projen-components", "tsx"],
 });
 
 project.defaultTask?.reset("tsx .projenrc.ts");

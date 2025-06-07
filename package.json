@@ -39,7 +39,7 @@
     "@effect/platform": "^0.68.6",
     "@effect/platform-node": "^0.63.6",
     "@effect/vitest": "^0.12.1",
-    "@floydspace/projen-components": "next",
+    "@floydspace/projen-components": "^1.0.0",
     "@fluffy-spoon/substitute": "^1.208.0",
     "@types/node": "ts5.6",
     "@typescript-eslint/eslint-plugin": "^8",
