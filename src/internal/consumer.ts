@@ -180,7 +180,7 @@ export const serveStream = (
   consumerTag.pipe(
     Effect.tap((consumer) => consumer.subscribe([path])),
     Effect.flatMap((consumer) => consumer.consume()),
-    Effect.map(Stream.fromQueue),
+    Effect.map((queue) => Stream.fromQueue(queue, { shutdown: true })),
     Stream.scoped,
     Stream.flatten(),
   );
