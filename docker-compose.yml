@@ -10,18 +10,19 @@
 #   to deploy on Kubernetes via Helm, or AWS using Cloudformation.
 ####################################################################################################
 
-
-services:  
-
+services:
   # Conduktor Console, the enterprise UI.
   # It depends on PostgreSQL. Here, we depend on Redpanda only for our get-started.
   # https://docs.conduktor.io/platform/get-started/configuration/introduction/
   conduktor-console:
-    image: conduktor/conduktor-console:1.28.0
+    image: conduktor/conduktor-console:1.34.1
     depends_on:
-      - postgresql
-      - postgresql-2
-      - redpanda-0
+      postgresql:
+        condition: service_healthy
+      postgresql-2:
+        condition: service_healthy
+      redpanda-0:
+        condition: service_healthy
     ports:
       - "8080:8080"
     volumes:
@@ -51,7 +52,6 @@ services:
       CDK_MONITORING_ALERT-MANAGER-URL: http://conduktor-monitoring:9010/
       CDK_MONITORING_CALLBACK-URL: http://conduktor-console:8080/monitoring/api/
       CDK_MONITORING_NOTIFICATIONS-CALLBACK-URL: http://localhost:8080
-      
   # Conduktor stores its metadata in PostgreSQL.
   # Consider using an external managed database for production usage.
   # https://docs.conduktor.io/platform/get-started/configuration/database/
@@ -66,7 +66,11 @@ services:
       POSTGRES_USER: "conduktor"
       POSTGRES_PASSWORD: "change_me"
       POSTGRES_HOST_AUTH_METHOD: "scram-sha-256"
-
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   # Conduktor depends on a separate db for storing Kafka data for SQL querying
   # It is optional, but required if you wish to use SQL functionality
   # Separate db ensures continued operation of the core Console experience if the SQL db becomes unavailable
@@ -82,15 +86,18 @@ services:
       POSTGRES_USER: "conduktor"
       POSTGRES_PASSWORD: "change_me"
       POSTGRES_HOST_AUTH_METHOD: "scram-sha-256"
-
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   # Conduktor uses Cortex to store Kafka and applications metrics as well as alerting.
-  # It is optional. 
+  # It is optional.
   # https://docs.conduktor.io/platform/get-started/configuration/cortex/
   conduktor-monitoring:
-    image: conduktor/conduktor-console-cortex:1.28.0
+    image: conduktor/conduktor-console-cortex:1.34.1
     environment:
       CDK_CONSOLE-URL: "http://conduktor-console:8080"
-
   # We use Redpanda to get started with Kafka as it's small and efficient.
   # This is an example here. For production, connect Conduktor to your own Kafka clusters.
   redpanda-0:
@@ -125,12 +132,11 @@ services:
       timeout: 3s
       retries: 5
       start_period: 5s
-
   # Conduktor comes with its Gateway, a Kafka proxy bringing many security and governance features.
   # In this get started, Gateway uses Redpanda as its backend Kafka cluster.
   # https://docs.conduktor.io/gateway/
   conduktor-gateway:
-    image: conduktor/conduktor-gateway:3.3.0
+    image: conduktor/conduktor-gateway:3.9.0
     hostname: conduktor-gateway
     container_name: conduktor-gateway
     environment:
@@ -144,11 +150,10 @@ services:
     depends_on:
       redpanda-0:
         condition: service_healthy
-
   # As this is a get started, we want to bring some life to the cluster to demonstrate the value of Conduktor.
   # This is totally optional and only used for this purpose. Do not use it in production.
   conduktor-data-generator:
-    image: conduktor/conduktor-data-generator:0.6
+    image: conduktor/conduktor-data-generator:0.9
     container_name: conduktor-data-generator
     environment:
       KAFKA_BOOTSTRAP_SERVERS: conduktor-gateway:6969
@@ -160,7 +165,6 @@ services:
         condition: service_healthy
       conduktor-gateway:
         condition: service_healthy
-
 volumes:
   pg_data: {}
   pg_data_sql: {}
