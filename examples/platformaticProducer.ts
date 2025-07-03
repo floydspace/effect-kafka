@@ -10,7 +10,7 @@ const program = Producer.sendScoped({
 
 const PlatformaticLive = PlatformaticKafka.layer({
   clientId: "my-producer",
-  bootstrapBrokers: ["localhost:19092"],
+  bootstrapBrokers: ["localhost:29092"],
 });
 const MainLive = Effect.scoped(program).pipe(Effect.provide(PlatformaticLive));
 

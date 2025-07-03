@@ -3,12 +3,12 @@
  */
 import {
   BaseOptions,
-  ConsumeBaseOptions,
-  GroupOptions,
+  ConsumerOptions,
   Message,
   MessageToProduce,
-  ProduceOptions,
+  ProducerOptions,
   StreamOptions,
+  stringSerializers,
 } from "@platformatic/kafka";
 import { Config, Deferred, Effect, Layer, Queue } from "effect";
 import * as Admin from "../Admin.js";
@@ -52,13 +52,15 @@ export const make = (config: BaseOptions): Effect.Effect<KafkaInstance.KafkaInst
         }),
       producer: (options) =>
         Effect.gen(function* () {
-          const produceOptions: ProduceOptions<Buffer, Buffer, Buffer, Buffer> = {
+          const produceOptions: ProducerOptions<string, string, string, string> = {
+            ...config,
             acks: options?.acks,
             autocreateTopics: options?.allowAutoTopicCreation,
             compression: options?.compression,
             idempotent: options?.idempotent,
+            serializers: stringSerializers,
           };
-          const producer = yield* internal.connectProducerScoped({ ...config, ...produceOptions });
+          const producer = yield* internal.connectProducerScoped(produceOptions);
 
           return Producer.make({
             send: (record) =>
@@ -73,7 +75,7 @@ export const make = (config: BaseOptions): Effect.Effect<KafkaInstance.KafkaInst
                         partition: message.partition,
                         timestamp: message.timestamp,
                         headers: message.headers,
-                      }) as MessageToProduce<Buffer, Buffer, Buffer, Buffer>,
+                      }) as MessageToProduce<string, string, string, string>,
                   ),
                 })
                 .pipe(
@@ -103,7 +105,7 @@ export const make = (config: BaseOptions): Effect.Effect<KafkaInstance.KafkaInst
                             partition: message.partition,
                             timestamp: message.timestamp,
                             headers: message.headers,
-                          }) as MessageToProduce<Buffer, Buffer, Buffer, Buffer>,
+                          }) as MessageToProduce<string, string, string, string>,
                       ),
                     )
                     .flat(),
@@ -125,19 +127,33 @@ export const make = (config: BaseOptions): Effect.Effect<KafkaInstance.KafkaInst
         }),
       consumer: ({ partitionAssigners: _, fromBeginning, ...options }) =>
         Effect.gen(function* () {
-          const consumeOptions: { groupId: string } & GroupOptions &
-            ConsumeBaseOptions<Buffer, Buffer, Buffer, Buffer> = {
+          const consumeOptions: ConsumerOptions<Buffer, Buffer, Buffer, Buffer> = {
+            ...config,
             groupId: options.groupId,
-            autocommit: options.autoCommit,
-            heartbeatInterval: options.heartbeatInterval,
-            maxBytes: options.maxBytes,
-            minBytes: options.minBytes,
-            rebalanceTimeout: options.rebalanceTimeout,
-            sessionTimeout: options.sessionTimeout,
-            maxWaitTime: options.maxWaitTimeInMs,
             isolationLevel: options.readUncommitted ? "READ_UNCOMMITTED" : "READ_COMMITTED",
           };
-          const consumer = yield* internal.connectConsumerScoped({ ...config, ...consumeOptions });
+          if (options && "autoCommit" in options) {
+            consumeOptions.autocommit = options.autoCommit;
+          }
+          if (options && "heartbeatInterval" in options) {
+            consumeOptions.heartbeatInterval = options.heartbeatInterval;
+          }
+          if (options && "maxBytes" in options) {
+            consumeOptions.maxBytes = options.maxBytes;
+          }
+          if (options && "minBytes" in options) {
+            consumeOptions.minBytes = options.minBytes;
+          }
+          if (options && "rebalanceTimeout" in options) {
+            consumeOptions.rebalanceTimeout = options.rebalanceTimeout;
+          }
+          if (options && "sessionTimeout" in options) {
+            consumeOptions.sessionTimeout = options.sessionTimeout;
+          }
+          if (options && "maxWaitTimeInMs" in options) {
+            consumeOptions.maxWaitTime = options.maxWaitTimeInMs;
+          }
+          const consumer = yield* internal.connectConsumerScoped(consumeOptions);
 
           const streamOptions = yield* Deferred.make<StreamOptions>();
 
