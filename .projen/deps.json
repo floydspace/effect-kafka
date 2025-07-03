@@ -124,6 +124,11 @@
       "type": "peer"
     },
     {
+      "name": "@platformatic/kafka",
+      "version": "^1.7",
+      "type": "peer"
+    },
+    {
       "name": "effect",
       "type": "peer"
     },

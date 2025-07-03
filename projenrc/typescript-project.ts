@@ -33,6 +33,7 @@ export class TypeScriptLibProject extends typescript.TypeScriptProject {
           lib: ["es2019", "dom"],
           outDir: "build/cjs",
           declaration: false, // Declaration is set in esm tsconfig
+          skipLibCheck: true,
         },
       },
       tsconfigDev: { compilerOptions: { outDir: undefined } },
