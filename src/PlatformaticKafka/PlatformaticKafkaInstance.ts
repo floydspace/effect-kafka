@@ -10,7 +10,7 @@ import {
   StreamOptions,
   stringSerializers,
 } from "@platformatic/kafka";
-import { Config, Deferred, Effect, Layer, Queue } from "effect";
+import { Array, Config, Deferred, Effect, Layer, Queue } from "effect";
 import * as Admin from "../Admin.js";
 import * as Consumer from "../Consumer.js";
 import * as ConsumerRecord from "../ConsumerRecord.js";
@@ -65,67 +65,38 @@ export const make = (config: BaseOptions): KafkaInstance.KafkaInstance =>
         };
         const producer = yield* internal.connectProducerScoped(produceOptions);
 
-        return Producer.make({
-          send: (record) =>
-            internal
-              .send(producer, {
-                messages: record.messages.map(
-                  (message) =>
+        const send: Producer.Producer["send"] = (record) =>
+          internal
+            .send(producer, {
+              messages: record.messages.map(
+                (message) =>
+                  ({
+                    topic: record.topic,
+                    key: message.key,
+                    value: message.value,
+                    partition: message.partition,
+                    timestamp: message.timestamp,
+                    headers: message.headers,
+                  }) as MessageToProduce<string, string, string, string>,
+              ),
+            })
+            .pipe(
+              Effect.map((result) =>
+                (result.offsets ?? []).map(
+                  (offset) =>
                     ({
-                      topic: record.topic,
-                      key: message.key,
-                      value: message.value,
-                      partition: message.partition,
-                      timestamp: message.timestamp,
-                      headers: message.headers,
-                    }) as MessageToProduce<string, string, string, string>,
-                ),
-              })
-              .pipe(
-                Effect.map((result) =>
-                  (result.offsets ?? []).map(
-                    (offset) =>
-                      ({
-                        topicName: offset.topic,
-                        partition: offset.partition,
-                        offset: offset.offset.toString(),
-                        errorCode: 0,
-                      }) as Producer.Producer.RecordMetadata,
-                  ),
+                      topicName: offset.topic,
+                      partition: offset.partition,
+                      offset: offset.offset.toString(),
+                      errorCode: 0,
+                    }) satisfies Producer.Producer.RecordMetadata,
                 ),
               ),
-          sendBatch: (batch) =>
-            internal
-              .send(producer, {
-                messages: (batch.topicMessages ?? [])
-                  .map((topicMessage) =>
-                    topicMessage.messages.map(
-                      (message) =>
-                        ({
-                          topic: topicMessage.topic,
-                          key: message.key,
-                          value: message.value,
-                          partition: message.partition,
-                          timestamp: message.timestamp,
-                          headers: message.headers,
-                        }) as MessageToProduce<string, string, string, string>,
-                    ),
-                  )
-                  .flat(),
-              })
-              .pipe(
-                Effect.map((result) =>
-                  (result.offsets ?? []).map(
-                    (offset) =>
-                      ({
-                        topicName: offset.topic,
-                        partition: offset.partition,
-                        offset: offset.offset.toString(),
-                        errorCode: 0,
-                      }) as Producer.Producer.RecordMetadata,
-                  ),
-                ),
-              ),
+            );
+
+        return Producer.make({
+          send,
+          sendBatch: (batch) => Effect.forEach(batch.topicMessages ?? [], send).pipe(Effect.map(Array.flatten)),
         });
       }),
     consumer: ({ partitionAssigners: _, fromBeginning: __, ...options }) =>
