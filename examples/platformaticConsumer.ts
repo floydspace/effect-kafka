@@ -5,20 +5,23 @@ import { PlatformaticKafka } from "../src/PlatformaticKafka";
 
 const ConsumerLive = MessageRouter.empty.pipe(
   MessageRouter.subscribe(
-    "test-topic",
-    Effect.flatMap(ConsumerRecord.ConsumerRecord, ({ topic: _, partition, ...message }) =>
-      Console.log({
-        partition,
-        ...message,
-        key: message.key?.toString(),
-        value: message.value?.toString(),
-      }),
+    "my-topic",
+    Effect.flatMap(ConsumerRecord.ConsumerRecord, (message) =>
+      Console.log(`Received: ${message.key} -> ${message.value}`),
     ),
   ),
-  Consumer.serve({ groupId: "group" }),
+  Consumer.serve({
+    groupId: "my-consumer-group",
+    autoCommit: true,
+    sessionTimeout: 10000,
+    heartbeatInterval: 500,
+  }),
 );
 
-const KafkaLive = PlatformaticKafka.layer({ clientId: "my-consumer", bootstrapBrokers: ["localhost:29092"] });
+const KafkaLive = PlatformaticKafka.layer({
+  clientId: "my-consumer",
+  bootstrapBrokers: ["localhost:9092"],
+});
 const MainLive = ConsumerLive.pipe(Layer.provide(KafkaLive));
 
 NodeRuntime.runMain(Layer.launch(MainLive));

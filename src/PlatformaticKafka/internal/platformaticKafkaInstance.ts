@@ -16,7 +16,7 @@ import * as ProducerError from "../../ProducerError.js";
 
 /** @internal */
 export const listTopics = (admin: Admin): Effect.Effect<ReadonlyArray<string>, AdminError.UnknownAdminError> =>
-  Effect.dieMessage("Not implemented");
+  Effect.tryPromise(() => admin.listTopics()).pipe(Effect.catchAll((err) => new AdminError.UnknownAdminError(err)));
 
 /** @internal */
 export const send = <Key = Buffer, Value = Buffer, HeaderKey = Buffer, HeaderValue = Buffer>(

@@ -41,7 +41,7 @@
     "@effect/vitest": "^0.12.1",
     "@floydspace/projen-components": "^1.0.0",
     "@fluffy-spoon/substitute": "^1.208.0",
-    "@platformatic/kafka": "1.2.0",
+    "@platformatic/kafka": "1.7.0",
     "@types/node": "ts5.6",
     "@typescript-eslint/eslint-plugin": "^8",
     "@typescript-eslint/parser": "^8",
@@ -66,7 +66,7 @@
   },
   "peerDependencies": {
     "@confluentinc/kafka-javascript": ">=0.2.1 <1.0.0",
-    "@platformatic/kafka": "^1.2",
+    "@platformatic/kafka": "^1.7",
     "effect": "^3.9.2",
     "kafkajs": "^2"
   },

@@ -4,13 +4,19 @@ import { Producer } from "../src";
 import { PlatformaticKafka } from "../src/PlatformaticKafka";
 
 const program = Producer.sendScoped({
-  topic: "test-topic",
-  messages: [{ value: "Hello effect-kafka user!" }],
-}).pipe(Producer.withProducerOptions({ allowAutoTopicCreation: true }));
+  topic: "events",
+  messages: [
+    {
+      key: "user-123",
+      value: JSON.stringify({ name: "John", action: "login" }),
+      headers: { source: "web-app" },
+    },
+  ],
+});
 
 const PlatformaticLive = PlatformaticKafka.layer({
   clientId: "my-producer",
-  bootstrapBrokers: ["localhost:29092"],
+  bootstrapBrokers: ["localhost:9092"],
 });
 const MainLive = Effect.scoped(program).pipe(Effect.provide(PlatformaticLive));
 

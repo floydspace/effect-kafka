@@ -26,7 +26,13 @@ const mapBatchToConsumerRecords = (message: Message<Buffer, Buffer, Buffer, Buff
     value: message.value,
     timestamp: message.timestamp.toString(),
     offset: message.offset.toString(),
-    // headers: message.headers,
+    headers: [...message.headers.entries()].reduce(
+      (acc, [key, value]) => ({
+        ...acc,
+        [key.toString()]: value,
+      }),
+      {} as ConsumerRecord.ConsumerRecord.Headers,
+    ),
     attributes: 0,
     highWatermark: "",
     heartbeat: () => Effect.dieMessage("Not supported"),

@@ -66,7 +66,7 @@ project.addDevDeps("@effect/platform", "@effect/platform-node", "@effect/vitest"
 project.addPeerDeps("effect");
 
 // Kafka dependencies
-project.addPeerDeps("kafkajs@^2", "@confluentinc/kafka-javascript@>=0.2.1 <1.0.0", "@platformatic/kafka@^1.2");
+project.addPeerDeps("kafkajs@^2", "@confluentinc/kafka-javascript@>=0.2.1 <1.0.0", "@platformatic/kafka@^1.7");
 project.addFields({
   peerDependenciesMeta: {
     kafkajs: { optional: true },
