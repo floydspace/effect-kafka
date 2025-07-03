@@ -1,5 +1,11 @@
 # effect-kafka
 
+## 0.8.0
+
+### Minor Changes
+
+- [#32](https://github.com/floydspace/effect-kafka/pull/32) [`3fab074`](https://github.com/floydspace/effect-kafka/commit/3fab074b1ccee45f80e7a31ab7308fd6c4397d28) Thanks [@floydspace](https://github.com/floydspace)! - Implement mvp platformatic kafka instance
+
 ## 0.7.1
 
 ### Patch Changes
