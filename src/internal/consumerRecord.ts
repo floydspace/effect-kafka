@@ -1,5 +1,6 @@
-import { Context, Effect, String } from "effect";
+import { Context, Effect, Schema, SchemaAST, String } from "effect";
 import type * as ConsumerRecord from "../ConsumerRecord.js";
+import * as ConsumerSchema from "../ConsumerSchema.js";
 
 /** @internal */
 export const TypeId: ConsumerRecord.TypeId = Symbol.for("effect-kafka/ConsumerRecord") as ConsumerRecord.TypeId;
@@ -24,6 +25,35 @@ export type ConsumerRecordConstructorProps = {
   readonly size?: number;
   readonly heartbeat: () => Effect.Effect<void>;
   readonly commit: () => Effect.Effect<void>;
+};
+
+/** @internal */
+export const schemaValueRaw = <A, R>(
+  schema: Schema.Schema<A, Uint8Array, R>,
+  options?: SchemaAST.ParseOptions | undefined,
+) => {
+  const parse = Schema.decodeUnknown(schema, options);
+  return Effect.flatMap(consumerRecordTag, (self) => parse(self.value));
+};
+
+/** @internal */
+export const schemaValueJson = <A, I, R>(
+  schema: Schema.Schema<A, I, R>,
+  options?: SchemaAST.ParseOptions | undefined,
+) => {
+  return schemaValueRaw(
+    ConsumerSchema.String.pipe(Schema.compose(Schema.parseJson()), Schema.compose(schema)),
+    options,
+  );
+};
+
+/** @internal */
+export const schemaHeaders = <A, I extends Readonly<Record<string, string | undefined>>, R>(
+  schema: Schema.Schema<A, I, R>,
+  options?: SchemaAST.ParseOptions | undefined,
+) => {
+  const parse = Schema.decodeUnknown(schema, options);
+  return Effect.flatMap(consumerRecordTag, (self) => parse(self.headers));
 };
 
 /** @internal */

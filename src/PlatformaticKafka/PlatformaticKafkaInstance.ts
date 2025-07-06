@@ -22,8 +22,8 @@ const mapBatchToConsumerRecords = (message: Message<Buffer, Buffer, Buffer, Buff
   ConsumerRecord.make({
     topic: message.topic,
     partition: message.partition,
-    key: message.key,
-    value: message.value,
+    key: message.key.length > 0 ? message.key : null,
+    value: message.value.length > 0 ? message.value : null,
     timestamp: message.timestamp.toString(),
     offset: message.offset.toString(),
     headers: [...message.headers.entries()].reduce(
@@ -104,11 +104,9 @@ export const make = (config: BaseOptions): KafkaInstance.KafkaInstance =>
         const consumeOptions: ConsumerOptions<Buffer, Buffer, Buffer, Buffer> = {
           ...config,
           groupId: options.groupId,
+          autocommit: options.autoCommit ?? true,
           isolationLevel: options.readUncommitted ? "READ_UNCOMMITTED" : "READ_COMMITTED",
         };
-        if (options && "autoCommit" in options) {
-          consumeOptions.autocommit = options.autoCommit;
-        }
         if (options && "heartbeatInterval" in options) {
           consumeOptions.heartbeatInterval = options.heartbeatInterval;
         }

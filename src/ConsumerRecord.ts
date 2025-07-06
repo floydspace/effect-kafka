@@ -1,6 +1,7 @@
 /**
  * @since 0.1.0
  */
+import { Effect, ParseResult, Schema, SchemaAST } from "effect";
 import type * as Context from "effect/Context";
 import * as internal from "./internal/consumerRecord.js";
 
@@ -41,6 +42,33 @@ export declare namespace ConsumerRecord {
     [key: string]: Buffer | string | (Buffer | string)[] | undefined;
   }
 }
+
+/**
+ * @since 0.9.0
+ * @category schema
+ */
+export const schemaValueRaw: <A, R>(
+  schema: Schema.Schema<A, Uint8Array, R>,
+  options?: SchemaAST.ParseOptions | undefined,
+) => Effect.Effect<A, ParseResult.ParseError, ConsumerRecord | R> = internal.schemaValueRaw;
+
+/**
+ * @since 0.9.0
+ * @category schema
+ */
+export const schemaValueJson: <A, I, R>(
+  schema: Schema.Schema<A, I, R>,
+  options?: SchemaAST.ParseOptions | undefined,
+) => Effect.Effect<A, ParseResult.ParseError, ConsumerRecord | R> = internal.schemaValueJson;
+
+/**
+ * @since 0.9.0
+ * @category schema
+ */
+export const schemaHeaders: <A, I extends Readonly<Record<string, string | undefined>>, R>(
+  schema: Schema.Schema<A, I, R>,
+  options?: SchemaAST.ParseOptions | undefined,
+) => Effect.Effect<A, ParseResult.ParseError, ConsumerRecord | R> = internal.schemaHeaders;
 
 /**
  * @since 0.1.0

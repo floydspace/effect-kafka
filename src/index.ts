@@ -23,6 +23,10 @@ export * as ConsumerError from "./ConsumerError.js";
  */
 export * as ConsumerRecord from "./ConsumerRecord.js";
 /**
+ * @since 0.9.0
+ */
+export * as ConsumerSchema from "./ConsumerSchema.js";
+/**
  * @since 0.1.0
  */
 export * as MessageRouter from "./MessageRouter.js";

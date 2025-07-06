@@ -9,13 +9,16 @@ import {
   Layer,
   Option,
   Predicate,
+  Schema,
+  SchemaAST,
   Tracer,
 } from "effect";
 import { dual } from "effect/Function";
 import type { Mutable } from "effect/Types";
 import type * as App from "../ConsumerApp.js";
 import * as Error from "../ConsumerError.js";
-import type * as ConsumerRecord from "../ConsumerRecord.js";
+import * as ConsumerRecord from "../ConsumerRecord.js";
+import * as ConsumerSchema from "../ConsumerSchema.js";
 import type * as Router from "../MessageRouter.js";
 import { consumerRecordTag } from "./consumerRecord.js";
 
@@ -26,6 +29,75 @@ export const TypeId: Router.TypeId = Symbol.for("effect-kafka/MessageRouter") as
 export const RouteTypeId: Router.RouteTypeId = Symbol.for("effect-kafka/MessageRouter/Route") as Router.RouteTypeId;
 
 const isRouter = (u: unknown): u is Router.MessageRouter<unknown, unknown> => Predicate.hasProperty(u, TypeId);
+
+/** @internal */
+export const schemaRaw = <
+  R,
+  I extends Partial<{
+    readonly topic: string;
+    readonly partition: number;
+    readonly highWatermark: string;
+    readonly key: Uint8Array | null;
+    readonly value: Uint8Array | null;
+    readonly timestamp: string;
+    readonly attributes: number;
+    readonly offset: string;
+    readonly headers?: ConsumerRecord.ConsumerRecord.Headers;
+    readonly size?: number;
+  }>,
+  A,
+>(
+  schema: Schema.Schema<A, I, R>,
+  options?: SchemaAST.ParseOptions | undefined,
+) => {
+  const parse = Schema.decodeUnknown(schema, options);
+  return Effect.flatMap(Effect.context<ConsumerRecord.ConsumerRecord>(), (context) => {
+    const request = Context.get(context, ConsumerRecord.ConsumerRecord);
+    return parse(request);
+  });
+};
+
+/** @internal */
+export const schemaJson = <
+  R,
+  I extends Partial<{
+    readonly topic: string;
+    readonly partition: number;
+    readonly highWatermark: string;
+    readonly key: Uint8Array | null;
+    readonly value: unknown;
+    readonly timestamp: string;
+    readonly attributes: number;
+    readonly offset: string;
+    readonly headers?: ConsumerRecord.ConsumerRecord.Headers;
+    readonly size?: number;
+  }>,
+  A,
+>(
+  schema: Schema.Schema<A, I, R>,
+  options?: SchemaAST.ParseOptions | undefined,
+) => {
+  const parse = Schema.decodeUnknown(schema, options);
+  return Effect.flatMap(Effect.context<ConsumerRecord.ConsumerRecord>(), (context) => {
+    const request = Context.get(context, ConsumerRecord.ConsumerRecord);
+    return Effect.flatMap(
+      Schema.decode(ConsumerSchema.String.pipe(Schema.compose(Schema.parseJson()), Schema.NullOr))(request.value),
+      (value) =>
+        parse({
+          topic: request.topic,
+          partition: request.partition,
+          highWatermark: request.highWatermark,
+          key: request.key,
+          value,
+          timestamp: request.timestamp,
+          attributes: request.attributes,
+          offset: request.offset,
+          headers: request.headers,
+          size: request.size,
+        }),
+    );
+  });
+};
 
 class RouterImpl<E = never, R = never>
   extends Effectable.StructuralClass<void, E, R>

@@ -1,7 +1,7 @@
 /**
  * @since 0.1.0
  */
-import { Cause, Chunk, Context, Effect, Inspectable, Layer, Scope } from "effect";
+import { Cause, Chunk, Context, Effect, Inspectable, Layer, ParseResult, Schema, SchemaAST, Scope } from "effect";
 import type * as App from "./ConsumerApp.js";
 import type * as ConsumerRecord from "./ConsumerRecord.js";
 import * as internal from "./internal/messageRouter.js";
@@ -104,6 +104,54 @@ export declare namespace Route {
    */
   export type Handler<E, R> = App.Default<E, R>;
 }
+
+/**
+ * @since 0.9.0
+ * @category route context
+ */
+export const schemaRaw: <
+  R,
+  I extends Partial<{
+    readonly topic: string;
+    readonly partition: number;
+    readonly highWatermark: string;
+    readonly key: Uint8Array | null;
+    readonly value: Uint8Array | null;
+    readonly timestamp: string;
+    readonly attributes: number;
+    readonly offset: string;
+    readonly headers?: ConsumerRecord.ConsumerRecord.Headers;
+    readonly size?: number;
+  }>,
+  A,
+>(
+  schema: Schema.Schema<A, I, R>,
+  options?: SchemaAST.ParseOptions | undefined,
+) => Effect.Effect<A, ParseResult.ParseError, R | ConsumerRecord.ConsumerRecord> = internal.schemaRaw;
+
+/**
+ * @since 0.9.0
+ * @category route context
+ */
+export const schemaJson: <
+  R,
+  I extends Partial<{
+    readonly topic: string;
+    readonly partition: number;
+    readonly highWatermark: string;
+    readonly key: Uint8Array | null;
+    readonly value: unknown;
+    readonly timestamp: string;
+    readonly attributes: number;
+    readonly offset: string;
+    readonly headers?: ConsumerRecord.ConsumerRecord.Headers;
+    readonly size?: number;
+  }>,
+  A,
+>(
+  schema: Schema.Schema<A, I, R>,
+  options?: SchemaAST.ParseOptions | undefined,
+) => Effect.Effect<A, ParseResult.ParseError, R | ConsumerRecord.ConsumerRecord> = internal.schemaJson;
 
 /**
  * @since 0.1.0
