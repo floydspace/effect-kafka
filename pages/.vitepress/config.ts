@@ -39,7 +39,7 @@ export default defineConfig({
 function nav() {
   return [
     { text: "Docs", link: "/docs/what-is", activeMatch: "/docs/" },
-    { text: "API Reference", link: "https://floydspace.github.io/effect-kafka" },
+    { text: "API Reference", link: "https://effect-kafka.netlify.app" },
     { text: `Version: ${version}`, link: `https://github.com/floydspace/effect-kafka/releases/tag/v${version}` },
   ];
 }

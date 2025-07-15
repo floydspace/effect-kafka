@@ -7,9 +7,10 @@
 [![build status](https://img.shields.io/github/actions/workflow/status/floydspace/effect-kafka/release.yml?branch=main)](https://github.com/floydspace/effect-kafka/actions)
 [![wakatime](https://wakatime.com/badge/github/floydspace/effect-kafka.svg)](https://wakatime.com/badge/github/floydspace/effect-kafka)
 
-Effect Docs: https://www.effect.website<br>
-Effect Reference: https://effect-ts.github.io/effect<br>
-Effect Kafka Reference: https://floydspace.github.io/effect-kafka
+Effect Website: https://www.effect.website<br>
+Effect API Reference: https://effect-ts.github.io/effect<br>
+Effect Kafka Website: https://effect-kafka.netlify.app<br>
+Effect Kafka API Reference: https://floydspace.github.io/effect-kafka
 
 # Installation
 

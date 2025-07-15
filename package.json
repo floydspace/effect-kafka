@@ -93,7 +93,7 @@
   },
   "main": "build/cjs/index.js",
   "license": "MIT",
-  "homepage": "https://floydspace.github.io/effect-kafka",
+  "homepage": "https://effect-kafka.netlify.app",
   "publishConfig": {
     "access": "public",
     "directory": "dist"
