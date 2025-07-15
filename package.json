@@ -15,6 +15,9 @@
     "eject": "npx projen eject",
     "eslint": "npx projen eslint",
     "package": "npx projen package",
+    "pages:build": "npx projen pages:build",
+    "pages:dev": "npx projen pages:dev",
+    "pages:preview": "npx projen pages:preview",
     "post-compile": "npx projen post-compile",
     "pre-compile": "npx projen pre-compile",
     "prepare": "npx projen prepare",
@@ -62,6 +65,7 @@
     "ts-node": "^10.9.2",
     "tsx": "^4.19.1",
     "typescript": "~5.6.3",
+    "vitepress": "^1.6.3",
     "vitest": "^2.1.4"
   },
   "peerDependencies": {

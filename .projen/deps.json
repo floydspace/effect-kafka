@@ -118,6 +118,10 @@
       "type": "build"
     },
     {
+      "name": "vitepress",
+      "type": "build"
+    },
+    {
       "name": "vitest",
       "type": "build"
     },

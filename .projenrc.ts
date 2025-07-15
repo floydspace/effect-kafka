@@ -85,4 +85,10 @@ project.addDevDeps("@effect/build-utils");
 project.postCompileTask.exec("build-utils pack-v2");
 project.addFields({ publishConfig: { access: "public", directory: "dist" } });
 
+// Pages
+project.addDevDeps("vitepress");
+project.addTask("pages:dev", { exec: "vitepress dev pages" });
+project.addTask("pages:build", { exec: "vitepress build pages" });
+project.addTask("pages:preview", { exec: "vitepress preview pages" });
+
 project.synth();
