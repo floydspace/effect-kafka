@@ -13,8 +13,8 @@ hero:
       text: Get Started
       link: /docs/getting-started
     - theme: alt
-      text: View on GitHub
-      link: https://github.com/floydspace/effect-kafka
+      text: Installation
+      link: /docs/installation
 
 features:
   - title: Unified Interface

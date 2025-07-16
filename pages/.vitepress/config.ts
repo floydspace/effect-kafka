@@ -1,5 +1,6 @@
 import fs from "fs";
 import { defineConfig } from "vitepress";
+import { groupIconMdPlugin, groupIconVitePlugin } from "vitepress-plugin-group-icons";
 
 const meta = JSON.parse(fs.readFileSync("./package.json", "utf-8"));
 const version = meta["version"];
@@ -33,6 +34,16 @@ export default defineConfig({
     search: {
       provider: "local",
     },
+  },
+
+  markdown: {
+    config: (md) => {
+      md.use(groupIconMdPlugin);
+    },
+  },
+
+  vite: {
+    plugins: [groupIconVitePlugin()],
   },
 });
 

@@ -86,7 +86,7 @@ project.postCompileTask.exec("build-utils pack-v2");
 project.addFields({ publishConfig: { access: "public", directory: "dist" } });
 
 // Pages
-project.addDevDeps("vitepress");
+project.addDevDeps("vitepress", "vitepress-plugin-group-icons");
 project.addTask("pages:dev", { exec: "vitepress dev pages" });
 project.addTask("pages:build", { exec: "vitepress build pages" });
 project.addTask("pages:preview", { exec: "vitepress preview pages" });
