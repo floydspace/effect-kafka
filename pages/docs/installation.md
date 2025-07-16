@@ -45,4 +45,5 @@ pnpm add @platformatic/kafka
 - [@confluentinc/kafka-javascript](https://github.com/confluentinc/confluent-kafka-javascript?tab=readme-ov-file#requirements) - JavaScript interface for C++ librdkafka implementation, which is more performant, but requires native bindings.
 - [@platformatic/kafka](https://github.com/platformatic/kafka?tab=readme-ov-file#installation) - New pure JavaScript Kafka client implementation with ambition to replace KafkaJS
 
-_**Note:** You can use any of the above Kafka engine packages, depending on your preference._
+> [!NOTE]
+> You can use any of the above Kafka engine packages, depending on your preference.
