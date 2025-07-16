@@ -23,7 +23,7 @@ const project = new TypeScriptLibProject({
     "effect-ts",
   ],
   repository: `https://github.com/${org}/${name}.git`,
-  homepage: `https://effect-kafka.netlify.app`,
+  homepage: `https://effect-kafka.website`,
   typescriptVersion: "~5.6.3", // Limited by @typescript-eslint v8
   prettierOptions: { settings: { printWidth: 120 } },
   github: true,

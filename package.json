@@ -93,7 +93,7 @@
   },
   "main": "build/cjs/index.js",
   "license": "MIT",
-  "homepage": "https://effect-kafka.netlify.app",
+  "homepage": "https://effect-kafka.website",
   "publishConfig": {
     "access": "public",
     "directory": "dist"

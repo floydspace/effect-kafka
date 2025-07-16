@@ -9,7 +9,7 @@
 
 Effect Website: https://www.effect.website<br>
 Effect API Reference: https://effect-ts.github.io/effect<br>
-Effect Kafka Website: https://effect-kafka.netlify.app<br>
+Effect Kafka Website: https://effect-kafka.website<br>
 Effect Kafka API Reference: https://floydspace.github.io/effect-kafka
 
 # Installation
