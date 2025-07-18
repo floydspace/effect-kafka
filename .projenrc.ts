@@ -71,7 +71,7 @@ project.addDevDeps(
 project.addPeerDeps("effect@^3.10.0");
 
 // Kafka dependencies
-project.addPeerDeps("kafkajs@^2", "@confluentinc/kafka-javascript@>=0.2.1 <1.0.0", "@platformatic/kafka@^1.7");
+project.addPeerDeps("kafkajs@^2", "@confluentinc/kafka-javascript@^1", "@platformatic/kafka@^1.7");
 project.addFields({
   peerDependenciesMeta: {
     kafkajs: { optional: true },
