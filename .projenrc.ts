@@ -63,12 +63,12 @@ project.addPackageIgnore("/docker-compose.yml");
 
 // Effect dependencies
 project.addDevDeps(
-  "@effect/platform@0.69.0",
-  "@effect/platform-node@0.64.0",
-  "@effect/vitest@0.13.0",
+  "@effect/platform@0.77.2",
+  "@effect/platform-node@0.73.2",
+  "@effect/vitest@0.19.0",
   "@fluffy-spoon/substitute",
 );
-project.addPeerDeps("effect@^3.10.0");
+project.addPeerDeps("effect@^3.13.2");
 
 // Kafka dependencies
 project.addPeerDeps("kafkajs@^2", "@confluentinc/kafka-javascript@^1", "@platformatic/kafka@^1.7");
