@@ -30,6 +30,7 @@ tsconfig.tsbuildinfo
 /flake.lock
 /flake.nix
 /docker-compose.yml
+/pages
 /.gitattributes
 /.projenrc.ts
 /projenrc

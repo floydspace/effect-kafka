@@ -1,5 +1,5 @@
 import fs from "fs";
-import { defineConfig } from "vitepress";
+import { DefaultTheme, defineConfig } from "vitepress";
 import { groupIconMdPlugin, groupIconVitePlugin } from "vitepress-plugin-group-icons";
 
 const meta = JSON.parse(fs.readFileSync("./package.json", "utf-8"));
@@ -55,16 +55,30 @@ function nav() {
   ];
 }
 
-function sidebar() {
+function sidebar(): DefaultTheme.SidebarItem[] {
   return [
     {
       text: "Introduction",
-      collapsible: true,
+      collapsed: false,
       items: [
         { text: "What is Effect Kafka?", link: "/docs/what-is" },
         { text: "Installation", link: "/docs/installation" },
         { text: "Getting Started", link: "/docs/getting-started" },
       ],
+    },
+    {
+      text: "Interfaces",
+      collapsed: false,
+      items: [
+        { text: "Producer", link: "/docs/producer" },
+        { text: "Consumer", link: "/docs/consumer" },
+        { text: "Admin", link: "/docs/admin" },
+      ],
+    },
+    {
+      text: "Changelog",
+      collapsed: false,
+      link: "/docs/changelog",
     },
   ];
 }

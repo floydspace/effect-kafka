@@ -83,12 +83,12 @@ const ProducerLive = Producer.layer({ allowAutoTopicCreation: true });
 const ConsumerLive = Consumer.layer({ groupId: "group" });
 
 const KafkaLive = KafkaJS.layer({ brokers: ["localhost:29092"] });
-const MainLive = program.pipe(
+const main = program.pipe(
   Effect.provide(Layer.merge(ProducerLive, ConsumerLive)),
   Effect.provide(KafkaLive)
 );
 
-NodeRuntime.runMain(MainLive);
+NodeRuntime.runMain(main);
 ```
 :::
 
